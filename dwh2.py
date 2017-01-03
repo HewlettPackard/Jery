@@ -1448,7 +1448,7 @@ class simpleapp_tk(Tkinter.Tk):
         
 if __name__ == "__main__":
     app = simpleapp_tk(None)
-    app.title('JERY Workload Generator')
+    app.title('JERY Workload Generator Test')
     app.mainloop()
     
     
