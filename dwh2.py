@@ -13,7 +13,20 @@ import cx_Oracle
 import threading
 import time
 import tkMessageBox
+import ConfigParser
 
+def ConfigSectionMap(section):
+    dict1 = {}
+    options = Config.options(section)
+    for option in options:
+        try:
+            dict1[option] = Config.get(section, option)
+            if dict1[option] == -1:
+                DebugPrint("skip: %s" % option)
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
 
 
 class CreateTestSchema(Tkinter.Toplevel):
@@ -277,10 +290,14 @@ class CreateAProposWindow(Tkinter.Toplevel):
         """
 
         AProposWindow.wm_title(" A Propos... ")
-        
-        AProposWindow.LabelVersion = Tkinter.Label(AProposWindow, text="Version: 0.5a ")
-        AProposWindow.LabelDate = Tkinter.Label(AProposWindow, text="Build: 20140617a")
-        AProposWindow.LabelContact = Tkinter.Label(AProposWindow, text="Contact: dwh2@hp.com")
+
+        version = ConfigSectionMap("Info")['version']
+        build = ConfigSectionMap("Info")['build']
+        contact = ConfigSectionMap("Info")['contact']
+
+        AProposWindow.LabelVersion = Tkinter.Label(AProposWindow, text= "Version: " + version)
+        AProposWindow.LabelDate = Tkinter.Label(AProposWindow, text= "Build: " + build)
+        AProposWindow.LabelContact = Tkinter.Label(AProposWindow, text= "Contact: " + contact)
         AProposWindow.LabelVersion.grid (column=0, row=0)
         AProposWindow.LabelDate.grid (column=0, row=1)
         AProposWindow.LabelContact.grid (column=0, row=2)
@@ -332,7 +349,7 @@ class GraphWindow(Tkinter.Toplevel):
         """
             Graph runs in a loop until quit is hited
             Print a bar in a chart for the last 200 completed jobs
-            Refresh done every 2 seconds by a complete redesign of the graph.
+            Refresh done every n seconds (config) by a complete redesign of the graph.
         """    
         while GraphWindow.LoopGraphVar == 0:
             error_con = 0
@@ -373,7 +390,8 @@ class GraphWindow(Tkinter.Toplevel):
                         
                     curValue.close()
                 c.pack()
-                time.sleep(2)
+                refresh = int(ConfigSectionMap("Settings")['refresh'])
+                time.sleep(refresh)
                 c.destroy()
                 
 
@@ -838,9 +856,10 @@ class simpleapp_tk(Tkinter.Tk):
             - HP logo (can1)
             - Horizontal line 1 (can2). Split login information and load setting
             - Horizontal line 2 (can3). Split load setting and action buttons
-        """    
+        """
+        logohp = ConfigSectionMap("Settings")['logohp']
         can1 = Canvas(self, width = 130, height = 60, bg='white')
-        self.logohp = PhotoImage(file='bitmap/HPEElement3.gif')
+        self.logohp = PhotoImage(file=logohp)
         item = can1.create_image(66,32, image=self.logohp)
         can1.grid(column=1, row=22, rowspan = 5, padx=15, pady=15)
 
@@ -902,19 +921,22 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry1 = Tkinter.Entry(self, textvariable=self.entryUserVariable)
         self.Entry1.grid (column=0, row=1, sticky='EW')
         self.Entry1.bind('<Return>', self.OnPressEnter)
-        self.entryUserVariable.set(u"SCOTT")
+        userVariable = ConfigSectionMap("Prefilled")['user']
+        self.entryUserVariable.set(userVariable)
 
         self.entryPwdVariable = Tkinter.StringVar()
         self.Entry2 = Tkinter.Entry(self, textvariable=self.entryPwdVariable, show="*", width=15)
         self.Entry2.grid (column=1, row=1, sticky='EW')
         self.Entry2.bind('<Return>', self.OnPressEnter)
-        self.entryPwdVariable.set(u"tiger")
+        pwdVariable = ConfigSectionMap("Prefilled")['pwd']
+        self.entryPwdVariable.set(pwdVariable)
 
         self.entryConnectStringVariable = Tkinter.StringVar()
         self.Entry3 = Tkinter.Entry(self, textvariable=self.entryConnectStringVariable)
         self.Entry3.grid (column=2, row=1, sticky='EW')
         self.Entry3.bind('<Return>', self.OnPressEnter)
-        self.entryConnectStringVariable.set(u"HPRAC")
+        entryConnectStringVariable = ConfigSectionMap("Prefilled")['entryconnectstring']
+        self.entryConnectStringVariable.set(entryConnectStringVariable)
 
         self.entryConUsersVariable = Tkinter.IntVar()
         self.EntryConUsers = Tkinter.Entry(self, textvariable=self.entryConUsersVariable)
@@ -1447,6 +1469,9 @@ class simpleapp_tk(Tkinter.Tk):
         
         
 if __name__ == "__main__":
+    Config = ConfigParser.ConfigParser()
+    Config.read("./config.ini")
+
     app = simpleapp_tk(None)
     app.title('JERY Workload Generator Test')
     app.mainloop()
