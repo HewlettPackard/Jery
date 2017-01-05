@@ -16,23 +16,7 @@ import tkMessageBox
 import ConfigParser
 
 
-def ConfigSectionMap(section):
-    """
-                helper function for reading config files
-    """
-    dict1 = {}
-    options = Config.options(section)
-    for option in options:
-        try:
-            dict1[option] = Config.get(section, option)
-            if dict1[option] == -1:
-                DebugPrint("skip: %s" % option)
-        except:
-            print("exception on %s!" % option)
-            dict1[option] = None
-    return dict1
-
-
+###########################  GUI  ##############################
 class CreateTestSchemaWindow(Tkinter.Toplevel):
     def __init__(CrSchemaWindow, SID, passwd):
         Tkinter.Toplevel.__init__(CrSchemaWindow)
@@ -711,8 +695,11 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
         """ Close properly the Toplevel window if the user click the "x" button
         """
         statWindow.StopStatWindow()
+################################################################
 
 
+
+##########################  HELPER  ############################
 class OraLoadThread(threading.Thread):
     def __init__(self, OraUser, OraPwd, OraConnect, LengthTest):
         """
@@ -829,6 +816,26 @@ class InfoBulle(Tkinter.Toplevel):
         self.parent.after_cancel(self.action)
 
 
+def ConfigSectionMap(section):
+        """
+                    helper function for reading config files
+        """
+        dict1 = {}
+        options = Config.options(section)
+        for option in options:
+            try:
+                dict1[option] = Config.get(section, option)
+                if dict1[option] == -1:
+                    DebugPrint("skip: %s" % option)
+            except:
+                print("exception on %s!" % option)
+                dict1[option] = None
+        return dict1
+################################################################
+
+
+
+###########################  MAIN  #############################
 class simpleapp_tk(Tkinter.Tk):
     """
         Main window class
@@ -837,9 +844,9 @@ class simpleapp_tk(Tkinter.Tk):
     def __init__(self, parent):
         Tkinter.Tk.__init__(self, parent)
         self.parent = parent
-        self.initialize()
+        self.initWindow()
 
-    def initialize(self):
+    def initWindow(self):
         self.grid()
 
         """ Global variable. Check if some toplevel are open
@@ -1457,3 +1464,4 @@ if __name__ == "__main__":
     app = simpleapp_tk(None)
     app.title('JERY Workload Generator Test')
     app.mainloop()
+################################################################
