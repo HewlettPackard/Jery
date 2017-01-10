@@ -1041,9 +1041,9 @@ class simpleapp_tk(Tkinter.Tk):
         """ Balloon section
             enable help on Entry field
         """
-        balloonHelpSID = InfoBulle(parent=self.Entry3, texte="Enter the SID or the connect string (ip:port:SID)")
-        balloonUserScott = InfoBulle(parent=self.Entry1, texte="Enter the username owning the test schema")
-        balloonUserPwd = InfoBulle(parent=self.Entry2, texte="Enter the password of the user owning the test schema")
+        balloonHelpSID = InfoBulle(parent=self.Entry5, texte="Enter the SID or the connect string (ip:port:SID)")
+        balloonUserScott = InfoBulle(parent=self.Entry3, texte="Enter the username owning the test schema")
+        balloonUserPwd = InfoBulle(parent=self.Entry4, texte="Enter the password of the user owning the test schema")
         balloonSystemPwd = InfoBulle(parent=self.EntryPwdSys, texte="Enter the password of the SYSTEM (sysdba) user")
         balloonTestLength = InfoBulle(parent=self.EntryTestLength, texte="How long will run the test in minutes")
 
@@ -1226,7 +1226,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         # if self.GlobalStop == 0:
         if GlobalStop == 0:
-            con = cx_Oracle.connect(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry3.get()))
+            con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
             cur = con.cursor()
             cur.execute('select count(*) from dwhstat')
             for result in cur:
@@ -1271,7 +1271,7 @@ class simpleapp_tk(Tkinter.Tk):
             return
 
         self.InitTableStat()
-        self.my_thread = OraLoadThread(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry3.get()), \
+        self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()), \
                                        int(self.EntryTestLength.get()))
         # self.labelVariable.set('self.my_thread value = {0}'.format(str(runStatus)))
         self.my_thread.name = i
@@ -1281,7 +1281,7 @@ class simpleapp_tk(Tkinter.Tk):
         # while (int(threading.activeCount()) < ((int(self.EntryConUsers.get ()))+2)) and runStatus == 0:
         while int(threading.activeCount()) < ((int(self.EntryConUsers.get())) + 2):
             i += 1
-            self.my_thread = OraLoadThread(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry3.get()), \
+            self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()), \
                                            int(self.EntryTestLength.get()))
             self.my_thread.name = i
             self.my_thread.start()
@@ -1299,10 +1299,10 @@ class simpleapp_tk(Tkinter.Tk):
         """
         error_con = 0
         try:
-            con = cx_Oracle.connect(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry3.get()))
+            con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect with user {0}!" \
-                                   .format(str(self.Entry1.get())))
+                                   .format(str(self.Entry3.get())))
             return 1
 
         if error_con != 1:
@@ -1341,7 +1341,7 @@ class simpleapp_tk(Tkinter.Tk):
         """
         error_con = 0
         try:
-            con = cx_Oracle.connect(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry3.get()))
+            con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
             error_con = 1
@@ -1370,12 +1370,12 @@ class simpleapp_tk(Tkinter.Tk):
 
         if origin == "User":
             try:
-                con = cx_Oracle.connect(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry3.get()))
+                con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
                     self.labelVariable.set(self.entryConnectStringVariable.get() + \
-                                           ": {0} Invalid username or password".format(str(self.Entry1.get())))
+                                           ": {0} Invalid username or password".format(str(self.Entry3.get())))
                     error_con = 1
                 elif error.code == 12154:
                     self.labelVariable.set(self.entryConnectStringVariable.get() + ": TNS couldn't resolve the SID")
@@ -1392,12 +1392,12 @@ class simpleapp_tk(Tkinter.Tk):
                 cur.execute('select * from global_name')
                 for result in cur:
                     resultVar = str(result[0])
-                    self.labelVariable.set("{0}: {1}, Connection succesfull".format(resultVar, str(self.Entry1.get())))
+                    self.labelVariable.set("{0}: {1}, Connection succesfull".format(resultVar, str(self.Entry3.get())))
                 cur.close()
                 con.close()
         elif origin == "System":
             try:
-                con = cx_Oracle.connect("system", str(self.EntryPwdSys.get()), str(self.Entry3.get()))
+                con = cx_Oracle.connect("system", str(self.EntryPwdSys.get()), str(self.Entry5.get()))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -1433,7 +1433,7 @@ class simpleapp_tk(Tkinter.Tk):
         """
         error_con = 0
         try:
-            con = cx_Oracle.connect(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry3.get()))
+            con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
             error_con = 1
@@ -1475,7 +1475,7 @@ class simpleapp_tk(Tkinter.Tk):
         AProposWindow = CreateAProposWindow()
 
     def StartGraph(self):
-        GraphikWindow = GraphWindow(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry3.get()))
+        GraphikWindow = GraphWindow(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
 
 
 if __name__ == "__main__":
