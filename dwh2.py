@@ -106,19 +106,13 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
         """
-        # dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        # dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        # version_DB['text'] = str(self.Entry3.get())
-
         error_con = 0
         CrSchemaWindow.LoopRatioVar = RatioVar + 14
         CrSchemaWindow.i = 1
 
         try:
-            #her
             dsn = cx_Oracle.makedsn(str(ip), str(port), str(SID))
             con = cx_Oracle.connect("system", str(passwd), dsn)
-            #con = cx_Oracle.connect("system", str(passwd), str(SID))
         except cx_Oracle.DatabaseError as e:
             error, = e.args
             if error.code == 1017:
@@ -168,17 +162,11 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
         """
-        # dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        # dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        # version_DB['text'] = str(self.Entry3.get())
-
         error_con = 0
 
         try:
-            #her
             dsn = cx_Oracle.makedsn(str(ip), str(port), str(SID))
             con = cx_Oracle.connect("system", str(passwd), dsn)
-            #con = cx_Oracle.connect("system", str(passwd), str(SID))
         except cx_Oracle.DatabaseError as e:
             error, = e.args
             if error.code == 1017:
@@ -232,10 +220,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         """ Used as progress bar.
             for each and every recursive insert done, a message is printed into the vocable blue bar
         """
-        #her
         dsn = cx_Oracle.makedsn(str(ip), str(port), str(SID))
         con = cx_Oracle.connect("system", str(passwd), dsn)
-        #con = cx_Oracle.connect("system", str(passwd), str(SID))
         cur2 = con.cursor()
         cur2.execute('insert into scott.emp2 select * from scott.emp2')
         con.commit()
@@ -255,10 +241,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
     def Statistics(CrSchemaWindow, SID, passwd, ip, port):
         """ Used generating staistics in SCOTT schema.
         """
-        #her
         dsn = cx_Oracle.makedsn(str(ip), str(port), str(SID))
         con = cx_Oracle.connect("system", str(passwd), dsn)
-        #con = cx_Oracle.connect("system", str(passwd), str(SID))
         cur3 = con.cursor()
         cur3.execute("""
         begin
@@ -373,7 +357,6 @@ class GraphWindow(Tkinter.Toplevel):
             try:
                 dsn = cx_Oracle.makedsn(GraphWindow.ip, GraphWindow.port, GraphWindow.SID)
                 con = cx_Oracle.connect(GraphWindow.user, GraphWindow.passwd, dsn)
-                #con = cx_Oracle.connect(GraphWindow.user, GraphWindow.passwd, GraphWindow.SID)
             except cx_Oracle.DatabaseError:
                 error_con = 1
                 return error_con
@@ -635,17 +618,12 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
         """
-        # dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        # dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        # version_DB['text'] = str(self.Entry3.get())
         while statWindow.LoopWindowVar == 0:
             error_con = 0
 
             try:
-                #her
                 dsn = cx_Oracle.makedsn(str(ip), str(port), str(SID))
                 con = cx_Oracle.connect("system", str(passwd), dsn)
-                #con = cx_Oracle.connect("system", str(passwd), str(SID))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -767,7 +745,6 @@ class OraLoadThread(threading.Thread):
         try:
             dsn = cx_Oracle.makedsn(self.OraIp, self.OraPort, self.OraConnect)
             con = cx_Oracle.connect(self.OraUser, self.OraPwd, dsn)
-            #con = cx_Oracle.connect(self.OraUser, self.OraPwd, self.OraConnect, threaded=True)
         except cx_Oracle.DatabaseError:
             error_con = 1
             return error_con
@@ -1156,10 +1133,8 @@ class simpleapp_tk(Tkinter.Tk):
         error_con = 0
         if self.CheckAWRSnapshot.get() == 1:
             try:
-                #her
                 dsn = cx_Oracle.makedsn(str(self.Entry1.get()), str(self.Entry1.get()), str(self.Entry5.get()))
                 con = cx_Oracle.connect("system", str(self.EntryPwdSys.get()), dsn)
-                #con = cx_Oracle.connect("system", str(self.EntryPwdSys.get()), str(self.Entry5.get()))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -1258,7 +1233,6 @@ class simpleapp_tk(Tkinter.Tk):
         if GlobalStop == 0:
             dsn = cx_Oracle.makedsn(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()))
             con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
-            #con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
             cur = con.cursor()
             cur.execute('select count(*) from dwhstat')
             for result in cur:
@@ -1335,7 +1309,6 @@ class simpleapp_tk(Tkinter.Tk):
         try:
             dsn = cx_Oracle.makedsn(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()))
             con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
-            #con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect with user {0}!" \
                                    .format(str(self.Entry3.get())))
@@ -1379,7 +1352,6 @@ class simpleapp_tk(Tkinter.Tk):
         try:
             dsn = cx_Oracle.makedsn(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()))
             con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
-            #con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
             error_con = 1
@@ -1401,16 +1373,12 @@ class simpleapp_tk(Tkinter.Tk):
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
         """
-        # dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        # dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        # version_DB['text'] = str(self.Entry3.get())
         error_con = 0
 
         if origin == "User":
             try:
                 dsn = cx_Oracle.makedsn(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()))
                 con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
-                #con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -1437,10 +1405,8 @@ class simpleapp_tk(Tkinter.Tk):
                 con.close()
         elif origin == "System":
             try:
-                #her
                 dsn = cx_Oracle.makedsn(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()))
                 con = cx_Oracle.connect("system", str(self.EntryPwdSys.get()), dsn)
-                #con = cx_Oracle.connect("system", str(self.EntryPwdSys.get()), str(self.Entry5.get()))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -1454,8 +1420,11 @@ class simpleapp_tk(Tkinter.Tk):
                 elif error.code == 12543:
                     self.labelVariable.set(self.entryConnectStringVariable.get() + ": Destination host not available")
                     error_con = 1
+                elif error.code == 28000:
+                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": The system account is locked")
+                    error_con = 1
                 else:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": System unable to connect")
+                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": System unable to connect " + str(error.code))
                     error_con = 1
 
             if error_con != 1:
@@ -1478,7 +1447,6 @@ class simpleapp_tk(Tkinter.Tk):
         try:
             dsn = cx_Oracle.makedsn(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()))
             con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
-            #con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
             error_con = 1
