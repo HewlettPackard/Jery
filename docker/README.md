@@ -3,7 +3,7 @@ based on CentOs 7
 https://hub.docker.com/_/centos/
 
 ##Build
-For the docker image refer to "releases"
+For an recent docker image please refer to "releases" https://github.hpe.com/marcel-jakob/jery/releases
 
 ##Docker run command
 ```docker run -ti --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix jerydocker```
