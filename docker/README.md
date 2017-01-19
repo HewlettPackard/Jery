@@ -25,8 +25,8 @@ Is needed by Jery for establishing the connection to the Oracle DB. Both is adde
  Switch to this user and execute the Jery script.
  
 ##Issues
-```_tkinter.TclError: couldn't connect to display ":0"```
-X-Server connection of other users (root) are rejected
-Solved with ```xhost local:root```
+```Error _tkinter.TclError: couldn't connect to display ":0"```</br>
+X-Server connection of other users (root) are rejected</br>
+--> Solved with the command ```xhost local:root```
 
  
