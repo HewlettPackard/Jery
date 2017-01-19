@@ -1,6 +1,5 @@
 #Dockerfile for packaging Jery
-based on CentOs 7
-https://hub.docker.com/_/centos/
+based on [CentOs 7](https://hub.docker.com/_/centos/)
 
 ##Build
 For an recent docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
