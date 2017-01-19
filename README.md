@@ -24,14 +24,16 @@ https://github.hpe.com/marcel-jakob/jery/tree/master/docker
     - Calibration
     - Performance comparison
 
-However, JERY is not a benchmark tool
+_However, JERY is not a benchmark tool_
 
 ##Used Libraries
 
-- Tkinter
-- cx_Oracle
-- threading
-- ConfigParser
+- [Tkinter](http://tkinter.unpythonic.net/wiki/)
+- [cx_Oracle](https://cx-oracle.readthedocs.io/en/latest/)
+- [threading](https://docs.python.org/2/library/threading.html)
+- [ConfigParser](https://docs.python.org/2/library/configparser.html)
+
+_Oracle Client needs to be installed_
 
 ##Oracle Client install
 - copy file from /oracle
