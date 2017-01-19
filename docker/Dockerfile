@@ -1,3 +1,4 @@
+#!/bin/bash
 FROM centos:7
 MAINTAINER Marcel Jakob <jery@hpe.com>
 
@@ -22,9 +23,8 @@ RUN yum install -y libaio && \
 	rm cx_Oracle.rpm
 	
 
-#install GUI (GNOME Desktop) + tkinter
-RUN yum groupinstall -y "X Window System" && \
-	yum install -y liberation-mono-fonts && \
+#GUI fixes + install tkinter
+RUN yum install -y liberation-mono-fonts && \
 	ln -sf /lib/systemd/system/runlevel5.target /etc/systemd/system/default.target && \
 	dbus-uuidgen > /var/lib/dbus/machine-id && \
 	yum install -y tkinter && \
@@ -36,7 +36,7 @@ RUN export uid=0 gid=0 && \
 	mkdir -p /home/developer && \
 	echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
 	echo "developer:x:${uid}:" >> /etc/group && \
-	echo "developer ALL=(ALL) NOPASSWD: ALL" >  /etc/sudoers && \
+	echo "developer ALL=(ALL) NOPASSWD: ALL" >>  /etc/sudoers && \
 	chmod 0440  /etc/sudoers && \
 	chown ${uid}:${gid} -R /home/developer
 
@@ -48,4 +48,3 @@ ENV HOME /home/developer
 #start Jery
 ADD /jery/ /jery/
 CMD cd /jery/ && python jery.py
-
