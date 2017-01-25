@@ -986,7 +986,8 @@ class simpleapp_tk(Tkinter.Tk):
         self.EntryPwdSys = Tkinter.Entry(self, textvariable=self.EntryPwdSysVariable, \
                                          show="*", width=15, state='disabled')
         self.EntryPwdSys.grid(column=1, row=7, sticky='EW')
-        self.EntryPwdSysVariable.set(u"manager")
+        entryPwdSysVariable = ConfigSectionMap("Prefilled")['pwdsys']
+        self.EntryPwdSysVariable.set(entryPwdSysVariable)
 
         """ Button section:
            - buttonLess: decrease the number of // workers
