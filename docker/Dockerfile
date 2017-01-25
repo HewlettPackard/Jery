@@ -23,8 +23,8 @@ RUN yum install -y libaio && \
 	rm cx_Oracle.rpm
 	
 
-#GUI fixes + install tkinter
-RUN yum install -y liberation-mono-fonts && \
+#install GUI (GNOME Desktop) + tkinter
+RUN yum install -y liberation-sans-fonts.noarch && \
 	ln -sf /lib/systemd/system/runlevel5.target /etc/systemd/system/default.target && \
 	dbus-uuidgen > /var/lib/dbus/machine-id && \
 	yum install -y tkinter && \
