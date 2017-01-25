@@ -15,7 +15,6 @@ import time
 import tkMessageBox
 import ConfigParser
 
-
 ###########################  GUI  ##############################
 class CreateTestSchemaWindow(Tkinter.Toplevel):
     def __init__(CrSchemaWindow, SID, passwd, ip, port):
@@ -154,7 +153,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
 
             cur.close()
-            CrSchemaWindow.CreateSchemaProgress(SID, passwd)
+            CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
             con.close()
 
     def DropSchema(CrSchemaWindow, SID, passwd, ip, port):
@@ -232,7 +231,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
         if CrSchemaWindow.i < CrSchemaWindow.LoopRatioVar:
             CrSchemaWindow.after(500, lambda:
-            CrSchemaWindow.CreateSchemaProgress(SID, passwd))
+            CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port))
         else:
             con.close()
             CrSchemaWindow.VocableVariable.set("Updating statistics, please wait...")
@@ -1482,7 +1481,7 @@ class simpleapp_tk(Tkinter.Tk):
 
     def CreateSchema(self):
         """ test schema creation method """
-        CreateSchematWindow = CreateTestSchemaWindow(str(self.Entry3.get()), str(self.EntryPwdSys.get()), str(self.Entry1.get()), str(self.Entry2.get()))
+        CreateSchematWindow = CreateTestSchemaWindow(str(self.Entry5.get()), str(self.EntryPwdSys.get()), str(self.Entry1.get()), str(self.Entry2.get()))
 
     def APropos(self):
         """ Information about the application """
