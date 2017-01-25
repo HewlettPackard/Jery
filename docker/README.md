@@ -1,9 +1,18 @@
-#Dockerfile for packaging Jery
+#Docker Image for deploying Jery
 based on [CentOs 7](https://hub.docker.com/_/centos/)
 
+##Table of Contents  
+- [Build](#Build)  
+- [Docker run command](#Dockerruncommand)  
+- [Dockerfile explained](#Dockerfileexplained)
+- [Issues](#Issues)
+- [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
+
+<a name="Build"/>
 ##Build
 For an recent docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
 
+<a name="Dockerruncommand"/>
 ##Docker run command
 Needs to be executed with superuser privileges: <br>
 ```docker run -ti --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix jerydocker```
@@ -14,6 +23,7 @@ Needs to be executed with superuser privileges: <br>
 - ```-v /tmp/.X11-unix:/tmp/.X11-unix```: Connect a new volume with the hosts X11 binaries to the container
 - ```jerydocker```: Run the container jerydocker
 
+<a name="Dockerfileexplained"/>
 ##Dockerfile explained
 ####Enable Sources
 Add and install epel and ius sources. For installing libaio and tkinter with yum.
@@ -25,13 +35,15 @@ Is needed by Jery for establishing the connection to the Oracle DB. Both is adde
  Add a new user developer with root rights to the system. This one is needed to x11 forward the window out of the docker container.
 ####Execute Jery
  Switch to this user and execute the Jery script.
- 
+
+<a name="Issues"/> 
 ##Issues
 Excecuting Jery as root if not logged in as root
 ```Error _tkinter.TclError: couldn't connect to display ":0"```</br></br>
 X-Server connection of other users (root) are rejected</br>
 --> Solved with the command ```xhost local:root```
 
+<a name="AddinganinsecureDockerregistry"/>
 ##Adding an insecure Docker registry
 There are two options for adding a registry with no authorization to docker running on RHEL7 (on client which wants to push/pull to registry)
 ####Start docker daemon with --insecure-registry
