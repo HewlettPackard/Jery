@@ -787,7 +787,7 @@ class InfoBulle(Tkinter.Toplevel):
         self.withdraw()
         self.overrideredirect(1)  ## No board for the window
         self.transient()
-        l = Tkinter.Label(self, text=texte, bg="yellow", justify='left')
+        l = Tkinter.Label(self, text=texte, bg="white", justify='left')
         l.update_idletasks()
         l.pack()
         l.update_idletasks()
@@ -804,7 +804,7 @@ class InfoBulle(Tkinter.Toplevel):
     ## Print the balloon       
     def affiche(self):
         self.update_idletasks()
-        posX = self.parent.winfo_rootx() + self.parent.winfo_width()
+        posX = self.parent.winfo_rootx()
         posY = self.parent.winfo_rooty() + self.parent.winfo_height()
         if posX + self.tipwidth > self.winfo_screenwidth():
             posX = posX - self.winfo_width() - self.tipwidth
@@ -1045,11 +1045,13 @@ class simpleapp_tk(Tkinter.Tk):
         """ Balloon section
             enable help on Entry field
         """
-        balloonHelpSID = InfoBulle(parent=self.Entry5, texte="Enter the SID or the connect string (ip:port:SID)")
+        balloonHelpSID = InfoBulle(parent=self.Entry5, texte="Enter the SID")
         balloonUserScott = InfoBulle(parent=self.Entry3, texte="Enter the username owning the test schema")
         balloonUserPwd = InfoBulle(parent=self.Entry4, texte="Enter the password of the user owning the test schema")
         balloonSystemPwd = InfoBulle(parent=self.EntryPwdSys, texte="Enter the password of the SYSTEM (sysdba) user")
         balloonTestLength = InfoBulle(parent=self.EntryTestLength, texte="How long will run the test in minutes")
+        balloonIP = InfoBulle(parent=self.Entry1, texte="Enter the IP address of the database")
+        balloonPort = InfoBulle(parent=self.Entry2, texte="Enter the port of the database")
 
         """ Checkbutton define whether the test run on a limited period of time or if it will run
             until the stop button is hitted
