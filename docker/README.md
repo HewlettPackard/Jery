@@ -1,8 +1,9 @@
 #Docker Image for deploying Jery
 based on [CentOs 7](https://hub.docker.com/_/centos/)
 
-##Table of Contents  
-- [Build](#Build)  
+##Table of Contents
+- [Build](#Build)
+- [Pulling from Registry](#PullingfromRegistry)  
 - [Docker run command](#Dockerruncommand)  
 - [Dockerfile explained](#Dockerfileexplained)
 - [Issues](#Issues)
@@ -10,7 +11,13 @@ based on [CentOs 7](https://hub.docker.com/_/centos/)
 
 <a name="Build"/>
 ##Build
-For an recent docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
+For a tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
+
+<a name="PullingfromRegistry"/>
+##Pulling from Registry
+####From inside the EPC network
+1. [Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry](#AddinganinsecureDockerregistry)
+2. Execute the command: ```docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker```
 
 <a name="Dockerruncommand"/>
 ##Docker run command
