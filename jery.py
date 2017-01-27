@@ -75,12 +75,12 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         buttonQuit.grid (column=0, row=14, sticky=S)
 
         buttonCreate = Tkinter.Button(CrSchemaWindow,text=u"Create the data now", command=lambda:
-                                      CrSchemaWindow.CreateSchema(CrSchemaWindow.SID,CrSchemaWindow.passwd,int(CrSchemaWindow.RatioVar.get())) \
+                                      CrSchemaWindow.CreateSchema(CrSchemaWindow.SID,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port,int(CrSchemaWindow.RatioVar.get())) \
                                       , width=29)
         buttonCreate.grid (column=0, row=12, sticky=S)
 
         buttonDrop = Tkinter.Button(CrSchemaWindow,text=u"Drop the test data now", command=lambda:
-                                      CrSchemaWindow.DropSchema(CrSchemaWindow.SID,CrSchemaWindow.passwd), width=29)
+                                      CrSchemaWindow.DropSchema(CrSchemaWindow.SID,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port), width=29)
         buttonDrop.grid (column=0, row=13, sticky=S)
 
         CrSchemaWindow.VocableVariable = Tkinter.StringVar()
