@@ -612,7 +612,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
         statWindow.VocableVariable.set(u"Hello !")
 
         """ Start data collecting thread  """
-        StatThread = threading.Thread(target=statWindow.CollectStat, args=(statWindow.SID, statWindow.passwd))
+        StatThread = threading.Thread(target=statWindow.CollectStat, args=(statWindow.SID, statWindow.passwd, statWindow.ip, statWindow.port))
         StatThread.start()
         
         statWindow.grid_columnconfigure(0,weight=1)
@@ -1524,7 +1524,7 @@ class simpleapp_tk(Tkinter.Tk):
 
     def ExtendedStatistics(self):
         """ Advanced Statistics call method """
-        statWindow = ExtendedStatisticsWindow(str(self.Entry3.get()), str(self.EntryPwdSys.get()), str(self.Entry1.get()), str(self.Entry2.get()))
+        statWindow = ExtendedStatisticsWindow(str(self.Entry5.get()), str(self.EntryPwdSys.get()), str(self.Entry1.get()), str(self.Entry2.get()))
 
     def CreateSchema(self):
         """ test schema creation method """
