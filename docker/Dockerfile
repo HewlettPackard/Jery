@@ -24,7 +24,7 @@ RUN yum install -y libaio && \
 	
 
 #install GUI (GNOME Desktop) + tkinter
-RUN yum install -y liberation-sans-fonts.noarch && \
+RUN yum install -y abattis-cantarell-fonts.noarch && \
 	ln -sf /lib/systemd/system/runlevel5.target /etc/systemd/system/default.target && \
 	dbus-uuidgen > /var/lib/dbus/machine-id && \
 	yum install -y tkinter && \
