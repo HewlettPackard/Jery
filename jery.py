@@ -127,32 +127,47 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 
         if error_con != 1:
             cur = con.cursor()
-            try:
-                cur.execute('create table scott.emp2 as select * from scott.emp')
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 3113:
-                    cur.execute('drop table scott.emp2')
-                    cur.execute('create table scott.emp2 as select * from scott.emp')
-                elif error.code == 955:
-                    cur.execute('drop table scott.emp2')
-                    cur.execute('create table scott.emp2 as select * from scott.emp')
-                else:
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
-                    cur.close()
-                    return
-            try:
-                cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 955:
-                    cur.execute('truncate table scott.dwhstat')
+            resultVar = ""
+            cur.execute("select 1 from dba_users where upper(username) like 'SCOTT'")
+            for result in cur:
+                resultVar = result[0]
 
-            cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
-            
-            cur.close()
-            CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
-            con.close()
+            if resultVar == 1:
+                cur.execute(
+                    "select 1 from dba_objects where upper(OWNER) like 'SCOTT' and upper(OBJECT_NAME) like 'EMP'")
+                for result in cur:
+                    resultVar = result[0]
+                if resultVar == 1:
+                    try:
+                        cur.execute('create table scott.emp2 as select * from scott.emp')
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code == 3113:
+                            cur.execute('drop table scott.emp2')
+                            cur.execute('create table scott.emp2 as select * from scott.emp')
+                        elif error.code == 955:
+                            cur.execute('drop table scott.emp2')
+                            cur.execute('create table scott.emp2 as select * from scott.emp')
+                        else:
+                            CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
+                            cur.close()
+                            return
+                    try:
+                        cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code == 955:
+                            cur.execute('truncate table scott.dwhstat')
+
+                    cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
+
+                    cur.close()
+                    CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
+                    con.close()
+                else:
+                    CrSchemaWindow.VocableVariable.set("EMP table does not exist!")
+            else:
+                CrSchemaWindow.VocableVariable.set("SCOTT schema does not exist!")
             
 
     def DropSchema(CrSchemaWindow, SID, passwd, ip, port):
@@ -229,12 +244,12 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         cur2.execute('insert into scott.emp2 select * from scott.emp2')
         con.commit()
         CrSchemaWindow.i += 1
-        CrSchemaWindow.VocableVariable.set("Test schema processing step {0} out of {1}".format(str(CrSchemaWindow.i),\
-                                                            str(CrSchemaWindow.LoopRatioVar - 1)))
-                
+        CrSchemaWindow.VocableVariable.set("Test schema processing step {0} out of {1}".format(str(CrSchemaWindow.i),
+                                                                str(CrSchemaWindow.LoopRatioVar - 1)))
+
         if CrSchemaWindow.i < CrSchemaWindow.LoopRatioVar:
-             CrSchemaWindow.after (500, lambda:
-                                   CrSchemaWindow.CreateSchemaProgress(SID,passwd, ip, port))
+            CrSchemaWindow.after(500, lambda:
+            CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port))
         else:
             con.close()
             CrSchemaWindow.VocableVariable.set("Updating statistics, please wait...")
