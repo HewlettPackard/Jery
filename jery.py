@@ -1254,10 +1254,17 @@ class simpleapp_tk(Tkinter.Tk):
         """
             Reduce by one the number of concurrent users.
         """
-        self.labelVariable.set("Decreasing the number of users...")
         ConcUsers = int(self.EntryConUsers.get())
         ConcUsers -= 1
         self.entryConUsersVariable.set(ConcUsers)
+
+        
+        lastThread = self.existingThread.pop()
+        if lastThread.isAlive():
+            lastThread.stopThread()
+            ActiveUsers = int(threading.activeCount()) - 3
+            self.labelVariable.set("Number of active users: " + str(ActiveUsers))
+
 
     def OnButtonMoreClick(self):
         """
@@ -1296,11 +1303,11 @@ class simpleapp_tk(Tkinter.Tk):
             Enable the start load button
         """
         #global GlobalStop
-        
+
         for t in self.existingThread:
             if t.isAlive():
                 t.stopThread()
-                
+
         
         #if self.GlobalStop == 0:
         if GlobalStop == 0:
