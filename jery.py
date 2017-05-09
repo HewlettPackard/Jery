@@ -1263,17 +1263,17 @@ class simpleapp_tk(Tkinter.Tk):
         """
             Increase by one the number of concurrent users.
         """
-        i = int(threading.activeCount())
+        noActiveThreads = int(threading.activeCount())
         ConcUsers = int(self.EntryConUsers.get())
         ConcUsers += 1
         self.entryConUsersVariable.set(ConcUsers)
 
-        while int(threading.activeCount()) < ((int(self.EntryConUsers.get ())) + 2):
-            i += 1
+        if int(threading.activeCount()) < ((int(self.EntryConUsers.get ())) + 2):
+            noActiveThreads += 1
             self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
                                            str(self.Entry1.get()), str(self.Entry2.get()),
                                            int(self.EntryTestLength.get()))
-            self.my_thread.name = i
+            self.my_thread.name = noActiveThreads
             self.my_thread.start()
             self.existingThread.append(self.my_thread)
             #time.sleep(1)
