@@ -1258,12 +1258,12 @@ class simpleapp_tk(Tkinter.Tk):
         ConcUsers -= 1
         self.entryConUsersVariable.set(ConcUsers)
 
-        
-        lastThread = self.existingThread.pop()
-        if lastThread.isAlive():
-            lastThread.stopThread()
-            ActiveUsers = int(threading.activeCount()) - 3
-            self.labelVariable.set("Number of active users: " + str(ActiveUsers))
+        if hasattr(self, 'existingThread') and len(self.existingThread) > 0:
+            lastThread = self.existingThread.pop()
+            if lastThread.isAlive():
+                lastThread.stopThread()
+                ActiveUsers = int(threading.activeCount()) - 3
+                self.labelVariable.set("Number of active users: " + str(ActiveUsers))
 
 
     def OnButtonMoreClick(self):
@@ -1275,7 +1275,7 @@ class simpleapp_tk(Tkinter.Tk):
         ConcUsers += 1
         self.entryConUsersVariable.set(ConcUsers)
 
-        if int(threading.activeCount()) < ((int(self.EntryConUsers.get ())) + 2):
+        if int(threading.activeCount()) < ((int(self.EntryConUsers.get ())) + 2) and hasattr(self, 'existingThread'):
             noActiveThreads += 1
             self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
                                            str(self.Entry1.get()), str(self.Entry2.get()),
