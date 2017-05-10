@@ -805,6 +805,63 @@ class OraLoadThread(threading.Thread):
         """Set the stop load flag to 1. Will be passed to the threads"""
         self.runLoad = 1
 
+class WatcherThread(threading.Thread):
+    def __init__(self, Entry1, Entry2, Entry3, Entry4, Entry5, EntryConUsers, EntryTestLength, existingThread, labelVariable):
+        threading.Thread.__init__(self)
+        self.EntryConUsers = EntryConUsers
+        self.Entry3 = Entry3
+        self.Entry4 = Entry4
+        self.Entry5 = Entry5
+        self.Entry1 = Entry1
+        self.Entry2 = Entry2
+        self.EntryTestLength = EntryTestLength
+        self.existingThread = existingThread
+        self.labelVariable = labelVariable
+        self.runWatch = 0
+
+
+    def run(self):
+        i = 1
+        while self.runWatch != 1:
+
+            if self.EntryConUsers.get().isdigit() and int(self.EntryConUsers.get()) >= 1:
+                ConcUsers = int(self.EntryConUsers.get())
+                noActiveOraThreads = int(threading.activeCount()) -2
+                # print "------------------------------------------"
+                # print "ConcUsers: " + str(ConcUsers)
+                # print "noActiveOraThreads: " + str(noActiveOraThreads)
+
+                while int(threading.activeCount())-2 < ConcUsers:
+                    i += 1
+                    self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
+                                                   str(self.Entry1.get()), str(self.Entry2.get()),
+                                                   int(self.EntryTestLength.get()))
+                    self.my_thread.name = i
+                    self.my_thread.start()
+                    self.existingThread.append(self.my_thread)
+                    # time.sleep(1)
+                    # self.after(500, self.labelVariable.set("Number of Thread: "+str(threading.activeCount())))
+
+
+                while len(self.existingThread)-1 > ConcUsers and self.existingThread:
+                        i -= 1
+                        lastThread = self.existingThread.pop()
+                        if lastThread.isAlive():
+                            lastThread.stopThread()
+
+                ActiveUsers = int(threading.activeCount()) - 2
+                self.labelVariable.set("Number of active users: " + str(ActiveUsers))
+
+                # print self.existingThread
+                # print "\n"
+            else:
+                self.labelVariable.set("Please enter a valid number of users")
+
+            time.sleep(1)
+
+    def stopThread(self):
+        """Set the stop watcher flag to 1. Will be passed to the threads"""
+        self.runWatch = 1
 
 class InfoBulle(Tkinter.Toplevel):
     """
@@ -849,20 +906,20 @@ class InfoBulle(Tkinter.Toplevel):
         self.parent.after_cancel(self.action)
 
 def ConfigSectionMap(section):
-	"""
+    """
 				helper function for reading config files
 	"""
-	dict1 = {}
-	options = Config.options(section)
-	for option in options:
-		try:
-			dict1[option] = Config.get(section, option)
-			if dict1[option] == -1:
-				print "skip: %s" % option
-		except:
-			print("exception on %s!" % option)
-			dict1[option] = None
-	return dict1
+    dict1 = {}
+    options = Config.options(section)
+    for option in options:
+        try:
+            dict1[option] = Config.get(section, option)
+            if dict1[option] == -1:
+                print "skip: %s" % option
+        except:
+            print("exception on %s!" % option)
+            dict1[option] = None
+    return dict1
 ################################################################		
 
 
@@ -1256,37 +1313,18 @@ class simpleapp_tk(Tkinter.Tk):
         """
         ConcUsers = int(self.EntryConUsers.get())
         ConcUsers -= 1
-        self.entryConUsersVariable.set(ConcUsers)
-
-        if hasattr(self, 'existingThread') and len(self.existingThread) > 0:
-            lastThread = self.existingThread.pop()
-            if lastThread.isAlive():
-                lastThread.stopThread()
-                ActiveUsers = int(threading.activeCount()) - 3
-                self.labelVariable.set("Number of active users: " + str(ActiveUsers))
+        if(ConcUsers >= 1):
+            self.entryConUsersVariable.set(ConcUsers)
 
 
     def OnButtonMoreClick(self):
         """
             Increase by one the number of concurrent users.
         """
-        noActiveThreads = int(threading.activeCount())
         ConcUsers = int(self.EntryConUsers.get())
         ConcUsers += 1
         self.entryConUsersVariable.set(ConcUsers)
 
-        if int(threading.activeCount()) < ((int(self.EntryConUsers.get ())) + 2) and hasattr(self, 'existingThread'):
-            noActiveThreads += 1
-            self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
-                                           str(self.Entry1.get()), str(self.Entry2.get()),
-                                           int(self.EntryTestLength.get()))
-            self.my_thread.name = noActiveThreads
-            self.my_thread.start()
-            self.existingThread.append(self.my_thread)
-            #time.sleep(1)
-            #self.after(500, self.labelVariable.set("Number of Thread: "+str(threading.activeCount())))
-            ActiveUsers = int(threading.activeCount()) - 2
-            self.labelVariable.set("Number of active users: " + str(ActiveUsers))
 
     def OnButtonClick(self):
         """
@@ -1304,9 +1342,10 @@ class simpleapp_tk(Tkinter.Tk):
         """
         #global GlobalStop
 
-        for t in self.existingThread:
-            if t.isAlive():
-                t.stopThread()
+        if hasattr(self, 'existingThread'):
+            for t in self.existingThread:
+                if t.isAlive():
+                    t.stopThread()
 
         
         #if self.GlobalStop == 0:
@@ -1345,7 +1384,6 @@ class simpleapp_tk(Tkinter.Tk):
         #runStatus=  0
         error_con = 0
         CheckSchemaVar = 0
-        i = 1
 
         ### Snapshot the db if the option is selected.
         self.SnapshotDB()
@@ -1357,29 +1395,20 @@ class simpleapp_tk(Tkinter.Tk):
             return
         
         self.InitTableStat()
+
+        self.watcherThread = WatcherThread(self.Entry1, self.Entry2, self.Entry3, self.Entry4, self.Entry5, self.EntryConUsers, self.EntryTestLength, self.existingThread, self.labelVariable)
+        self.watcherThread.name = 1
+        self.watcherThread.start()
+        self.existingThread.append(self.watcherThread)
+
         self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
                                        str(self.Entry1.get()), str(self.Entry2.get()),
                                        int(self.EntryTestLength.get()))
         #self.labelVariable.set('self.my_thread value = {0}'.format(str(runStatus)))
-        self.my_thread.name = i
+        self.my_thread.name = 1
         self.my_thread.start()
         self.existingThread.append(self.my_thread)
-        
-        #while (int(threading.activeCount()) < ((int(self.EntryConUsers.get ()))+2)) and runStatus == 0:
-        while int(threading.activeCount()) < ((int(self.EntryConUsers.get ())) + 2):
-            i += 1
-            self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
-                                           str(self.Entry1.get()), str(self.Entry2.get()),
-                                           int(self.EntryTestLength.get()))
-            self.my_thread.name = i
-            self.my_thread.start()
-            self.existingThread.append(self.my_thread)
-            #time.sleep(1)
-            #self.after(500, self.labelVariable.set("Number of Thread: "+str(threading.activeCount())))
-            ActiveUsers = int(threading.activeCount()) - 2
-            self.labelVariable.set("Number of active users: " + str(ActiveUsers))
-            
-            
+
     def CheckSchema(self):
         """
             This method checks if the test schema is existing and the database available before starting the load threads.
