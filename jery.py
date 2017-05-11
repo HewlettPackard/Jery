@@ -824,7 +824,7 @@ class WatcherThread(threading.Thread):
         i = 1
         while self.runWatch != 1:
 
-            if self.EntryConUsers.get().isdigit() and int(self.EntryConUsers.get()) >= 1:
+            if self.EntryConUsers.get() and self.EntryConUsers.get().isdigit() and int(self.EntryConUsers.get()) >= 1:
                 ConcUsers = int(self.EntryConUsers.get())
                 noActiveOraThreads = int(threading.activeCount()) -2
                 # print "------------------------------------------"
@@ -1311,19 +1311,21 @@ class simpleapp_tk(Tkinter.Tk):
         """
             Reduce by one the number of concurrent users.
         """
-        ConcUsers = int(self.EntryConUsers.get())
-        ConcUsers -= 1
-        if(ConcUsers >= 1):
-            self.entryConUsersVariable.set(ConcUsers)
+        if self.EntryConUsers.get():
+            ConcUsers = int(self.EntryConUsers.get())
+            ConcUsers -= 1
+            if(ConcUsers >= 1):
+                self.entryConUsersVariable.set(ConcUsers)
 
 
     def OnButtonMoreClick(self):
         """
             Increase by one the number of concurrent users.
         """
-        ConcUsers = int(self.EntryConUsers.get())
-        ConcUsers += 1
-        self.entryConUsersVariable.set(ConcUsers)
+        if self.EntryConUsers.get():
+            ConcUsers = int(self.EntryConUsers.get())
+            ConcUsers += 1
+            self.entryConUsersVariable.set(ConcUsers)
 
 
     def OnButtonClick(self):
