@@ -784,9 +784,13 @@ class OraLoadThread(threading.Thread):
                 cur = con.cursor()
                 cur2 = con.cursor()
                 startTimeQuery = time.time()
-                cur.execute('select e1.ename, min(e2.deptno), max(e2.deptno), avg(to_number(to_char(e2.sal))), \
-                        avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
-                    
+                try:
+                    cur.execute('select e1.ename, min(e2.deptno), max(e2.deptno), avg(to_number(to_char(e2.sal))), \
+                            avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
+                except cx_Oracle.OperationalError:
+                    error_con = 1
+                    return error_con
+
                 elapsedTimeQuery = int(time.time() - startTimeQuery)
                 cur2.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)',{"id":elapsedTimeQuery})
                 con.commit()
@@ -867,14 +871,14 @@ class InfoBulle(Tkinter.Toplevel):
     """
         Allow context help balloon on Entry field
     """
-    def __init__(self, parent=None, texte='', temps=1000):
-        Tkinter.Toplevel.__init__(self, parent, bd=1, bg='black')
+    def __init__(self, parent=None, texte='', temps=500):
+        Tkinter.Toplevel.__init__(self, parent, bd=1)
         self.tps = temps
         self.parent = parent
         self.withdraw()
         self.overrideredirect(1)  ## No board for the window
         self.transient()     
-        l = Tkinter.Label(self, text=texte, bg="white", justify='left')
+        l = Tkinter.Label(self, text=texte, bg="light yellow", justify='left')
         l.update_idletasks()
         l.pack()
         l.update_idletasks()
@@ -891,7 +895,7 @@ class InfoBulle(Tkinter.Toplevel):
     ## Print the balloon       
     def affiche(self):
         self.update_idletasks()
-        posX = self.parent.winfo_rootx()+self.parent.winfo_width()
+        posX = self.parent.winfo_rootx()
         posY = self.parent.winfo_rooty()+self.parent.winfo_height()
         if posX + self.tipwidth > self.winfo_screenwidth():
             posX = posX-self.winfo_width()-self.tipwidth
@@ -1091,10 +1095,10 @@ class simpleapp_tk(Tkinter.Tk):
            - buttonExtendedStat: Open a second window with advanced statistics.
         """
 
-        buttonLess = Tkinter.Button(self, text=u"-", command=self.OnButtonLessClick, width=14)
+        buttonLess = Tkinter.Button(self, text=u"-", command=self.OnButtonLessClick, width=5)
         buttonLess.grid(column=0, row=18, sticky=E)
 
-        buttonMore = Tkinter.Button(self, text=u"+", command=self.OnButtonMoreClick, width=14)
+        buttonMore = Tkinter.Button(self, text=u"+", command=self.OnButtonMoreClick, width=5)
         buttonMore.grid(column=2, row=18, sticky=W)
 
 
@@ -1140,7 +1144,7 @@ class simpleapp_tk(Tkinter.Tk):
         buttonAPropos.grid(column=2, row=23, columnspan=2)
 
         buttonNbThread = Tkinter.Button(self, text=u"Nb. of threads", command=self.NbThread, width=14)
-        buttonNbThread.grid(column=2, row=22, columnspan=1)
+        buttonNbThread.grid(column=2, row=22, columnspan=2)
 
 
         """ Balloon section
@@ -1587,7 +1591,7 @@ class simpleapp_tk(Tkinter.Tk):
                 NbExecTime = str(int(result[0]))
                 self.LabelNbQueriesVariable.set('Nb queries in last MM: {0}'.format(NbExecTime))
             curExec.close()
-        con.close()
+            con.close()
 
 
     def ExtendedStatistics(self):
