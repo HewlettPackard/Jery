@@ -777,6 +777,7 @@ class OraLoadThread(threading.Thread):
             con = cx_Oracle.connect(self.OraUser, self.OraPwd, dsn, threaded=True)
         except cx_Oracle.DatabaseError:
             error_con = 1
+            print cx_Oracle.DatabaseError
             return error_con
         
         if error_con != 1:
@@ -789,6 +790,7 @@ class OraLoadThread(threading.Thread):
                             avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
                 except cx_Oracle.OperationalError:
                     error_con = 1
+                    print cx_Oracle.OperationalError
                     return error_con
 
                 elapsedTimeQuery = int(time.time() - startTimeQuery)
@@ -827,39 +829,46 @@ class WatcherThread(threading.Thread):
     def run(self):
         i = 1
         while self.runWatch != 1:
+            try:
+                if self.EntryConUsers.get() and self.EntryConUsers.get().isdigit() and int(self.EntryConUsers.get()) >= 1:
+                    try:
+                        ConcUsers = int(self.EntryConUsers.get())
+                        noActiveOraThreads = int(threading.activeCount()) -2
+                        # print "------------------------------------------"
+                        # print "ConcUsers: " + str(ConcUsers)
+                        # print "noActiveOraThreads: " + str(noActiveOraThreads)
 
-            if self.EntryConUsers.get() and self.EntryConUsers.get().isdigit() and int(self.EntryConUsers.get()) >= 1:
-                ConcUsers = int(self.EntryConUsers.get())
-                noActiveOraThreads = int(threading.activeCount()) -2
-                # print "------------------------------------------"
-                # print "ConcUsers: " + str(ConcUsers)
-                # print "noActiveOraThreads: " + str(noActiveOraThreads)
-
-                while int(threading.activeCount())-2 < ConcUsers:
-                    i += 1
-                    self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
-                                                   str(self.Entry1.get()), str(self.Entry2.get()),
-                                                   int(self.EntryTestLength.get()))
-                    self.my_thread.name = i
-                    self.my_thread.start()
-                    self.existingThread.append(self.my_thread)
-                    # time.sleep(1)
-                    # self.after(500, self.labelVariable.set("Number of Thread: "+str(threading.activeCount())))
+                        while int(threading.activeCount())-2 < ConcUsers:
+                            i += 1
+                            self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
+                                                           str(self.Entry1.get()), str(self.Entry2.get()),
+                                                           int(self.EntryTestLength.get()))
+                            self.my_thread.name = i
+                            self.my_thread.start()
+                            self.existingThread.append(self.my_thread)
+                            # time.sleep(1)
+                            # self.after(500, self.labelVariable.set("Number of Thread: "+str(threading.activeCount())))
 
 
-                while len(self.existingThread)-1 > ConcUsers and self.existingThread:
-                        i -= 1
-                        lastThread = self.existingThread.pop()
-                        if lastThread.isAlive():
-                            lastThread.stopThread()
+                        while len(self.existingThread)-1 > ConcUsers and self.existingThread:
+                                i -= 1
+                                lastThread = self.existingThread.pop()
+                                if lastThread.isAlive():
+                                    lastThread.stopThread()
 
-                ActiveUsers = int(threading.activeCount()) - 2
-                self.labelVariable.set("Number of active users: " + str(ActiveUsers))
+                        ActiveUsers = int(threading.activeCount()) - 2
+                        self.labelVariable.set("Number of active users: " + str(ActiveUsers))
 
-                # print self.existingThread
-                # print "\n"
-            else:
-                self.labelVariable.set("Please enter a valid number of users")
+                        # print self.existingThread
+                        # print "\n"
+                    except ValueError:
+                        print "Value Error"
+                else:
+                    self.labelVariable.set("Please enter a valid number of users")
+            except TclError:
+                print "TclError"
+
+
 
             time.sleep(1)
 
