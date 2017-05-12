@@ -14,10 +14,6 @@ import threading
 import time
 import tkMessageBox
 import ConfigParser
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import numpy as np
-
 
 ###########################  GUI  ##############################
 class CreateTestSchemaWindow(Tkinter.Toplevel):
@@ -323,7 +319,7 @@ class CreateAProposWindow(Tkinter.Toplevel):
 
 class GraphWindow(Tkinter.Toplevel):
     def __init__(GraphWindow, user, passwd, SID, ip, port):
-        Tkinter.Toplevel.__init__(GraphWindow, height=400, width=450)
+        Tkinter.Toplevel.__init__(GraphWindow, height=600, width=450)
 
         """ This window shows graphically the evolution of the job execution time.
             3 procedures in this class:
@@ -332,29 +328,20 @@ class GraphWindow(Tkinter.Toplevel):
             - handling for the "x" button press. Need to properly close the Toplevel window
         """
 
-        GraphWindow.wm_title("JERY - Queries execution time")
-        GraphWindow.geometry ("450x400")
+        GraphWindow.wm_title(" -- Queries execution time -- ")
+        GraphWindow.geometry ("450x600")
         GraphWindow.user = user
         GraphWindow.passwd = passwd
         GraphWindow.SID = SID
         GraphWindow.ip = ip
         GraphWindow.port = port
         GraphWindow.LoopGraphVar = 0
-        GraphWindow.resizable(False, False)
+        GraphWindow.resizable(False,False)
         GraphWindow.protocol("WM_DELETE_WINDOW", GraphWindow.handler)
         GraphWindow.update()
         
         buttonQuit = Tkinter.Button(GraphWindow,text=u"Close window", command=GraphWindow.StopGraph, width=20)
-        buttonQuit.pack(side=BOTTOM)
-
-        figure = Figure(figsize=(5, 4), dpi=100)
-        GraphWindow.a = figure.add_subplot(111)
-
-        GraphWindow.bars = GraphWindow.a.bar([2], [2], alpha=0.5, color='r')
-
-        canvas = FigureCanvasTkAgg(figure, master=GraphWindow)
-        canvas.show()
-        canvas.get_tk_widget().pack(side='top', expand=1)
+        buttonQuit.pack (side=BOTTOM)
 
         """
             Global variable checking the status of the toplevel windows opening a thread
@@ -374,6 +361,16 @@ class GraphWindow(Tkinter.Toplevel):
         """    
         while GraphWindow.LoopGraphVar == 0:
             error_con = 0
+            c_width = 450
+            c_height = 600
+            c = Tkinter.Canvas(GraphWindow, width=c_width, height=c_height, bg='white')
+
+            y_stretch = 15
+            y_gap = 20
+            x_stretch = 10
+            x_width = 20
+            x_gap = 20
+            pos = 1
 
             """Test the connection before printing the graph"""
             try:
@@ -382,8 +379,6 @@ class GraphWindow(Tkinter.Toplevel):
             except cx_Oracle.DatabaseError:
                 error_con = 1
                 return error_con
-
-            tempValues = []
 
             """if the connection is established, read the latest events of the stat table -dwhstat- and print the graph"""
             if error_con != 1:
@@ -394,17 +389,20 @@ class GraphWindow(Tkinter.Toplevel):
                     if int(result[0]) > 0:
                         curValue.execute('select elapsed from (select seq, elapsed from dwhstat) where seq>(select max(seq) - 20 from dwhstat) order by seq')
                         for y in curValue:
-                            tempValues.append(int(y[0]))
-
-                        #GraphWindow.bars.remove()
-                        GraphWindow.bars = GraphWindow.a.bar([1,2], [5,2], alpha=0.5, color='b')
-                        print tempValues
-
+                            x0 = pos * 20 +10
+                            y0 = c_height - (int(y[0]) * y_stretch + y_gap)
+                            x1 = pos * 20 +25
+                            y1 = c_height - y_gap
+                            c.create_rectangle(x0, y0, x1, y1, fill="red")
+                            c.create_text(x0 + 2, y0, anchor=Tkinter.SW, text=str(int(y[0])))
+                            pos += 1
+                        
                     curValue.close()
-
+                c.pack()
                 refresh = int(ConfigSectionMap("Settings")['refresh'])
                 time.sleep(refresh)
-
+                c.destroy()
+                
 
     def StopGraph(GraphWindow):
         """Close the window and decrement the number of toplevel window counter
@@ -413,7 +411,7 @@ class GraphWindow(Tkinter.Toplevel):
 
         OpenToplevel -= 1
         GraphWindow.LoopGraphVar = 1
-        GraphWindow.after(0, GraphWindow.destroy)
+        GraphWindow.after(2000, GraphWindow.destroy)
 
 
     def handler(GraphWindow):
@@ -779,6 +777,7 @@ class OraLoadThread(threading.Thread):
             con = cx_Oracle.connect(self.OraUser, self.OraPwd, dsn, threaded=True)
         except cx_Oracle.DatabaseError:
             error_con = 1
+            print cx_Oracle.DatabaseError
             return error_con
         
         if error_con != 1:
@@ -790,8 +789,9 @@ class OraLoadThread(threading.Thread):
                     cur.execute('select e1.ename, min(e2.deptno), max(e2.deptno), avg(to_number(to_char(e2.sal))), \
                             avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
                 except cx_Oracle.OperationalError:
+                    error_con = 1
                     print cx_Oracle.OperationalError
-
+                    return error_con
 
                 elapsedTimeQuery = int(time.time() - startTimeQuery)
                 cur2.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)',{"id":elapsedTimeQuery})
@@ -829,39 +829,46 @@ class WatcherThread(threading.Thread):
     def run(self):
         i = 1
         while self.runWatch != 1:
+            try:
+                if self.EntryConUsers.get() and self.EntryConUsers.get().isdigit() and int(self.EntryConUsers.get()) >= 1:
+                    try:
+                        ConcUsers = int(self.EntryConUsers.get())
+                        noActiveOraThreads = int(threading.activeCount()) -2
+                        # print "------------------------------------------"
+                        # print "ConcUsers: " + str(ConcUsers)
+                        # print "noActiveOraThreads: " + str(noActiveOraThreads)
 
-            if self.EntryConUsers.get() and self.EntryConUsers.get().isdigit() and int(self.EntryConUsers.get()) >= 1:
-                ConcUsers = int(self.EntryConUsers.get())
-                noActiveOraThreads = int(threading.activeCount()) -2
-                # print "------------------------------------------"
-                # print "ConcUsers: " + str(ConcUsers)
-                # print "noActiveOraThreads: " + str(noActiveOraThreads)
-
-                while int(threading.activeCount())-2 < ConcUsers:
-                    i += 1
-                    self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
-                                                   str(self.Entry1.get()), str(self.Entry2.get()),
-                                                   int(self.EntryTestLength.get()))
-                    self.my_thread.name = i
-                    self.my_thread.start()
-                    self.existingThread.append(self.my_thread)
-                    # time.sleep(1)
-                    # self.after(500, self.labelVariable.set("Number of Thread: "+str(threading.activeCount())))
+                        while int(threading.activeCount())-2 < ConcUsers:
+                            i += 1
+                            self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
+                                                           str(self.Entry1.get()), str(self.Entry2.get()),
+                                                           int(self.EntryTestLength.get()))
+                            self.my_thread.name = i
+                            self.my_thread.start()
+                            self.existingThread.append(self.my_thread)
+                            # time.sleep(1)
+                            # self.after(500, self.labelVariable.set("Number of Thread: "+str(threading.activeCount())))
 
 
-                while len(self.existingThread)-1 > ConcUsers and self.existingThread:
-                        i -= 1
-                        lastThread = self.existingThread.pop()
-                        if lastThread.isAlive():
-                            lastThread.stopThread()
+                        while len(self.existingThread)-1 > ConcUsers and self.existingThread:
+                                i -= 1
+                                lastThread = self.existingThread.pop()
+                                if lastThread.isAlive():
+                                    lastThread.stopThread()
 
-                ActiveUsers = int(threading.activeCount()) - 2
-                self.labelVariable.set("Number of active users: " + str(ActiveUsers))
+                        ActiveUsers = int(threading.activeCount()) - 2
+                        self.labelVariable.set("Number of active users: " + str(ActiveUsers))
 
-                # print self.existingThread
-                # print "\n"
-            else:
-                self.labelVariable.set("Please enter a valid number of users")
+                        # print self.existingThread
+                        # print "\n"
+                    except ValueError:
+                        print "Value Error"
+                else:
+                    self.labelVariable.set("Please enter a valid number of users")
+            except TclError:
+                print "TclError"
+
+
 
             time.sleep(1)
 
