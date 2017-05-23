@@ -98,14 +98,12 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         """ Test if the connection parameters are valid.
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
-        """        
-        #dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        #dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        #version_DB['text'] = str(self.Entry3.get())
+        """
         
         error_con = 0
         CrSchemaWindow.LoopRatioVar = RatioVar + 14
         CrSchemaWindow.i = 1
+
 
         try:
             dsn = cx_Oracle.makedsn(host=str(ip), port=str(port), service_name=str(SID))
@@ -124,61 +122,59 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             else:
                 CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
                 error_con = 1
-                
+
         if error_con != 1:
             cur = con.cursor()
-            resultVar = ""
-            cur.execute("select 1 from dba_users where upper(username) like 'SCOTT'")
-            for result in cur:
-                resultVar = result[0]
 
-            if resultVar == 1:
-                cur.execute(
-                    "select 1 from dba_objects where upper(OWNER) like 'SCOTT' and upper(OBJECT_NAME) like 'EMP'")
-                for result in cur:
-                    resultVar = result[0]
-                if resultVar == 1:
-                    try:
-                        cur.execute('create table scott.emp2 as select * from scott.emp')
-                    except cx_Oracle.DatabaseError as e:
-                        error, = e.args
-                        if error.code == 3113:
-                            cur.execute('drop table scott.emp2')
-                            cur.execute('create table scott.emp2 as select * from scott.emp')
-                        elif error.code == 955:
-                            cur.execute('drop table scott.emp2')
-                            cur.execute('create table scott.emp2 as select * from scott.emp')
-                        else:
-                            CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
-                            cur.close()
-                            return
-                    try:
-                        cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
-                    except cx_Oracle.DatabaseError as e:
-                        error, = e.args
-                        if error.code == 955:
-                            cur.execute('truncate table scott.dwhstat')
+            f = open('./queries/scott_ora.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
 
-                    cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
 
-                    cur.close()
-                    CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
-                    con.close()
+
+            try:
+                cur.execute('create table scott.emp2 as select * from scott.emp')
+            except cx_Oracle.DatabaseError as e:
+                error, = e.args
+                if error.code == 3113:
+                    cur.execute('drop table scott.emp2')
+                    cur.execute('create table scott.emp2 as select * from scott.emp')
+                elif error.code == 955:
+                    cur.execute('drop table scott.emp2')
+                    cur.execute('create table scott.emp2 as select * from scott.emp')
                 else:
-                    CrSchemaWindow.VocableVariable.set("EMP table does not exist!")
-            else:
-                CrSchemaWindow.VocableVariable.set("SCOTT schema does not exist!")
-            
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
+                    cur.close()
+                    return
+            try:
+                cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
+            except cx_Oracle.DatabaseError as e:
+                error, = e.args
+                if error.code == 955:
+                    cur.execute('truncate table scott.dwhstat')
+
+            try:
+                cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
+            except cx_Oracle.DatabaseError as e:
+                CrSchemaWindow.VocableVariable.set("Schema already exists!")
+
+
+            cur.close()
+            CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
+            con.close()
+
+
 
     def DropSchema(CrSchemaWindow, SID, passwd, ip, port):
         """ Test if the connection parameters are valid.
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
         """        
-        #dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        #dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        #version_DB['text'] = str(self.Entry3.get())
-        
         error_con = 0
 
         try:
@@ -207,7 +203,6 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 error, = e.args
                 if error.code == 942:
                     CrSchemaWindow.VocableVariable.set('Test schema does not exist')
-                    error_con = 2
                 else:
                     CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
                     error_con = 2
