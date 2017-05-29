@@ -14,10 +14,25 @@ import threading
 import time
 import tkMessageBox
 import ConfigParser
+import psycopg2
+
+########################  CONNECTION  ##########################
+def connectToOracle(ip, port, SID, user, passwd, threaded=False):
+    dsn = cx_Oracle.makedsn(host = ip, port = port, service_name = SID)
+    con = cx_Oracle.connect(user, passwd, dsn, threaded=threaded)
+    return con
+
+def connectToEDB(ip, dbname, user, passwd):
+    # print "ip " + ip
+    # print "dbname " + dbname
+    # print "user " + user
+    # print "passwd " + passwd
+    con = psycopg2.connect(host=ip, user=user, password=passwd, dbname=dbname)
+    return con
 
 ###########################  GUI  ##############################
 class CreateTestSchemaWindow(Tkinter.Toplevel):
-    def __init__(CrSchemaWindow, SID, passwd, ip, port):
+    def __init__(CrSchemaWindow, SID, user, passwd, ip, port):
         Tkinter.Toplevel.__init__(CrSchemaWindow)
 
         """ Test schema Creation class
@@ -40,6 +55,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.wm_title(" Test schema creation ")
         CrSchemaWindow.protocol("WM_DELETE_WINDOW", CrSchemaWindow.handler)
         CrSchemaWindow.SID = SID
+        CrSchemaWindow.user = user
         CrSchemaWindow.passwd = passwd
         CrSchemaWindow.ip = ip
         CrSchemaWindow.port = port
@@ -71,16 +87,16 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         Ratio1.select()
 
         
-        buttonQuit = Tkinter.Button(CrSchemaWindow,text=u"Close window", command=CrSchemaWindow.CloseCrSchemaWindow, width=29)
+        buttonQuit = Tkinter.Button(CrSchemaWindow,text=u"Close window", command=CrSchemaWindow.CloseCrSchemaWindow, width=39)
         buttonQuit.grid (column=0, row=14, sticky=S)
 
         buttonCreate = Tkinter.Button(CrSchemaWindow,text=u"Create the data now", command=lambda:
-                                      CrSchemaWindow.CreateSchema(CrSchemaWindow.SID,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port,int(CrSchemaWindow.RatioVar.get())) \
-                                      , width=29)
+                                      CrSchemaWindow.CreateSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port,int(CrSchemaWindow.RatioVar.get())) \
+                                      , width=39)
         buttonCreate.grid (column=0, row=12, sticky=S)
 
         buttonDrop = Tkinter.Button(CrSchemaWindow,text=u"Drop the test data now", command=lambda:
-                                      CrSchemaWindow.DropSchema(CrSchemaWindow.SID,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port), width=29)
+                                      CrSchemaWindow.DropSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port), width=39)
         buttonDrop.grid (column=0, row=13, sticky=S)
 
         CrSchemaWindow.VocableVariable = Tkinter.StringVar()
@@ -94,7 +110,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.geometry(CrSchemaWindow.geometry())
 
 
-    def CreateSchema(CrSchemaWindow, SID, passwd, ip, port, RatioVar):
+    def CreateSchema(CrSchemaWindow, SID, user, passwd, ip, port, RatioVar):
         """ Test if the connection parameters are valid.
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
@@ -104,170 +120,315 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.LoopRatioVar = RatioVar + 14
         CrSchemaWindow.i = 1
 
+        if ConfigSectionMap("Settings")['useedb'] == "False":
+            try:
+                con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+            except cx_Oracle.DatabaseError as e:
+                error, = e.args
+                if error.code == 1017:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+                    error_con = 1
+                elif error.code == 12154:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+                    error_con = 1
+                elif error.code == 12543:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+                    error_con = 1
+                else:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
+                    error_con = 1
 
-        try:
-            dsn = cx_Oracle.makedsn(host=str(ip), port=str(port), service_name=str(SID))
-            con = cx_Oracle.connect("system", str(passwd), dsn)
-        except cx_Oracle.DatabaseError as e:
-            error, = e.args
-            if error.code == 1017:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
-                error_con = 1
-            elif error.code == 12154:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
-                error_con = 1
-            elif error.code == 12543:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
-                error_con = 1
-            else:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
-                error_con = 1
+            if error_con != 1:
+                cur = con.cursor()
 
-        if error_con != 1:
-            cur = con.cursor()
+                f = open('./queries/scott_ora.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
 
-            f = open('./queries/scott_ora.sql')
-            full_sql = f.read()
-            sql_commands = full_sql.split(';')
+                for sql_command in sql_commands:
+                    try:
+                        cur.execute(sql_command)
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
 
-            for sql_command in sql_commands:
+
                 try:
-                    cur.execute(sql_command)
+                    cur.execute('create table scott.emp2 as select * from scott.emp')
                 except cx_Oracle.DatabaseError as e:
                     error, = e.args
+                    if error.code == 3113:
+                        cur.execute('drop table scott.emp2')
+                        cur.execute('create table scott.emp2 as select * from scott.emp')
+                    elif error.code == 955:
+                        cur.execute('drop table scott.emp2')
+                        cur.execute('create table scott.emp2 as select * from scott.emp')
+                    else:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
+                        cur.close()
+                        return
+                try:
+                    cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 955:
+                        cur.execute('truncate table scott.dwhstat')
 
+                try:
+                    cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
+                except cx_Oracle.DatabaseError as e:
+                    CrSchemaWindow.VocableVariable.set("Schema already exists!")
 
+                cur.close()
+                CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
+                con.close()
+
+        elif ConfigSectionMap("Settings")['useedb'] == "True":
             try:
-                cur.execute('create table scott.emp2 as select * from scott.emp')
-            except cx_Oracle.DatabaseError as e:
+                con = connectToEDB(str(ip), str(SID), str(user), str(passwd))
+            except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
                 error, = e.args
-                if error.code == 3113:
-                    cur.execute('drop table scott.emp2')
-                    cur.execute('create table scott.emp2 as select * from scott.emp')
-                elif error.code == 955:
-                    cur.execute('drop table scott.emp2')
-                    cur.execute('create table scott.emp2 as select * from scott.emp')
-                else:
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
-                    cur.close()
-                    return
-            try:
-                cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 955:
-                    cur.execute('truncate table scott.dwhstat')
-
-            try:
-                cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
-            except cx_Oracle.DatabaseError as e:
-                CrSchemaWindow.VocableVariable.set("Schema already exists!")
+                error = error.replace('FATAL:  ', '')
+                error = error.replace('\n', '')
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": " + error)
+                error_con = 1
 
 
-            cur.close()
-            CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
-            con.close()
+            if error_con != 1:
+                cur = con.cursor()
+
+                f = open('./queries/scott_edb.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
+
+                try:
+                    cur.execute("drop table dept cascade")
+                    cur.execute("drop table emp cascade")
+                    cur.execute("drop table bonus cascade")
+                    cur.execute("drop table salgrade cascade")
+
+                except (psycopg2.DatabaseError, psycopg2.ProgrammingError) as e:
+                    error = e.pgcode
+                    con.rollback()
+                    if error != '42P01':
+                        print e
+                con.commit()
+
+                for sql_command in sql_commands:
+                    try:
+                        if sql_command != "":
+                            cur.execute(sql_command)
+                    except (psycopg2.DatabaseError, psycopg2.ProgrammingError) as e:
+                        con.rollback()
+                        error, = e.args
+                        print error
+                    con.commit()
+
+                try:
+                    cur.execute('create table emp2 as select * from emp')
+                except psycopg2.DatabaseError as e:
+                    error = e.pgcode
+                    con.rollback()
+                    if error == '42P07':
+                        cur.execute('drop table emp2')
+                        cur.execute('create table emp2 as select * from emp')
+                    else:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
+                        cur.close()
+                        return
+                con.commit()
+
+                try:
+                    cur.execute('create table dwhstat (seq int not null primary key, elapsed int, insdate date)')
+                except psycopg2.DatabaseError as e:
+                    error = e.pgcode
+                    con.rollback()
+                    if error == '42P07':
+                        cur.execute('truncate table dwhstat')
+                con.commit()
+
+                try:
+                    cur.execute('CREATE SEQUENCE seq START WITH 1 INCREMENT BY 1 NOCACHE')
+                except psycopg2.DatabaseError as e:
+                    CrSchemaWindow.VocableVariable.set("Schema already exists!")
+
+                cur.close()
+                CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
+                con.close()
 
 
-
-    def DropSchema(CrSchemaWindow, SID, passwd, ip, port):
+    def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
         """ Test if the connection parameters are valid.
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
-        """        
-        error_con = 0
+        """
+        if ConfigSectionMap("Settings")['useedb'] == "False":
+            error_con = 0
 
-        try:
-            dsn = cx_Oracle.makedsn(host=str(ip), port=str(port), service_name=str(SID))
-            con = cx_Oracle.connect("system", str(passwd), dsn)
-        except cx_Oracle.DatabaseError as e:
-            error, = e.args
-            if error.code == 1017:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
-                error_con = 1
-            elif error.code == 12154:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
-                error_con = 1
-            elif error.code == 12543:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
-                error_con = 1
-            else:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
-                error_con = 1
-                
-        if error_con != 1:
-            cur = con.cursor()
             try:
-                cur.execute('drop table scott.emp2')
+                con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
-                if error.code == 942:
-                    CrSchemaWindow.VocableVariable.set('Test schema does not exist')
+                if error.code == 1017:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+                    error_con = 1
+                elif error.code == 12154:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+                    error_con = 1
+                elif error.code == 12543:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+                    error_con = 1
                 else:
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
-                    error_con = 2
-                    
-            try:
-                cur.execute('drop table scott.dwhstat')
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 942:
-                    CrSchemaWindow.VocableVariable.set('Test schema does not exist')
-                    error_con = 2
-                else:
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
-                    error_con = 2
-            
-            try:
-                cur.execute('drop SEQUENCE scott.seq')
-            except cx_Oracle.DatabaseError:
-                error_con = 3
-                
-            cur.close()
-            con.close()
-            if error_con == 0:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Test schema dropped!")
-            
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
+                    error_con = 1
 
-    def CreateSchemaProgress(CrSchemaWindow, SID, passwd, ip, port):
+            if error_con != 1:
+                cur = con.cursor()
+                try:
+                    cur.execute('drop table scott.emp2')
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 942:
+                        CrSchemaWindow.VocableVariable.set('Test schema does not exist')
+                    else:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
+                        error_con = 2
+
+                try:
+                    cur.execute('drop table scott.dwhstat')
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 942:
+                        CrSchemaWindow.VocableVariable.set('Test schema does not exist')
+                        error_con = 2
+                    else:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
+                        error_con = 2
+
+                try:
+                    cur.execute('drop SEQUENCE scott.seq')
+                except cx_Oracle.DatabaseError:
+                    error_con = 3
+
+                cur.close()
+                con.close()
+                if error_con == 0:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Test schema dropped!")
+
+        elif ConfigSectionMap("Settings")['useedb'] == "True":
+            error_con = 0
+
+            try:
+                con = connectToEDB(str(ip), str(SID), str(user), str(passwd))
+            except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
+                error, = e.args
+                error = error.replace('FATAL:  ', '')
+                error = error.replace('\n', '')
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": " + error)
+                error_con = 1
+
+            if error_con != 1:
+                cur = con.cursor()
+                try:
+                    cur.execute('drop table emp2')
+                except psycopg2.DatabaseError as e:
+                    error = e.pgcode
+                    con.rollback()
+                    if error == '42P01':
+                        CrSchemaWindow.VocableVariable.set('Test schema does not exist')
+                        error_con = 2
+                    else:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
+                        error_con = 2
+                con.commit()
+
+                try:
+                    cur.execute('drop table dwhstat')
+                except psycopg2.DatabaseError as e:
+                    error = e.pgcode
+                    con.rollback()
+                    if error == '3F000':
+                        CrSchemaWindow.VocableVariable.set('Test schema does not exist')
+                        error_con = 2
+                    else:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
+                        error_con = 2
+
+                #ToDo: drop seq
+                # try:
+                #     cur.execute('drop SEQUENCE seq')
+                # except (psycopg2.DatabaseError, psycopg2.ProgrammingError):
+                #     error_con = 3
+
+                cur.close()
+                con.close()
+                if error_con == 0:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Test schema dropped!")
+
+
+    def CreateSchemaProgress(CrSchemaWindow, SID, user, passwd, ip, port):
         """ Used as progress bar.
             for each and every recursive insert done, a message is printed into the vocable blue bar
         """
-        dsn = cx_Oracle.makedsn(host=str(ip), port=str(port), service_name=str(SID))
-        con = cx_Oracle.connect("system", str(passwd), dsn)
-        cur2 = con.cursor()
-        cur2.execute('insert into scott.emp2 select * from scott.emp2')
-        con.commit()
-        CrSchemaWindow.i += 1
-        CrSchemaWindow.VocableVariable.set("Test schema processing step {0} out of {1}".format(str(CrSchemaWindow.i),
-                                                                str(CrSchemaWindow.LoopRatioVar - 1)))
+        if ConfigSectionMap("Settings")['useedb'] == "False":
+            con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+            cur2 = con.cursor()
+            cur2.execute('insert into scott.emp2 select * from scott.emp2')
+            con.commit()
+            CrSchemaWindow.i += 1
+            CrSchemaWindow.VocableVariable.set("Test schema processing step {0} out of {1}".format(str(CrSchemaWindow.i),
+                                                                    str(CrSchemaWindow.LoopRatioVar - 1)))
 
-        if CrSchemaWindow.i < CrSchemaWindow.LoopRatioVar:
-            CrSchemaWindow.after(500, lambda:
-            CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port))
-        else:
-            con.close()
-            CrSchemaWindow.VocableVariable.set("Updating statistics, please wait...")
-            CrSchemaWindow.Statistics(SID, passwd, ip, port)
-            
+            if CrSchemaWindow.i < CrSchemaWindow.LoopRatioVar:
+                CrSchemaWindow.after(500, lambda:
+                CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port))
+            else:
+                con.close()
+                CrSchemaWindow.VocableVariable.set("Updating statistics, please wait...")
+                CrSchemaWindow.Statistics(SID, user, passwd, ip, port)
 
-    def Statistics(CrSchemaWindow, SID, passwd, ip, port):
+        elif ConfigSectionMap("Settings")['useedb'] == "True":
+            con = connectToEDB(str(ip), str(SID), str(user),  str(passwd))
+            cur2 = con.cursor()
+            cur2.execute('insert into emp2 select * from emp2')
+            con.commit()
+            CrSchemaWindow.i += 1
+            CrSchemaWindow.VocableVariable.set(
+                "Test schema processing step {0} out of {1}".format(str(CrSchemaWindow.i),
+                                                                    str(CrSchemaWindow.LoopRatioVar - 1)))
+            if CrSchemaWindow.i < CrSchemaWindow.LoopRatioVar:
+                CrSchemaWindow.after(500, lambda:
+                CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port))
+            else:
+                con.close()
+                CrSchemaWindow.VocableVariable.set("Updating statistics, please wait...")
+                CrSchemaWindow.Statistics(SID, user, passwd, ip, port)
+
+
+    def Statistics(CrSchemaWindow, SID, user, passwd, ip, port):
         """ Used generating staistics in SCOTT schema.
         """
-        dsn = cx_Oracle.makedsn(host=str(ip), port=str(port), service_name=str(SID))
-        con = cx_Oracle.connect("system", str(passwd), dsn)
-        cur3 = con.cursor()
-        cur3.execute("""
-        begin
-        
-        dbms_stats.gather_schema_stats(:name, estimate_percent => 100, method_opt => :method, options => :options, cascade => true,degree => 4);
-        end;""",
-                     name = 'SCOTT',
-                     method = 'for all columns size auto',
-                     options = 'gather stale')
-        con.close()
-        CrSchemaWindow.VocableVariable.set("Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
-        
+        if ConfigSectionMap("Settings")['useedb'] == "False":
+            con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+            cur3 = con.cursor()
+            cur3.execute("""
+            begin
+            
+            dbms_stats.gather_schema_stats(:name, estimate_percent => 100, method_opt => :method, options => :options, cascade => true,degree => 4);
+            end;""",
+                         name = 'SCOTT',
+                         method = 'for all columns size auto',
+                         options = 'gather stale')
+            con.close()
+            CrSchemaWindow.VocableVariable.set("Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
+
+        elif ConfigSectionMap("Settings")['useedb'] == "True":
+            con = connectToEDB(str(ip), str(SID), str(user), str(passwd))
+            cur3 = con.cursor()
+            #Todo: fix statistics generation
+            #cur3.execute("exec DBMS_UTILITY.ANALYZE_SCHEMA(SCOTT)")
+            con.close()
+            CrSchemaWindow.VocableVariable.set(
+                "Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
         
     def CloseCrSchemaWindow(CrSchemaWindow):
         """Close the window and decrement the number of toplevel window counter
@@ -369,8 +530,7 @@ class GraphWindow(Tkinter.Toplevel):
 
             """Test the connection before printing the graph"""
             try:
-                dsn = cx_Oracle.makedsn(host=GraphWindow.ip, port=GraphWindow.port, service_name=GraphWindow.SID)
-                con = cx_Oracle.connect(GraphWindow.user, GraphWindow.passwd, dsn)
+                con = connectToOracle(GraphWindow.ip, GraphWindow.port, GraphWindow.SID, GraphWindow.user, GraphWindow.passwd)
             except cx_Oracle.DatabaseError:
                 error_con = 1
                 return error_con
@@ -643,8 +803,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
             error_con = 0
 
             try:
-                dsn = cx_Oracle.makedsn(host=str(ip), port=str(port), service_name=str(SID))
-                con = cx_Oracle.connect("system", str(passwd), dsn)
+                con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -725,7 +884,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
 
 
 ##########################  HELPER  ############################ 
-class OraLoadThread(threading.Thread):
+class LoadThread(threading.Thread):
     def __init__(self, OraUser, OraPwd, OraConnect, OraIp, OraPort, LengthTest):
         """
            Initialisation of the execution thread.
@@ -767,39 +926,75 @@ class OraLoadThread(threading.Thread):
            or the test period is over
            app.ExecTime() call the statistics method
         """
-        try:
-            dsn = cx_Oracle.makedsn(host=self.OraIp, port=self.OraPort, service_name=self.OraConnect)
-            con = cx_Oracle.connect(self.OraUser, self.OraPwd, dsn, threaded=True)
-        except cx_Oracle.DatabaseError:
-            error_con = 1
-            print cx_Oracle.DatabaseError
-            return error_con
-        
-        if error_con != 1:
-            while self.runLoad == 0:
-                cur = con.cursor()
-                cur2 = con.cursor()
-                startTimeQuery = time.time()
-                try:
-                    cur.execute('select e1.ename, min(e2.deptno), max(e2.deptno), avg(to_number(to_char(e2.sal))), \
-                            avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
-                except cx_Oracle.OperationalError:
-                    error_con = 1
-                    return error_con
+        if ConfigSectionMap("Settings")['useedb'] == "False":
+            try:
+                con = connectToOracle(self.OraIp, self.OraPort, self.OraConnect, self.OraUser, self.OraPwd, threaded=True)
+            except cx_Oracle.DatabaseError:
+                error_con = 1
+                return error_con
 
-                elapsedTimeQuery = int(time.time() - startTimeQuery)
-                cur2.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)',{"id":elapsedTimeQuery})
-                con.commit()
-                cur.close()
-                cur2.close()
-                app.ExecTime()
+            if error_con != 1:
+                while self.runLoad == 0:
+                    cur = con.cursor()
+                    cur2 = con.cursor()
+                    startTimeQuery = time.time()
+                    try:
+                        cur.execute('select e1.ename, min(e2.deptno), max(e2.deptno), avg(to_number(to_char(e2.sal))), \
+                                avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
+                    except cx_Oracle.OperationalError:
+                        error_con = 1
+                        print cx_Oracle.OperationalError
+                        return error_con
 
-                if time.time() > (StartTimeTest + self.LengthTest):
-                    app.OnButtonStopLoadClick()
-                    #self.GlobalStop = 1
-                    GlobalStop = 1
+                    elapsedTimeQuery = int(time.time() - startTimeQuery)
+                    cur2.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)',{"id":elapsedTimeQuery})
+                    con.commit()
+                    cur.close()
+                    cur2.close()
+                    app.ExecTime()
 
-            con.close()
+                    if time.time() > (StartTimeTest + self.LengthTest):
+                        app.OnButtonStopLoadClick()
+                        #self.GlobalStop = 1
+                        GlobalStop = 1
+
+                con.close()
+        elif ConfigSectionMap("Settings")['useedb'] == "True":
+            try:
+                con = connectToEDB(self.OraIp, self.OraConnect, self.OraUser, self.OraPwd)
+            except psycopg2.DatabaseError:
+                error_con = 1
+                print psycopg2.DatabaseError
+                return error_con
+
+            if error_con != 1:
+                while self.runLoad == 0:
+                    cur = con.cursor()
+                    cur2 = con.cursor()
+                    startTimeQuery = time.time()
+                    try:
+                        cur.execute('select e1.ename, min(e2.deptno), max(e2.deptno), avg(cast(cast(e2.sal as character)\
+                        as numeric)), avg(e2.comm), max(cast(cast(e2.comm as character)as numeric)) from emp2 e2, emp e1 \
+                         where e1.ename=e2.ename group by e1.ename')
+                    except psycopg2.OperationalError:
+                        error_con = 1
+                        print cx_Oracle.OperationalError
+                        return error_con
+
+                    elapsedTimeQuery = int(time.time() - startTimeQuery)
+                    #ToDo: fix dwhstat
+                    #cur2.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)',{"id":elapsedTimeQuery})
+                    con.commit()
+                    cur.close()
+                    cur2.close()
+                    #app.ExecTime()
+
+                    if time.time() > (StartTimeTest + self.LengthTest):
+                        app.OnButtonStopLoadClick()
+                        #self.GlobalStop = 1
+                        GlobalStop = 1
+
+                con.close()
 
     def stopThread(self):
         """Set the stop load flag to 1. Will be passed to the threads"""
@@ -834,9 +1029,9 @@ class WatcherThread(threading.Thread):
 
                         while len(self.existingThread)-1 < ConcUsers:
                             i += 1
-                            self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
-                                                           str(self.Entry1.get()), str(self.Entry2.get()),
-                                                           int(self.EntryTestLength.get()))
+                            self.my_thread = LoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
+                                                        str(self.Entry1.get()), str(self.Entry2.get()),
+                                                        int(self.EntryTestLength.get()))
                             self.my_thread.name = i
                             self.my_thread.start()
                             self.existingThread.append(self.my_thread)
@@ -990,6 +1185,8 @@ class simpleapp_tk(Tkinter.Tk):
         self.Label1.grid(column=0, row=0, sticky=W)
         self.Label2 = Tkinter.Label(self, text='Port of Oracle DB')
         self.Label2.grid(column=1, row=0, sticky=W)
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            self.Label2.config(state='disabled')
 
         self.Label3 = Tkinter.Label(self, text='Test schema owner')
         self.Label3.grid(column=0, row=2, sticky=W)
@@ -1024,6 +1221,8 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.LabelSystemPwd = Tkinter.Label(self, text="SYSTEM user password: ")
         self.LabelSystemPwd.grid (column=0, row=7)
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            self.LabelSystemPwd.config(state='disabled')
 
         
 
@@ -1043,6 +1242,9 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry1.bind('<Return>', self.OnPressEnter)
         ipVariable = ConfigSectionMap("Prefilled")['ip']
         self.entryIpVariable.set(ipVariable)
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            ipVariable = ConfigSectionMap("PrefilledEDB")['ip']
+            self.entryIpVariable.set(ipVariable)
 
         self.entryPortVariable = Tkinter.StringVar()
         self.Entry2 = Tkinter.Entry(self, textvariable=self.entryPortVariable)
@@ -1050,6 +1252,9 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry2.bind('<Return>', self.OnPressEnter)
         portVariable = ConfigSectionMap("Prefilled")['port']
         self.entryPortVariable.set(portVariable)
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            self.Entry2.config(state = 'disabled')
+            self.entryPortVariable.set("")
 
 
         self.entryUserVariable = Tkinter.StringVar()
@@ -1057,6 +1262,9 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry3.grid(column=0, row=3, sticky='EW')
         self.Entry3.bind('<Return>', self.OnPressEnter)
         userVariable = ConfigSectionMap("Prefilled")['user']
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            userVariable = ConfigSectionMap("PrefilledEDB")['user']
+            self.entryUserVariable.set(userVariable)
 
         self.entryUserVariable.set(userVariable)
 
@@ -1065,6 +1273,9 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry4.grid(column=1, row=3, sticky='EW')
         self.Entry4.bind('<Return>', self.OnPressEnter)
         pwdVariable = ConfigSectionMap("Prefilled")['pwd']
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            pwdVariable = ConfigSectionMap("PrefilledEDB")['pwd']
+            self.entryPwdVariable.set(pwdVariable)
 
         self.entryPwdVariable.set(pwdVariable)
 
@@ -1073,6 +1284,9 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry5.grid(column=2, row=3, sticky='EW')
         self.Entry5.bind('<Return>', self.OnPressEnter)
         entryConnectStringVariable = ConfigSectionMap("Prefilled")['entryconnectstring']
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            entryConnectStringVariable = ConfigSectionMap("PrefilledEDB")['entryconnectstring']
+            self.entryConnectStringVariable.set(entryConnectStringVariable)
 
         self.entryConnectStringVariable.set(entryConnectStringVariable)
 
@@ -1148,10 +1362,13 @@ class simpleapp_tk(Tkinter.Tk):
         self.ButtonCreateSchema = Tkinter.Button(self, text=u"Create Test Schema", \
                                                  command=self.CreateSchema)
         self.ButtonCreateSchema.grid(column=2, row=8, columnspan=2, sticky=W+E+N+S)
-        self.ButtonCreateSchema.config(state=DISABLED)
+        if ConfigSectionMap("Settings")['useedb'] == "False":
+            self.ButtonCreateSchema.config(state=DISABLED)
 
         buttonGraph = Tkinter.Button(self, text=u"Graph", command=self.StartGraph, width=14)
         buttonGraph.grid(column=2, row=21, columnspan=2)
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            buttonGraph.config(state=DISABLED)
 
         buttonAPropos = Tkinter.Button(self, text=u"A propos...", command=self.APropos, width=14)
         buttonAPropos.grid(column=2, row=23, columnspan=2)
@@ -1181,6 +1398,8 @@ class simpleapp_tk(Tkinter.Tk):
                                                       command=self.SysdbaEnabledMeth)
         self.CheckSysdbaEnabled.grid(column=0, row=6, sticky=W)
         self.CheckSysdbaEnabled.deselect()
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            self.CheckSysdbaEnabled.config(state='disabled')
 
 
         self.TestLength = IntVar()
@@ -1261,8 +1480,7 @@ class simpleapp_tk(Tkinter.Tk):
         error_con = 0
         if self.CheckAWRSnapshot.get() == 1:
             try:
-                dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry1.get()), service_name=str(self.Entry5.get()))
-                con = cx_Oracle.connect("system", str(self.EntryPwdSys.get()), dsn)
+                con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()), "system", str(self.EntryPwdSys.get()))
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -1366,20 +1584,36 @@ class simpleapp_tk(Tkinter.Tk):
                 if t.isAlive():
                     t.stopThread()
 
-        
-        #if self.GlobalStop == 0:
-        if GlobalStop == 0:
-            dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry2.get()), service_name=str(self.Entry5.get()))
-            con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
-            cur = con.cursor()
-            cur.execute('select count(*) from dwhstat')
-            for result in cur:
-                resultVar = str(result[0])
-                self.labelVariable.set(u"Workload will end shortly! {0} trans. completed in this run.".format(resultVar))
-            cur.close()
-            con.close()
-            self.buttonStartLoad.config(state=NORMAL)
-            self.after(4000, self.SnapshotDB)
+        if ConfigSectionMap("Settings")['useedb'] == "False":
+            #if self.GlobalStop == 0:
+            if GlobalStop == 0:
+                con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()), str(self.Entry3.get()),
+                                      str(self.Entry4.get()))
+                cur = con.cursor()
+                cur.execute('select count(*) from dwhstat')
+                for result in cur:
+                    resultVar = str(result[0])
+                    self.labelVariable.set(u"Workload will end shortly! {0} trans. completed in this run.".format(resultVar))
+                cur.close()
+                con.close()
+                self.buttonStartLoad.config(state=NORMAL)
+                self.after(4000, self.SnapshotDB)
+        if ConfigSectionMap("Settings")['useedb'] == "True":
+            # if self.GlobalStop == 0:
+            if GlobalStop == 0:
+                con = connectToEDB(str(self.Entry1.get()), str(self.Entry5.get()),
+                                      str(self.Entry3.get()),
+                                      str(self.Entry4.get()))
+                cur = con.cursor()
+                cur.execute('select count(*) from dwhstat')
+                for result in cur:
+                    resultVar = str(result[0])
+                    self.labelVariable.set(
+                        u"Workload will end shortly! {0} trans. completed in this run.".format(resultVar))
+                cur.close()
+                con.close()
+                self.buttonStartLoad.config(state=NORMAL)
+                self.after(4000, self.SnapshotDB)
         
         
     def OnButtonStartLoadClick(self):
@@ -1420,9 +1654,9 @@ class simpleapp_tk(Tkinter.Tk):
         self.watcherThread.start()
         self.existingThread.append(self.watcherThread)
 
-        self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
-                                       str(self.Entry1.get()), str(self.Entry2.get()),
-                                       int(self.EntryTestLength.get()))
+        self.my_thread = LoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
+                                    str(self.Entry1.get()), str(self.Entry2.get()),
+                                    int(self.EntryTestLength.get()))
         #self.labelVariable.set('self.my_thread value = {0}'.format(str(runStatus)))
         self.my_thread.name = 1
         self.my_thread.start()
@@ -1435,35 +1669,62 @@ class simpleapp_tk(Tkinter.Tk):
             Return 2 if the test schema is not existing.
         """
         error_con = 0
-        try:
-            dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry2.get()), service_name=str(self.Entry5.get()))
-            con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
-        except cx_Oracle.DatabaseError:
-            self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect with user {0}!"\
-                                    .format(str(self.Entry3.get())))
-            return 1
-            
-        if error_con != 1:
-            cur = con.cursor()
+        if ConfigSectionMap("Settings")['useedb'] == "False":
             try:
-                cur.execute('select count(*) from emp2')
+                con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()), str(self.Entry3.get()), str(self.Entry4.get()))
             except cx_Oracle.DatabaseError:
-                self.labelVariable.set("Cannot access the test schema. Please create it again")
-                return 2
+                self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect with user {0}!"\
+                                        .format(str(self.Entry3.get())))
+                return 1
 
-            cur2 = con.cursor()
+            if error_con != 1:
+                cur = con.cursor()
+                try:
+                    cur.execute('select count(*) from emp2')
+                except cx_Oracle.DatabaseError:
+                    self.labelVariable.set("Cannot access the test schema. Please create it again")
+                    return 2
+
+                cur2 = con.cursor()
+                try:
+                    cur.execute('select count(*) from dwhstat')
+                except cx_Oracle.DatabaseError:
+                    self.labelVariable.set("Cannot access the test schema. Please create it again")
+                    return 3
+
+                cur.close()
+                cur2.close()
+                con.close()
+                return 0
+
+        elif ConfigSectionMap("Settings")['useedb'] == "True":
             try:
-                cur.execute('select count(*) from dwhstat')
-            except cx_Oracle.DatabaseError:
-                self.labelVariable.set("Cannot access the test schema. Please create it again")
-                return 3
+                con = connectToEDB(str(self.Entry1.get()), str(self.Entry5.get()), str(self.Entry3.get()), str(self.Entry4.get()))
+            except psycopg2.DatabaseError:
+                self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect with user {0}!"\
+                                        .format(str(self.Entry3.get())))
+                return 1
 
-            cur.close()
-            cur2.close()
-            con.close()
-            return 0
+            if error_con != 1:
+                cur = con.cursor()
+                try:
+                    cur.execute('select count(*) from emp2')
+                except psycopg2.DatabaseError:
+                    self.labelVariable.set("Cannot access the test schema. Please create it again")
+                    return 2
 
-        
+                cur2 = con.cursor()
+                try:
+                    cur.execute('select count(*) from dwhstat')
+                except psycopg2.DatabaseError:
+                    self.labelVariable.set("Cannot access the test schema. Please create it again")
+                    return 3
+
+                cur.close()
+                cur2.close()
+                con.close()
+                return 0
+
     def OnPressEnter(self, event):
         """
             Event associated with the Press Enter keybord action. No impact
@@ -1480,8 +1741,9 @@ class simpleapp_tk(Tkinter.Tk):
         """    
         error_con = 0
         try:
-            dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry2.get()), service_name=str(self.Entry5.get()))
-            con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
+            con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
+                                  str(self.Entry3.get()),
+                                  str(self.Entry4.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
             error_con = 1
@@ -1502,69 +1764,91 @@ class simpleapp_tk(Tkinter.Tk):
         """ Test if the connection parameters are valid.
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
-        """        
-        #dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        #dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        #version_DB['text'] = str(self.Entry3.get())
+        """
         error_con = 0
 
-        if origin == "User":
-            try:
-                dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry2.get()), service_name=str(self.Entry5.get()))
-                con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 1017:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() +  \
-                                            ": {0} Invalid username or password".format(str(self.Entry1.get())))
+        if ConfigSectionMap("Settings")['useedb'] != "True":
+            if origin == "User":
+                try:
+                    con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
+                                              str(self.Entry3.get()),
+                                              str(self.Entry4.get()))
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 1017:
+                        self.labelVariable.set(self.entryConnectStringVariable.get() +  \
+                                                ": {0} Invalid username or password".format(str(self.Entry1.get())))
+                        error_con = 1
+                    elif error.code == 12154:
+                        self.labelVariable.set(self.entryConnectStringVariable.get() + ": TNS couldn't resolve the SID")
+                        error_con = 1
+                    elif error.code == 12543:
+                        self.labelVariable.set(self.entryConnectStringVariable.get() + ": Destination host not available")
+                        error_con = 1
+                    else:
+                        self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect")
+                        error_con = 1
+
+                if error_con != 1:
+                    cur = con.cursor()
+                    cur.execute('select * from global_name')
+                    for result in cur:
+                        resultVar = str(result[0])
+                        self.labelVariable.set("{0}: {1}, Connection succesfull".format(resultVar, str(self.Entry3.get())))
+                    cur.close()
+                    con.close()
+            elif origin == "System":
+                try:
+                    con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
+                                          "system",
+                                          str(self.EntryPwdSys.get()))
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 1017:
+                        self.labelVariable.set(self.entryConnectStringVariable.get() + ": System invalid password")
+                        #statWindow.VocableVariable.set(self.entryConnectStringVariable.get()+": Invalid username or password")
+                        #messageretour = str(self.entryConnectStringVariable.get()+": Invalid username or password")
+                        error_con = 1
+                    elif error.code == 12154:
+                        self.labelVariable.set(self.entryConnectStringVariable.get() + ": TNS couldn't resolve the SID")
+                        error_con = 1
+                    elif error.code == 12543:
+                        self.labelVariable.set(self.entryConnectStringVariable.get() + ": Destination host not available")
+                        error_con = 1
+                    else:
+                        self.labelVariable.set(self.entryConnectStringVariable.get() + ": System unable to connect")
+                        error_con = 1
+
+                if error_con != 1:
+                    cur = con.cursor()
+                    cur.execute('select * from global_name')
+                    for result in cur:
+                        resultVar = str(result[0])
+                        self.labelVariable.set("{0}: System, connection succesfull".format(resultVar))
+                    cur.close()
+                    con.close()
+
+        elif ConfigSectionMap("Settings")['useedb'] == "True":
+            if origin == "User":
+                try:
+                    con = connectToEDB(str(self.Entry1.get()), str(self.Entry5.get()),
+                                       str(self.Entry3.get()),
+                                       str(self.Entry4.get()))
+                except psycopg2.OperationalError as e:
+                    error, = e.args
+                    error = error.replace('FATAL:  ', '')
+                    error = error.replace('\n', '')
+                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": " + error)
                     error_con = 1
-                elif error.code == 12154:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": TNS couldn't resolve the SID")
-                    error_con = 1
-                elif error.code == 12543:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": Destination host not available")
-                    error_con = 1
-                else:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect")
-                    error_con = 1
-            
-            if error_con != 1:
-                cur = con.cursor()
-                cur.execute('select * from global_name')
-                for result in cur:
-                    resultVar = str(result[0])
+
+                if error_con != 1:
+                    cur = con.cursor()
+
+                    cur.execute('select current_database()')
+                    resultVar = cur.fetchall()[0][0]
                     self.labelVariable.set("{0}: {1}, Connection succesfull".format(resultVar, str(self.Entry3.get())))
-                cur.close()
-                con.close()
-        elif origin == "System":
-            try:
-                dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry2.get()), service_name=str(self.Entry5.get()))
-                con = cx_Oracle.connect("system", str(self.EntryPwdSys.get()), dsn)
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 1017:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": System invalid password")
-                    #statWindow.VocableVariable.set(self.entryConnectStringVariable.get()+": Invalid username or password")
-                    #messageretour = str(self.entryConnectStringVariable.get()+": Invalid username or password")
-                    error_con = 1
-                elif error.code == 12154:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": TNS couldn't resolve the SID")
-                    error_con = 1
-                elif error.code == 12543:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": Destination host not available")
-                    error_con = 1
-                else:
-                    self.labelVariable.set(self.entryConnectStringVariable.get() + ": System unable to connect")
-                    error_con = 1
-            
-            if error_con != 1:
-                cur = con.cursor()
-                cur.execute('select * from global_name')
-                for result in cur:
-                    resultVar = str(result[0])
-                    self.labelVariable.set("{0}: System, connection succesfull".format(resultVar))
-                cur.close()
-                con.close()
+                    cur.close()
+                    con.close()
 
 
 
@@ -1578,8 +1862,9 @@ class simpleapp_tk(Tkinter.Tk):
         error_con = 0
         try:
             if self.Entry1 and self.Entry2 and self.Entry5 and self.Entry3 and self.Entry4:
-                dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry2.get()), service_name=str(self.Entry5.get()))
-                con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
+                con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
+                                      str(self.Entry3.get()),
+                                      str(self.Entry4.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
             error_con = 1
@@ -1614,7 +1899,7 @@ class simpleapp_tk(Tkinter.Tk):
 
     def CreateSchema(self):
         """ test schema creation method """
-        CreateSchematWindow = CreateTestSchemaWindow(str(self.Entry5.get()), str(self.EntryPwdSys.get()), str(self.Entry1.get()), str(self.Entry2.get()))
+        CreateSchematWindow = CreateTestSchemaWindow(str(self.Entry5.get()), str(self.Entry3.get()) , str(self.EntryPwdSys.get()), str(self.Entry1.get()), str(self.Entry2.get()))
 
     def APropos(self):
         """ Information about the application """
