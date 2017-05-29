@@ -1,9 +1,3 @@
-
-drop table dept;
-drop table emp;
-drop table bonus;
-drop table salgrade;
-
 CREATE TABLE DEPT
        (DEPTNO numeric CONSTRAINT PK_DEPT PRIMARY KEY,
 	DNAME CHARACTER(14) ,
@@ -68,6 +62,3 @@ INSERT INTO SALGRADE VALUES (2,1201,1400);
 INSERT INTO SALGRADE VALUES (3,1401,2000);
 INSERT INTO SALGRADE VALUES (4,2001,3000);
 INSERT INTO SALGRADE VALUES (5,3001,9999);
-
-create table emp2 as select * from emp;
-\q
