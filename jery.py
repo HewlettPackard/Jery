@@ -14,25 +14,10 @@ import threading
 import time
 import tkMessageBox
 import ConfigParser
-import psycopg2
-
-########################  CONNECTION  ##########################
-def connectToOracle(ip, port, SID, user, passwd, threaded=False):
-    dsn = cx_Oracle.makedsn(host = ip, port = port, service_name = SID)
-    con = cx_Oracle.connect(user, passwd, dsn, threaded=threaded)
-    return con
-
-def connectToEDB(ip, dbname, user, passwd):
-    # print "ip " + ip
-    # print "dbname " + dbname
-    # print "user " + user
-    # print "passwd " + passwd
-    con = psycopg2.connect(host=ip, user=user, password=passwd, dbname=dbname)
-    return con
 
 ###########################  GUI  ##############################
 class CreateTestSchemaWindow(Tkinter.Toplevel):
-    def __init__(CrSchemaWindow, SID, user, passwd, ip, port):
+    def __init__(CrSchemaWindow, SID, passwd, ip, port):
         Tkinter.Toplevel.__init__(CrSchemaWindow)
 
         """ Test schema Creation class
@@ -931,6 +916,7 @@ class LoadThread(threading.Thread):
                 con = connectToOracle(self.OraIp, self.OraPort, self.OraConnect, self.OraUser, self.OraPwd, threaded=True)
             except cx_Oracle.DatabaseError:
                 error_con = 1
+                print cx_Oracle.DatabaseError
                 return error_con
 
             if error_con != 1:
@@ -1048,14 +1034,17 @@ class WatcherThread(threading.Thread):
 
                         #check if thrad is alive. If thread died -> restart a new one
                         for thread in self.existingThread:
-                            #sys.stdout.write("X ")
-                            #sys.stdout.flush()
+                            # sys.stdout.write("X ")
+                            # sys.stdout.flush()
                             if not thread.isAlive():
-                                print str(thread) + "  died. Restarting..."
-                                self.existingThread.remove(thread)
-                        #sys.stdout.write("\n")
+                                print str(thread) + "  died. Restarting... "
+                                thread = LoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
+                                                           str(self.Entry1.get()), str(self.Entry2.get()),
+                                                           int(self.EntryTestLength.get()))
+                                thread.start()
+                        # sys.stdout.write("\n")
 
-                        ActiveUsers = len(self.existingThread)-1
+                        ActiveUsers = int(threading.activeCount()) - 2
                         self.labelVariable.set("Number of active users: " + str(ActiveUsers))
 
                         # print self.existingThread
@@ -1863,8 +1852,8 @@ class simpleapp_tk(Tkinter.Tk):
         try:
             if self.Entry1 and self.Entry2 and self.Entry5 and self.Entry3 and self.Entry4:
                 con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
-                                      str(self.Entry3.get()),
-                                      str(self.Entry4.get()))
+                                  str(self.Entry3.get()),
+                                  str(self.Entry4.get()))
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
             error_con = 1
