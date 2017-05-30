@@ -833,7 +833,7 @@ class WatcherThread(threading.Thread):
                         # print "ConcUsers: " + str(ConcUsers)
                         # print "noActiveOraThreads: " + str(noActiveOraThreads)
 
-                        while int(threading.activeCount())-2 < ConcUsers:
+                        while len(self.existingThread)-1 < ConcUsers:
                             i += 1
                             self.my_thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
                                                            str(self.Entry1.get()), str(self.Entry2.get()),
@@ -850,6 +850,19 @@ class WatcherThread(threading.Thread):
                                 lastThread = self.existingThread.pop()
                                 if lastThread.isAlive():
                                     lastThread.stopThread()
+
+
+                        #check if thrad is alive. If thread died -> restart a new one
+                        for thread in self.existingThread:
+                            # sys.stdout.write("X ")
+                            # sys.stdout.flush()
+                            if not thread.isAlive():
+                                print str(thread) + "  died. Restarting... "
+                                thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
+                                                           str(self.Entry1.get()), str(self.Entry2.get()),
+                                                           int(self.EntryTestLength.get()))
+                                thread.start()
+                        # sys.stdout.write("\n")
 
                         ActiveUsers = int(threading.activeCount()) - 2
                         self.labelVariable.set("Number of active users: " + str(ActiveUsers))
@@ -1568,8 +1581,9 @@ class simpleapp_tk(Tkinter.Tk):
         """        
         error_con = 0
         try:
-            dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry2.get()), service_name=str(self.Entry5.get()))
-            con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
+            if self.Entry1 and self.Entry2 and self.Entry5 and self.Entry3 and self.Entry4:
+                dsn = cx_Oracle.makedsn(host=str(self.Entry1.get()), port=str(self.Entry2.get()), service_name=str(self.Entry5.get()))
+                con = cx_Oracle.connect(str(self.Entry3.get()), str(self.Entry4.get()), dsn)
         except cx_Oracle.DatabaseError:
             self.labelVariable.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
             error_con = 1
