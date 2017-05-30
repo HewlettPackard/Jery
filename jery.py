@@ -74,34 +74,34 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         Ratio8 = Tkinter.Radiobutton(CrSchemaWindow, text='8: Disk space needed 1.4GB', variable=CrSchemaWindow.RatioVar, value=8)
         Ratio9 = Tkinter.Radiobutton(CrSchemaWindow, text='9: Disk space needed 2.7GB', variable=CrSchemaWindow.RatioVar, value=9)
         Ratio10 = Tkinter.Radiobutton(CrSchemaWindow, text='10: Disk space needed 5.5GB', variable=CrSchemaWindow.RatioVar, value=10)
-        Ratio1.grid(row=2, column=0, sticky='W')
-        Ratio2.grid(row=3, column=0, sticky='W')
-        Ratio3.grid(row=4, column=0, sticky='W')
-        Ratio4.grid(row=5, column=0, sticky='W')
-        Ratio5.grid(row=6, column=0, sticky='W')
-        Ratio6.grid(row=7, column=0, sticky='W')
-        Ratio7.grid(row=8, column=0, sticky='W')
-        Ratio8.grid(row=9, column=0, sticky='W')
-        Ratio9.grid(row=10, column=0, sticky='W')
-        Ratio10.grid(row=11, column=0, sticky='W')
+        Ratio1.grid(row=1, column=0, sticky='W')
+        Ratio2.grid(row=2, column=0, sticky='W')
+        Ratio3.grid(row=3, column=0, sticky='W')
+        Ratio4.grid(row=4, column=0, sticky='W')
+        Ratio5.grid(row=5, column=0, sticky='W')
+        Ratio6.grid(row=6, column=0, sticky='W')
+        Ratio7.grid(row=7, column=0, sticky='W')
+        Ratio8.grid(row=8, column=0, sticky='W')
+        Ratio9.grid(row=9, column=0, sticky='W')
+        Ratio10.grid(row=10, column=0, sticky='W')
         Ratio1.select()
 
         
         buttonQuit = Tkinter.Button(CrSchemaWindow,text=u"Close window", command=CrSchemaWindow.CloseCrSchemaWindow, width=39)
-        buttonQuit.grid (column=0, row=15, sticky=S)
+        buttonQuit.grid (column=0, row=14, sticky=S)
 
         buttonCreate = Tkinter.Button(CrSchemaWindow,text=u"Create the data now", command=lambda:
                                       CrSchemaWindow.CreateSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port,int(CrSchemaWindow.RatioVar.get())) \
                                       , width=39)
-        buttonCreate.grid (column=0, row=13, sticky=S)
+        buttonCreate.grid (column=0, row=12, sticky=S)
 
         buttonDrop = Tkinter.Button(CrSchemaWindow,text=u"Drop the test data now", command=lambda:
                                       CrSchemaWindow.DropSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port), width=39)
-        buttonDrop.grid (column=0, row=14, sticky=S)
+        buttonDrop.grid (column=0, row=13, sticky=S)
 
         CrSchemaWindow.VocableVariable = Tkinter.StringVar()
         Vocable = Tkinter.Label(CrSchemaWindow,textvariable=CrSchemaWindow.VocableVariable, anchor="w", fg="white", bg="blue")
-        Vocable.grid(column=0, row=12, columnspan=2, sticky='EW')
+        Vocable.grid(column=0, row=11, columnspan=2, sticky='EW')
         CrSchemaWindow.VocableVariable.set(u"Hello !")
         
         CrSchemaWindow.grid_columnconfigure(0,weight=1)
@@ -607,178 +607,178 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
         """ Label and Entry definition  """
         
         statWindow.LabelNodeName = Tkinter.Label(statWindow, text="Node name")
-        statWindow.LabelNodeName.grid(column=0, row=1)
+        statWindow.LabelNodeName.grid(column=0, row=0)
 
         statWindow.LabelInstanceName = Tkinter.Label(statWindow, text="Instance")
-        statWindow.LabelInstanceName.grid(column=1, row=1)
+        statWindow.LabelInstanceName.grid(column=1, row=0)
 
         statWindow.LabelNbUsers = Tkinter.Label(statWindow, text="Nb. Users")
-        statWindow.LabelNbUsers.grid(column=2, row=1)
+        statWindow.LabelNbUsers.grid(column=2, row=0)
         
         statWindow.LabelBusyTime = Tkinter.Label(statWindow, text="% Busy Time")
-        statWindow.LabelBusyTime.grid(column=3, row=1)
+        statWindow.LabelBusyTime.grid(column=3, row=0)
 
         statWindow.LabelSQLSec = Tkinter.Label(statWindow, text="SQL orders/Sec.")
-        statWindow.LabelSQLSec.grid(column=4, row=1)
+        statWindow.LabelSQLSec.grid(column=4, row=0)
 
         statWindow.LabelIOMSec = Tkinter.Label(statWindow, text="IO MB/Sec.")
-        statWindow.LabelIOMSec.grid(column=5, row=1)
+        statWindow.LabelIOMSec.grid(column=5, row=0)
 
         statWindow.LabelBlockRead = Tkinter.Label(statWindow, text="Blocks read/Sec.")
-        statWindow.LabelBlockRead.grid(column=6, row=1)
+        statWindow.LabelBlockRead.grid(column=6, row=0)
 
         statWindow.EntryNodeName1var = Tkinter.StringVar()
         statWindow.EntryNodeName1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName1var,\
                                                 width=12)
-        statWindow.EntryNodeName1.grid(column=0, row=2, sticky='EW')
+        statWindow.EntryNodeName1.grid(column=0, row=1, sticky='EW')
 
         statWindow.EntryInstanceName1var = Tkinter.StringVar()
         statWindow.EntryInstanceName1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName1var,\
                                                 width=12)
-        statWindow.EntryInstanceName1.grid(column=1, row=2, sticky='EW')
+        statWindow.EntryInstanceName1.grid(column=1, row=1, sticky='EW')
 
         statWindow.EntryNbUsers1var = Tkinter.StringVar()
         statWindow.EntryNbUsers1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers1var,\
                                                 width=12)
-        statWindow.EntryNbUsers1.grid(column=2, row=2, sticky='EW')
+        statWindow.EntryNbUsers1.grid(column=2, row=1, sticky='EW')
         
         statWindow.EntryBusyTime1var = Tkinter.StringVar()
         statWindow.EntryBusyTime1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime1var,\
                                                 width=12)
-        statWindow.EntryBusyTime1.grid(column=3, row=2, sticky='EW')
+        statWindow.EntryBusyTime1.grid(column=3, row=1, sticky='EW')
 
         statWindow.EntrySQLSec1var = Tkinter.StringVar()
         statWindow.EntrySQLSec1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec1var,\
                                                 width=12)
-        statWindow.EntrySQLSec1.grid(column=4, row=2, sticky='EW')
+        statWindow.EntrySQLSec1.grid(column=4, row=1, sticky='EW')
 
         statWindow.EntryIOMSec1var = Tkinter.StringVar()
         statWindow.EntryIOMSec1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec1var,\
                                                 width=12)
-        statWindow.EntryIOMSec1.grid(column=5, row=2, sticky='EW')
+        statWindow.EntryIOMSec1.grid(column=5, row=1, sticky='EW')
 
         statWindow.EntryBlockRead1var = Tkinter.StringVar()
         statWindow.EntryBlockRead1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead1var,\
                                                 width=12)
-        statWindow.EntryBlockRead1.grid(column=6, row=2, sticky='EW')
+        statWindow.EntryBlockRead1.grid(column=6, row=1, sticky='EW')
         
 
         statWindow.EntryNodeName2var = Tkinter.StringVar()
         statWindow.EntryNodeName2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName2var,\
                                                 width=12)
-        statWindow.EntryNodeName2.grid(column=0, row=3, sticky='EW')
+        statWindow.EntryNodeName2.grid(column=0, row=2, sticky='EW')
 
         statWindow.EntryInstanceName2var = Tkinter.StringVar()
         statWindow.EntryInstanceName2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName2var,\
                                                 width=12)
-        statWindow.EntryInstanceName2.grid(column=1, row=3, sticky='EW')
+        statWindow.EntryInstanceName2.grid(column=1, row=2, sticky='EW')
 
         statWindow.EntryNbUsers2var = Tkinter.StringVar()
         statWindow.EntryNbUsers2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers2var,\
                                                 width=12)
-        statWindow.EntryNbUsers2.grid(column=2, row=3, sticky='EW')
+        statWindow.EntryNbUsers2.grid(column=2, row=2, sticky='EW')
         
         statWindow.EntryBusyTime2var = Tkinter.StringVar()
         statWindow.EntryBusyTime2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime2var,\
                                                 width=12)
-        statWindow.EntryBusyTime2.grid(column=3, row=3, sticky='EW')
+        statWindow.EntryBusyTime2.grid(column=3, row=2, sticky='EW')
 
         statWindow.EntrySQLSec2var = Tkinter.StringVar()
         statWindow.EntrySQLSec2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec2var,\
                                                 width=12)
-        statWindow.EntrySQLSec2.grid(column=4, row=3, sticky='EW')
+        statWindow.EntrySQLSec2.grid(column=4, row=2, sticky='EW')
 
         statWindow.EntryIOMSec2var = Tkinter.StringVar()
         statWindow.EntryIOMSec2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec2var,\
                                                 width=12)
-        statWindow.EntryIOMSec2.grid(column=5, row=3, sticky='EW')
+        statWindow.EntryIOMSec2.grid(column=5, row=2, sticky='EW')
 
         statWindow.EntryBlockRead2var = Tkinter.StringVar()
         statWindow.EntryBlockRead2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead2var,\
                                                 width=12)
-        statWindow.EntryBlockRead2.grid(column=6, row=3, sticky='EW')
+        statWindow.EntryBlockRead2.grid(column=6, row=2, sticky='EW')
 
 
         statWindow.EntryNodeName3var = Tkinter.StringVar()
         statWindow.EntryNodeName3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName3var,\
                                                 width=12)
-        statWindow.EntryNodeName3.grid(column=0, row=4, sticky='EW')
+        statWindow.EntryNodeName3.grid(column=0, row=3, sticky='EW')
 
         statWindow.EntryInstanceName3var = Tkinter.StringVar()
         statWindow.EntryInstanceName3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName3var,\
                                                 width=12)
-        statWindow.EntryInstanceName3.grid(column=1, row=4, sticky='EW')
+        statWindow.EntryInstanceName3.grid(column=1, row=3, sticky='EW')
 
         statWindow.EntryNbUsers3var = Tkinter.StringVar()
         statWindow.EntryNbUsers3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers3var,\
                                                 width=12)
-        statWindow.EntryNbUsers3.grid(column=2, row=4, sticky='EW')
+        statWindow.EntryNbUsers3.grid(column=2, row=3, sticky='EW')
         
         statWindow.EntryBusyTime3var = Tkinter.StringVar()
         statWindow.EntryBusyTime3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime3var,\
                                                 width=12)
-        statWindow.EntryBusyTime3.grid(column=3, row=4, sticky='EW')
+        statWindow.EntryBusyTime3.grid(column=3, row=3, sticky='EW')
 
         statWindow.EntrySQLSec3var = Tkinter.StringVar()
         statWindow.EntrySQLSec3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec3var,\
                                                 width=12)
-        statWindow.EntrySQLSec3.grid(column=4, row=4, sticky='EW')
+        statWindow.EntrySQLSec3.grid(column=4, row=3, sticky='EW')
 
         statWindow.EntryIOMSec3var = Tkinter.StringVar()
         statWindow.EntryIOMSec3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec3var,\
                                                 width=12)
-        statWindow.EntryIOMSec3.grid(column=5, row=4, sticky='EW')
+        statWindow.EntryIOMSec3.grid(column=5, row=3, sticky='EW')
 
         statWindow.EntryBlockRead3var = Tkinter.StringVar()
         statWindow.EntryBlockRead3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead3var,\
                                                 width=12)
-        statWindow.EntryBlockRead3.grid (column=6, row=4, sticky='EW')
+        statWindow.EntryBlockRead3.grid (column=6, row=3, sticky='EW')
 
 
         statWindow.EntryNodeName4var = Tkinter.StringVar()
         statWindow.EntryNodeName4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName4var,\
                                                 width=12)
-        statWindow.EntryNodeName4.grid(column=0, row=5, sticky='EW')
+        statWindow.EntryNodeName4.grid(column=0, row=4, sticky='EW')
 
         statWindow.EntryInstanceName4var = Tkinter.StringVar()
         statWindow.EntryInstanceName4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName4var,\
                                                 width=12)
-        statWindow.EntryInstanceName4.grid(column=1, row=5, sticky='EW')
+        statWindow.EntryInstanceName4.grid(column=1, row=4, sticky='EW')
 
         statWindow.EntryNbUsers4var = Tkinter.StringVar()
         statWindow.EntryNbUsers4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers4var,\
                                                 width=12)
-        statWindow.EntryNbUsers4.grid(column=2, row=5, sticky='EW')
+        statWindow.EntryNbUsers4.grid(column=2, row=4, sticky='EW')
         
         statWindow.EntryBusyTime4var = Tkinter.StringVar()
         statWindow.EntryBusyTime4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime4var,\
                                                 width=12)
-        statWindow.EntryBusyTime4.grid(column=3, row=5, sticky='EW')
+        statWindow.EntryBusyTime4.grid(column=3, row=4, sticky='EW')
 
         statWindow.EntrySQLSec4var = Tkinter.StringVar()
         statWindow.EntrySQLSec4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec4var,\
                                                 width=12)
-        statWindow.EntrySQLSec4.grid(column=4, row=5, sticky='EW')
+        statWindow.EntrySQLSec4.grid(column=4, row=4, sticky='EW')
 
         statWindow.EntryIOMSec4var = Tkinter.StringVar()
         statWindow.EntryIOMSec4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec4var,\
                                                 width=12)
-        statWindow.EntryIOMSec4.grid(column=5, row=5, sticky='EW')
+        statWindow.EntryIOMSec4.grid(column=5, row=4, sticky='EW')
 
         statWindow.EntryBlockRead4var = Tkinter.StringVar()
         statWindow.EntryBlockRead4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead4var,\
                                                 width=12)
-        statWindow.EntryBlockRead4.grid(column=6, row=5, sticky='EW')
+        statWindow.EntryBlockRead4.grid(column=6, row=4, sticky='EW')
 
 
         """ Button definition  """
         buttonQuit = Tkinter.Button(statWindow,text=u"Quit Statistics", command=statWindow.StopStatWindow, width=12)
-        buttonQuit.grid (column=5, row=14, sticky=S)
+        buttonQuit.grid (column=5, row=13, sticky=S)
 
         """ Vocable blue bar Entry definition  """
         statWindow.VocableVariable = Tkinter.StringVar()
         Vocable = Tkinter.Label(statWindow,textvariable=statWindow.VocableVariable, anchor="w", fg="white", bg="blue")
-        Vocable.grid(column=0, row=14, columnspan=4, sticky='EW')
+        Vocable.grid(column=0, row=13, columnspan=4, sticky='EW')
         statWindow.VocableVariable.set(u"Hello !")
 
         """ Start data collecting thread  """
@@ -1156,6 +1156,8 @@ class simpleapp_tk(Tkinter.Tk):
         """
 
         global OpenToplevel
+        global mode
+        mode = 0
         OpenToplevel = 0
 
         #self.GlobalStop = 0
@@ -1172,14 +1174,14 @@ class simpleapp_tk(Tkinter.Tk):
         can1 = Canvas(self, width = 130, height = 60, bg='white')
         self.logohp = PhotoImage(file=logohp)
         item = can1.create_image(66,32, image=self.logohp)
-        can1.grid(column=1, row=25, rowspan = 5, padx=15, pady=15)
+        can1.grid(column=1, row=26, rowspan = 5, padx=15, pady=15)
 
         can2 = Canvas(self, width = 550, height=20)
-        can2.grid(column=0, row=16, columnspan=3, padx=10, pady=10)
+        can2.grid(column=0, row=17, columnspan=3, padx=10, pady=10)
         can2.create_line (10,10,540,10,width=3,fill='white')
 
         can3 = Canvas(self, width = 550, height=20)
-        can3.grid(column=0, row=21, columnspan=3, padx=10, pady=10)
+        can3.grid(column=0, row=22, columnspan=3, padx=10, pady=10)
         can3.create_line (10,10,540,10,width=3,fill='white')
 
         """ Label:
@@ -1192,47 +1194,57 @@ class simpleapp_tk(Tkinter.Tk):
             self.labelVariable1.set(u"JERY - ORACLE DB MODE")
         elif ConfigSectionMap("Settings")['useedb'] == "True":
             self.labelVariable1.set(u"JERY - EDB MODE")
+            
+        #TODO here
+        self.Label0 = Tkinter.Label(self, text='Mode')
+        self.Label0.grid(column=0, row=1, sticky=W)
+        mode = IntVar()
+        Mode1 = Tkinter.Radiobutton(self, text='1: Oracle DB', variable=mode, value=0)
+        Mode2 = Tkinter.Radiobutton(self, text='2: Enterprise DB', variable=mode, value=1)
+        Mode1.grid(row=1, column=1, sticky='W')
+        Mode2.grid(row=1, column=2, sticky='W')
+        Mode1.select()
 
         self.Label1 = Tkinter.Label(self, text='IP of Oracle DB')
-        self.Label1.grid(column=0, row=1, sticky=W)
+        self.Label1.grid(column=0, row=2, sticky=W)
         self.Label2 = Tkinter.Label(self, text='Port of Oracle DB')
-        self.Label2.grid(column=1, row=1, sticky=W)
+        self.Label2.grid(column=1, row=2, sticky=W)
         if ConfigSectionMap("Settings")['useedb'] == "True":
             self.Label2.config(state='disabled')
 
         self.Label3 = Tkinter.Label(self, text='Test schema owner')
-        self.Label3.grid(column=0, row=3, sticky=W)
+        self.Label3.grid(column=0, row=4, sticky=W)
         self.Label4 = Tkinter.Label(self, text='Test schema password')
-        self.Label4.grid(column=1, row=3, sticky=W)
+        self.Label4.grid(column=1, row=4, sticky=W)
 
         self.Label5 = Tkinter.Label(self, text='Connect string')
-        self.Label5.grid(column=2, row=3, sticky=W)
+        self.Label5.grid(column=2, row=4, sticky=W)
         self.Label6 = Tkinter.Label(self, text='Select the number of virtual users')
-        self.Label6.grid(column=0, row=17, columnspan=3)
+        self.Label6.grid(column=0, row=18, columnspan=3)
 
         self.LabelExecTimeVariable = Tkinter.StringVar()
         self.LabelExecTimeVariable.set("Avg. completion time: 0")
         self.LabelExecTime = Tkinter.Label(self, textvariable=self.LabelExecTimeVariable, fg="red")
-        self.LabelExecTime.grid (column=1, row=22)
+        self.LabelExecTime.grid (column=1, row=23)
 
         self.LabelNbQueriesVariable = Tkinter.StringVar()
         self.LabelNbQueriesVariable.set("Nb Queries in last MM: 0")
         self.LabelNbQueries = Tkinter.Label(self, textvariable=self.LabelNbQueriesVariable, fg="red")
-        self.LabelNbQueries.grid (column=1, row=23)
+        self.LabelNbQueries.grid (column=1, row=24)
 
         self.LabelTestLengthVariable = Tkinter.StringVar()
         self.LabelTestLengthVariable.set("How long will be the test:")
         self.LabelTestLength = Tkinter.Label(self, textvariable=self.LabelTestLengthVariable)
-        self.LabelTestLength.grid (column=1, row=20, sticky="W")
+        self.LabelTestLength.grid (column=1, row=21, sticky="W")
 
         self.labelVariable2 = Tkinter.StringVar()
         label2 = Tkinter.Label(self, textvariable=self.labelVariable2,
                               anchor="w", fg="white", bg="blue")
-        label2.grid(column=0, row=5, columnspan=2, sticky='EW')
+        label2.grid(column=0, row=6, columnspan=2, sticky='EW')
         self.labelVariable2.set(u"Hello !")
 
         self.LabelSystemPwd = Tkinter.Label(self, text="SYSTEM user password: ")
-        self.LabelSystemPwd.grid (column=0, row=8)
+        self.LabelSystemPwd.grid (column=0, row=9)
         if ConfigSectionMap("Settings")['useedb'] == "True":
             self.LabelSystemPwd.config(state='disabled')
 
@@ -1250,7 +1262,7 @@ class simpleapp_tk(Tkinter.Tk):
         """
         self.entryIpVariable = Tkinter.StringVar()
         self.Entry1 = Tkinter.Entry(self, textvariable=self.entryIpVariable)
-        self.Entry1.grid(column=0, row=2, sticky='EW')
+        self.Entry1.grid(column=0, row=3, sticky='EW')
         self.Entry1.bind('<Return>', self.OnPressEnter)
         ipVariable = ConfigSectionMap("Prefilled")['ip']
         self.entryIpVariable.set(ipVariable)
@@ -1260,7 +1272,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryPortVariable = Tkinter.StringVar()
         self.Entry2 = Tkinter.Entry(self, textvariable=self.entryPortVariable)
-        self.Entry2.grid(column=1, row=2, sticky='EW')
+        self.Entry2.grid(column=1, row=3, sticky='EW')
         self.Entry2.bind('<Return>', self.OnPressEnter)
         portVariable = ConfigSectionMap("Prefilled")['port']
         self.entryPortVariable.set(portVariable)
@@ -1271,7 +1283,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryUserVariable = Tkinter.StringVar()
         self.Entry3 = Tkinter.Entry(self, textvariable=self.entryUserVariable)
-        self.Entry3.grid(column=0, row=4, sticky='EW')
+        self.Entry3.grid(column=0, row=5, sticky='EW')
         self.Entry3.bind('<Return>', self.OnPressEnter)
         userVariable = ConfigSectionMap("Prefilled")['user']
         if ConfigSectionMap("Settings")['useedb'] == "True":
@@ -1282,7 +1294,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryPwdVariable = Tkinter.StringVar()
         self.Entry4 = Tkinter.Entry(self, textvariable=self.entryPwdVariable, show="*")
-        self.Entry4.grid(column=1, row=4, sticky='EW')
+        self.Entry4.grid(column=1, row=5, sticky='EW')
         self.Entry4.bind('<Return>', self.OnPressEnter)
         pwdVariable = ConfigSectionMap("Prefilled")['pwd']
         if ConfigSectionMap("Settings")['useedb'] == "True":
@@ -1293,7 +1305,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryConnectStringVariable = Tkinter.StringVar()
         self.Entry5 = Tkinter.Entry(self, textvariable=self.entryConnectStringVariable)
-        self.Entry5.grid(column=2, row=4, sticky='EW')
+        self.Entry5.grid(column=2, row=5, sticky='EW')
         self.Entry5.bind('<Return>', self.OnPressEnter)
         entryConnectStringVariable = ConfigSectionMap("Prefilled")['entryconnectstring']
         if ConfigSectionMap("Settings")['useedb'] == "True":
@@ -1304,7 +1316,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryConUsersVariable = Tkinter.IntVar()
         self.EntryConUsers = Tkinter.Entry(self, textvariable=self.entryConUsersVariable)
-        self.EntryConUsers.grid(column=1, row=19, sticky='EW')
+        self.EntryConUsers.grid(column=1, row=20, sticky='EW')
         self.EntryConUsers.bind('<Return>', self.OnPressEnter)
         self.entryConUsersVariable.set(4)
 
@@ -1313,13 +1325,13 @@ class simpleapp_tk(Tkinter.Tk):
         self.entryTestLengthVariable = Tkinter.IntVar()
         self.EntryTestLength = Tkinter.Entry(self, textvariable=self.entryTestLengthVariable, validate='key', \
                                              validatecommand=self.ValidateTestLength, state='disabled')
-        self.EntryTestLength.grid(column=2, row=20, sticky='E')
+        self.EntryTestLength.grid(column=2, row=21, sticky='E')
         self.entryTestLengthVariable.set(0)
 
         self.EntryPwdSysVariable = Tkinter.StringVar()
         self.EntryPwdSys = Tkinter.Entry(self, textvariable=self.EntryPwdSysVariable, \
                                          show="*", width=14, state='disabled')
-        self.EntryPwdSys.grid(column=1, row=8, sticky='EW')
+        self.EntryPwdSys.grid(column=1, row=9, sticky='EW')
         entryPwdSysVariable = ConfigSectionMap("Prefilled")['pwdsys']
         self.EntryPwdSysVariable.set(entryPwdSysVariable)
 
@@ -1335,32 +1347,32 @@ class simpleapp_tk(Tkinter.Tk):
         """
 
         buttonLess = Tkinter.Button(self, text=u"-", command=self.OnButtonLessClick, width=5)
-        buttonLess.grid(column=0, row=19, sticky=E)
+        buttonLess.grid(column=0, row=20, sticky=E)
 
         buttonMore = Tkinter.Button(self, text=u"+", command=self.OnButtonMoreClick, width=5)
-        buttonMore.grid(column=2, row=19, sticky=W)
+        buttonMore.grid(column=2, row=20, sticky=W)
 
 
 
 
         buttonTest = Tkinter.Button(self, text=u"Check User Connection", command=self.OnButtonClick, width=23)
-        buttonTest.grid(column=2, row=5, columnspan=2)
+        buttonTest.grid(column=2, row=6, columnspan=2)
 
         self.buttonStartLoad = Tkinter.Button(self, text=u"Start the load", command=self.OnButtonStartLoadClick \
                                               , width=14)
-        self.buttonStartLoad.grid(column=0, row=22, sticky=S)
+        self.buttonStartLoad.grid(column=0, row=23, sticky=S)
 
         buttonStopLoad = Tkinter.Button(self, text=u"Stop the load", command=self.OnButtonStopLoadClick \
                                         , width=14)
-        buttonStopLoad.grid(column=0, row=23, sticky=S)
+        buttonStopLoad.grid(column=0, row=24, sticky=S)
 
         buttonQuit = Tkinter.Button(self, text=u"Quit Application", command=self.QuitApps, width=14)
-        buttonQuit.grid(column=1, row=24, sticky=S)
+        buttonQuit.grid(column=1, row=25, sticky=S)
 
         self.buttonExtendedStat = Tkinter.Button(self, text=u"Extended Statistics", command=self.ExtendedStatistics \
                                                  , width=14)
 
-        self.buttonExtendedStat.grid(column=0, row=24, sticky=S)
+        self.buttonExtendedStat.grid(column=0, row=25, sticky=S)
         self.buttonExtendedStat.config(state=DISABLED)
 
         self.ButtonTestSystemConn = Tkinter.Button(self, text=u"Check System Connection", width=23, \
@@ -1368,25 +1380,25 @@ class simpleapp_tk(Tkinter.Tk):
                                                    self.test_SID("System"))
 
 
-        self.ButtonTestSystemConn.grid(column=2, row=8, columnspan=3)
+        self.ButtonTestSystemConn.grid(column=2, row=9, columnspan=3)
         self.ButtonTestSystemConn.config(state=DISABLED)
 
         self.ButtonCreateSchema = Tkinter.Button(self, text=u"Create Test Schema", width=23, \
                                                  command=self.CreateSchema)
-        self.ButtonCreateSchema.grid(column=2, row=9, columnspan=2)
+        self.ButtonCreateSchema.grid(column=2, row=10, columnspan=2)
         if ConfigSectionMap("Settings")['useedb'] == "False":
             self.ButtonCreateSchema.config(state=DISABLED)
 
         buttonGraph = Tkinter.Button(self, text=u"Graph", command=self.StartGraph, width=14)
-        buttonGraph.grid(column=2, row=22, columnspan=2)
+        buttonGraph.grid(column=2, row=23, columnspan=2)
         if ConfigSectionMap("Settings")['useedb'] == "True":
             buttonGraph.config(state=DISABLED)
 
         buttonAPropos = Tkinter.Button(self, text=u"A propos...", command=self.APropos, width=14)
-        buttonAPropos.grid(column=2, row=24, columnspan=2)
+        buttonAPropos.grid(column=2, row=25, columnspan=2)
 
         buttonNbThread = Tkinter.Button(self, text=u"Nb. of threads", command=self.NbThread, width=14)
-        buttonNbThread.grid(column=2, row=23, columnspan=2)
+        buttonNbThread.grid(column=2, row=24, columnspan=2)
 
 
         """ Balloon section
@@ -1408,7 +1420,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.SysdbaEnabled = IntVar()
         self.CheckSysdbaEnabled = Tkinter.Checkbutton(self, text="Enable SYSDBA mode?", variable=self.SysdbaEnabled, \
                                                       command=self.SysdbaEnabledMeth)
-        self.CheckSysdbaEnabled.grid(column=0, row=7, sticky=W)
+        self.CheckSysdbaEnabled.grid(column=0, row=8, sticky=W)
         self.CheckSysdbaEnabled.deselect()
         if ConfigSectionMap("Settings")['useedb'] == "True":
             self.CheckSysdbaEnabled.config(state='disabled')
@@ -1417,13 +1429,13 @@ class simpleapp_tk(Tkinter.Tk):
         self.TestLength = IntVar()
         self.TestLengthStatus = Tkinter.Checkbutton(self, text="Define Length of the test?", variable=self.TestLength, \
                                                     command=self.TestLengthMeth)
-        self.TestLengthStatus.grid(column=0, row=20, sticky=W)
+        self.TestLengthStatus.grid(column=0, row=21, sticky=W)
         self.TestLengthStatus.deselect()
 
         self.CheckAWRSnapshot = IntVar()
         self.CheckAWRSnapshotStatus = Tkinter.Checkbutton(self, text="Enable AWReport Snapshot", \
                                                           variable=self.CheckAWRSnapshot)
-        self.CheckAWRSnapshotStatus.grid(column=0, row=9, sticky=W)
+        self.CheckAWRSnapshotStatus.grid(column=0, row=10, sticky=W)
         self.CheckAWRSnapshotStatus.deselect()
         self.CheckAWRSnapshotStatus.configure(state='disabled')
 
