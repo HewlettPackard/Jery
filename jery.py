@@ -105,7 +105,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.LoopRatioVar = RatioVar + 14
         CrSchemaWindow.i = 1
 
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             try:
                 con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
             except cx_Oracle.DatabaseError as e:
@@ -167,7 +167,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
                 con.close()
 
-        elif ConfigSectionMap("Settings")['useedb'] == "True":
+        elif mode == 1:
             try:
                 con = connectToEDB(str(ip), str(SID), str(user), str(passwd))
             except (psycopg2.DatabaseError, psycopg2.OperationalError) as e:
@@ -246,7 +246,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
         """
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             error_con = 0
 
             try:
@@ -299,7 +299,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 if error_con == 0:
                     CrSchemaWindow.VocableVariable.set(str(SID) + ": Test schema dropped!")
 
-        elif ConfigSectionMap("Settings")['useedb'] == "True":
+        elif mode == 1:
             error_con = 0
 
             try:
@@ -354,7 +354,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         """ Used as progress bar.
             for each and every recursive insert done, a message is printed into the vocable blue bar
         """
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
             cur2 = con.cursor()
             cur2.execute('insert into scott.emp2 select * from scott.emp2')
@@ -371,7 +371,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 CrSchemaWindow.VocableVariable.set("Updating statistics, please wait...")
                 CrSchemaWindow.Statistics(SID, user, passwd, ip, port)
 
-        elif ConfigSectionMap("Settings")['useedb'] == "True":
+        elif mode == 1:
             con = connectToEDB(str(ip), str(SID), str(user),  str(passwd))
             cur2 = con.cursor()
             cur2.execute('insert into emp2 select * from emp2')
@@ -392,7 +392,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
     def Statistics(CrSchemaWindow, SID, user, passwd, ip, port):
         """ Used generating staistics in SCOTT schema.
         """
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
             cur3 = con.cursor()
             cur3.execute("""
@@ -406,7 +406,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             con.close()
             CrSchemaWindow.VocableVariable.set("Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
 
-        elif ConfigSectionMap("Settings")['useedb'] == "True":
+        elif mode == 1:
             con = connectToEDB(str(ip), str(SID), str(user), str(passwd))
             cur3 = con.cursor()
             #Todo: fix statistics generation
@@ -911,7 +911,7 @@ class LoadThread(threading.Thread):
            or the test period is over
            app.ExecTime() call the statistics method
         """
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             try:
                 con = connectToOracle(self.OraIp, self.OraPort, self.OraConnect, self.OraUser, self.OraPwd, threaded=True)
             except cx_Oracle.DatabaseError:
@@ -945,7 +945,7 @@ class LoadThread(threading.Thread):
                         GlobalStop = 1
 
                 con.close()
-        elif ConfigSectionMap("Settings")['useedb'] == "True":
+        elif mode == 1:
             try:
                 con = connectToEDB(self.OraIp, self.OraConnect, self.OraUser, self.OraPwd)
             except psycopg2.DatabaseError:
@@ -1132,6 +1132,8 @@ class simpleapp_tk(Tkinter.Tk):
     def __init__(self,parent):
         Tkinter.Tk.__init__(self,parent)
         self.parent = parent
+        global mode
+        mode = 0
         self.initialize()
 
     def initialize(self):
@@ -1141,9 +1143,8 @@ class simpleapp_tk(Tkinter.Tk):
         """
 
         global OpenToplevel
-        global mode
-        mode = 0
         OpenToplevel = 0
+        global mode
 
         #self.GlobalStop = 0
         global GlobalStop
@@ -1175,26 +1176,29 @@ class simpleapp_tk(Tkinter.Tk):
         self.labelVariable1 = Tkinter.StringVar()
         label1 = Tkinter.Label(self, textvariable=self.labelVariable1, fg="white", bg="gray60", font=(20))
         label1.grid(column=0, row=0, columnspan=3, sticky='EW')
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             self.labelVariable1.set(u"JERY - ORACLE DB MODE")
-        elif ConfigSectionMap("Settings")['useedb'] == "True":
+        elif mode == 1:
             self.labelVariable1.set(u"JERY - EDB MODE")
 
         #TODO here
         self.Label0 = Tkinter.Label(self, text='Mode')
         self.Label0.grid(column=0, row=1, sticky=W)
-        mode = IntVar()
-        Mode1 = Tkinter.Radiobutton(self, text='1: Oracle DB', variable=mode, value=0)
-        Mode2 = Tkinter.Radiobutton(self, text='2: Enterprise DB', variable=mode, value=1)
-        Mode1.grid(row=1, column=1, sticky='W')
-        Mode2.grid(row=1, column=2, sticky='W')
-        Mode1.select()
+        self.select = IntVar()
+        self.Mode1 = Tkinter.Radiobutton(self, text='1: Oracle DB', variable=self.select, command=self.onSelect, value=0)
+        self.Mode2 = Tkinter.Radiobutton(self, text='2: Enterprise DB', variable=self.select, command=self.onSelect, value=1)
+        self.Mode1.grid(row=1, column=1, sticky='W')
+        self.Mode2.grid(row=1, column=2, sticky='W')
+        if mode == 0:
+            self.Mode1.select()
+        elif mode == 1:
+            self.Mode2.select()
 
         self.Label1 = Tkinter.Label(self, text='IP of Oracle DB')
         self.Label1.grid(column=0, row=2, sticky=W)
         self.Label2 = Tkinter.Label(self, text='Port of Oracle DB')
         self.Label2.grid(column=1, row=2, sticky=W)
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             self.Label2.config(state='disabled')
 
         self.Label3 = Tkinter.Label(self, text='Test schema owner')
@@ -1209,12 +1213,20 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.LabelExecTimeVariable = Tkinter.StringVar()
         self.LabelExecTimeVariable.set("Avg. completion time: 0")
-        self.LabelExecTime = Tkinter.Label(self, textvariable=self.LabelExecTimeVariable, fg="red")
+        self.LabelExecTime = Tkinter.Label(self, textvariable=self.LabelExecTimeVariable)
+        if mode == 0:
+            self.LabelExecTime.config(fg="red")
+        if mode == 1:
+            self.LabelExecTime.config(fg="gray")
         self.LabelExecTime.grid (column=1, row=23)
 
         self.LabelNbQueriesVariable = Tkinter.StringVar()
         self.LabelNbQueriesVariable.set("Nb Queries in last MM: 0")
-        self.LabelNbQueries = Tkinter.Label(self, textvariable=self.LabelNbQueriesVariable, fg="red")
+        self.LabelNbQueries = Tkinter.Label(self, textvariable=self.LabelNbQueriesVariable)
+        if mode == 0:
+            self.LabelNbQueries.config(fg="red")
+        if mode == 1:
+            self.LabelNbQueries.config(fg="gray")
         self.LabelNbQueries.grid (column=1, row=24)
 
         self.LabelTestLengthVariable = Tkinter.StringVar()
@@ -1230,7 +1242,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.LabelSystemPwd = Tkinter.Label(self, text="SYSTEM user password: ")
         self.LabelSystemPwd.grid (column=0, row=9)
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             self.LabelSystemPwd.config(state='disabled')
 
         
@@ -1251,7 +1263,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry1.bind('<Return>', self.OnPressEnter)
         ipVariable = ConfigSectionMap("Prefilled")['ip']
         self.entryIpVariable.set(ipVariable)
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             ipVariable = ConfigSectionMap("PrefilledEDB")['ip']
             self.entryIpVariable.set(ipVariable)
 
@@ -1261,7 +1273,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry2.bind('<Return>', self.OnPressEnter)
         portVariable = ConfigSectionMap("Prefilled")['port']
         self.entryPortVariable.set(portVariable)
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             self.Entry2.config(state = 'disabled')
             self.entryPortVariable.set("")
 
@@ -1271,7 +1283,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry3.grid(column=0, row=5, sticky='EW')
         self.Entry3.bind('<Return>', self.OnPressEnter)
         userVariable = ConfigSectionMap("Prefilled")['user']
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             userVariable = ConfigSectionMap("PrefilledEDB")['user']
             self.entryUserVariable.set(userVariable)
 
@@ -1282,7 +1294,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry4.grid(column=1, row=5, sticky='EW')
         self.Entry4.bind('<Return>', self.OnPressEnter)
         pwdVariable = ConfigSectionMap("Prefilled")['pwd']
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             pwdVariable = ConfigSectionMap("PrefilledEDB")['pwd']
             self.entryPwdVariable.set(pwdVariable)
 
@@ -1293,7 +1305,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.Entry5.grid(column=2, row=5, sticky='EW')
         self.Entry5.bind('<Return>', self.OnPressEnter)
         entryConnectStringVariable = ConfigSectionMap("Prefilled")['entryconnectstring']
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             entryConnectStringVariable = ConfigSectionMap("PrefilledEDB")['entryconnectstring']
             self.entryConnectStringVariable.set(entryConnectStringVariable)
 
@@ -1371,12 +1383,12 @@ class simpleapp_tk(Tkinter.Tk):
         self.ButtonCreateSchema = Tkinter.Button(self, text=u"Create Test Schema", \
                                                  command=self.CreateSchema)
         self.ButtonCreateSchema.grid(column=2, row=10, columnspan=2, sticky=W+E+N+S)
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             self.ButtonCreateSchema.config(state=DISABLED)
 
         buttonGraph = Tkinter.Button(self, text=u"Graph", command=self.StartGraph, width=14)
         buttonGraph.grid(column=2, row=23, columnspan=2)
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             buttonGraph.config(state=DISABLED)
 
         buttonAPropos = Tkinter.Button(self, text=u"A propos...", command=self.APropos, width=14)
@@ -1407,7 +1419,7 @@ class simpleapp_tk(Tkinter.Tk):
                                                       command=self.SysdbaEnabledMeth)
         self.CheckSysdbaEnabled.grid(column=0, row=8, sticky=W)
         self.CheckSysdbaEnabled.deselect()
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             self.CheckSysdbaEnabled.config(state='disabled')
 
 
@@ -1593,7 +1605,7 @@ class simpleapp_tk(Tkinter.Tk):
                 if t.isAlive():
                     t.stopThread()
 
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             #if self.GlobalStop == 0:
             if GlobalStop == 0:
                 con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()), str(self.Entry3.get()),
@@ -1606,8 +1618,10 @@ class simpleapp_tk(Tkinter.Tk):
                 cur.close()
                 con.close()
                 self.buttonStartLoad.config(state=NORMAL)
+                self.Mode1.config(state=NORMAL)
+                self.Mode2.config(state=NORMAL)
                 self.after(4000, self.SnapshotDB)
-        if ConfigSectionMap("Settings")['useedb'] == "True":
+        if mode == 1:
             # if self.GlobalStop == 0:
             if GlobalStop == 0:
                 con = connectToEDB(str(self.Entry1.get()), str(self.Entry5.get()),
@@ -1618,10 +1632,12 @@ class simpleapp_tk(Tkinter.Tk):
                 for result in cur:
                     resultVar = str(result[0])
                     self.labelVariable2.set(
-                        u"Workload will end shortly! {0} trans. completed in this run.".format(resultVar))
+                        u"Workload will end shortly!") # {0} trans. completed in this run.".format(resultVar))
                 cur.close()
                 con.close()
                 self.buttonStartLoad.config(state=NORMAL)
+                self.Mode1.config(state=NORMAL)
+                self.Mode2.config(state=NORMAL)
                 self.after(4000, self.SnapshotDB)
         
         
@@ -1641,7 +1657,9 @@ class simpleapp_tk(Tkinter.Tk):
         #self.GlobalStop = 0
         
         self.buttonStartLoad.config(state=DISABLED)
-        self.LabelExecTimeVariable.set('Ramping up')
+        self.Mode1.config(state=DISABLED)
+        self.Mode2.config(state=DISABLED)
+        self.LabelExecTimeVariable.set('        Ramping up        ')
         self.existingThread = []
         #runStatus=  0
         error_con = 0
@@ -1678,7 +1696,7 @@ class simpleapp_tk(Tkinter.Tk):
             Return 2 if the test schema is not existing.
         """
         error_con = 0
-        if ConfigSectionMap("Settings")['useedb'] == "False":
+        if mode == 0:
             try:
                 con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()), str(self.Entry3.get()), str(self.Entry4.get()))
             except cx_Oracle.DatabaseError:
@@ -1706,7 +1724,7 @@ class simpleapp_tk(Tkinter.Tk):
                 con.close()
                 return 0
 
-        elif ConfigSectionMap("Settings")['useedb'] == "True":
+        elif mode == 1:
             try:
                 con = connectToEDB(str(self.Entry1.get()), str(self.Entry5.get()), str(self.Entry3.get()), str(self.Entry4.get()))
             except psycopg2.DatabaseError:
@@ -1776,7 +1794,7 @@ class simpleapp_tk(Tkinter.Tk):
         """
         error_con = 0
 
-        if ConfigSectionMap("Settings")['useedb'] != "True":
+        if mode == 0:
             if origin == "User":
                 try:
                     con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
@@ -1837,7 +1855,7 @@ class simpleapp_tk(Tkinter.Tk):
                     cur.close()
                     con.close()
 
-        elif ConfigSectionMap("Settings")['useedb'] == "True":
+        elif mode == 1:
             if origin == "User":
                 try:
                     con = connectToEDB(str(self.Entry1.get()), str(self.Entry5.get()),
@@ -1867,40 +1885,45 @@ class simpleapp_tk(Tkinter.Tk):
             - count the number of record into the statistics table.
             - When more than 10 are in, start to print an average execution time.
                 Otherwise just print "Ramping up"
-        """        
-        error_con = 0
-        try:
-            if self.Entry1 and self.Entry2 and self.Entry5 and self.Entry3 and self.Entry4:
-                con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
-                                  str(self.Entry3.get()),
-                                  str(self.Entry4.get()))
-        except cx_Oracle.DatabaseError:
-            self.labelVariable2.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
-            error_con = 1
-        
-        if error_con != 1:
-            curRampUp = con.cursor()
-            curRampUp.execute('select count(*) from dwhstat')
-            for result in curRampUp:
-                curExecTime = con.cursor()
-                if int(result[0]) > 10:
-                    curExecTime.execute('select (sum(elapsed))/10 from (select seq, elapsed from dwhstat) where seq>(select max(seq) - 10 from dwhstat)')
-                    for result in curExecTime:
-                        avgExecTime = str(int(result[0]))
-                        self.LabelExecTimeVariable.set('Avg completion time: {0} S'.format(avgExecTime))
-                else:
-                    self.LabelExecTimeVariable.set('Ramping up')
-                curExecTime.close()
-            curRampUp.close()
+        """
+        if mode == 0:
+            error_con = 0
+            try:
+                if self.Entry1 and self.Entry2 and self.Entry5 and self.Entry3 and self.Entry4:
+                    con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
+                                      str(self.Entry3.get()),
+                                      str(self.Entry4.get()))
+            except cx_Oracle.DatabaseError:
+                self.labelVariable2.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
+                error_con = 1
 
-            curExec = con.cursor()
-            curExec.execute('select count(*) from dwhstat where (sysdate - insdate)*60*60*24 <61')
-            for result in curExec:
-                NbExecTime = str(int(result[0]))
-                self.LabelNbQueriesVariable.set('Nb queries in last MM: {0}'.format(NbExecTime))
-            curExec.close()
-            con.close()
+            if error_con != 1:
+                curRampUp = con.cursor()
+                curRampUp.execute('select count(*) from dwhstat')
+                for result in curRampUp:
+                    curExecTime = con.cursor()
+                    if int(result[0]) > 10:
+                        curExecTime.execute('select (sum(elapsed))/10 from (select seq, elapsed from dwhstat) where seq>(select max(seq) - 10 from dwhstat)')
+                        for result in curExecTime:
+                            avgExecTime = str(int(result[0]))
+                            self.LabelExecTimeVariable.set('Avg completion time: {0} S'.format(avgExecTime))
+                    else:
+                        self.LabelExecTimeVariable.set('Ramping up')
+                    curExecTime.close()
+                curRampUp.close()
 
+                curExec = con.cursor()
+                curExec.execute('select count(*) from dwhstat where (sysdate - insdate)*60*60*24 <61')
+                for result in curExec:
+                    NbExecTime = str(int(result[0]))
+                    self.LabelNbQueriesVariable.set('Nb queries in last MM: {0}'.format(NbExecTime))
+                curExec.close()
+                con.close()
+
+    def onSelect(self):
+        global mode
+        mode = self.select.get()
+        self.initialize()
 
     def ExtendedStatistics(self):
         """ Advanced Statistics call method """
