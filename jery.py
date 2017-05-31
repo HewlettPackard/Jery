@@ -1175,14 +1175,18 @@ class simpleapp_tk(Tkinter.Tk):
         can1 = Canvas(self, width = 130, height = 60, bg='white')
         self.logohp = PhotoImage(file=logohp)
         item = can1.create_image(66,32, image=self.logohp)
-        can1.grid(column=1, row=26, rowspan = 5, padx=15, pady=15)
+        can1.grid(column=1, row=27, rowspan = 5, padx=15, pady=15)
+
+        can4 = Canvas(self, width=550, height=20)
+        can4.grid(column=0, row=2, columnspan=3, padx=10, pady=10)
+        can4.create_line(10, 10, 540, 10, width=3, fill='white')
 
         can2 = Canvas(self, width = 550, height=20)
-        can2.grid(column=0, row=17, columnspan=3, padx=10, pady=10)
+        can2.grid(column=0, row=18, columnspan=3, padx=10, pady=10)
         can2.create_line (10,10,540,10,width=3,fill='white')
 
         can3 = Canvas(self, width = 550, height=20)
-        can3.grid(column=0, row=22, columnspan=3, padx=10, pady=10)
+        can3.grid(column=0, row=23, columnspan=3, padx=10, pady=10)
         can3.create_line (10,10,540,10,width=3,fill='white')
 
         """ Label:
@@ -1210,21 +1214,21 @@ class simpleapp_tk(Tkinter.Tk):
             self.Mode2.select()
 
         self.Label1 = Tkinter.Label(self, text='IP of Oracle DB')
-        self.Label1.grid(column=0, row=2, sticky=W)
+        self.Label1.grid(column=0, row=3, sticky=W)
         self.Label2 = Tkinter.Label(self, text='Port of Oracle DB')
-        self.Label2.grid(column=1, row=2, sticky=W)
+        self.Label2.grid(column=1, row=3, sticky=W)
         if mode == 1:
             self.Label2.config(state='disabled')
 
         self.Label3 = Tkinter.Label(self, text='Test schema owner')
-        self.Label3.grid(column=0, row=4, sticky=W)
+        self.Label3.grid(column=0, row=5, sticky=W)
         self.Label4 = Tkinter.Label(self, text='Test schema password')
-        self.Label4.grid(column=1, row=4, sticky=W)
+        self.Label4.grid(column=1, row=5, sticky=W)
 
         self.Label5 = Tkinter.Label(self, text='Connect string')
-        self.Label5.grid(column=2, row=4, sticky=W)
+        self.Label5.grid(column=2, row=5, sticky=W)
         self.Label6 = Tkinter.Label(self, text='Select the number of virtual users')
-        self.Label6.grid(column=0, row=18, columnspan=3)
+        self.Label6.grid(column=0, row=19, columnspan=3)
 
         self.LabelExecTimeVariable = Tkinter.StringVar()
         self.LabelExecTimeVariable.set("Avg. completion time: 0")
@@ -1233,7 +1237,7 @@ class simpleapp_tk(Tkinter.Tk):
             self.LabelExecTime.config(fg="red")
         if mode == 1:
             self.LabelExecTime.config(fg="gray")
-        self.LabelExecTime.grid (column=1, row=23)
+        self.LabelExecTime.grid (column=1, row=24)
 
         self.LabelNbQueriesVariable = Tkinter.StringVar()
         self.LabelNbQueriesVariable.set("Nb Queries in last MM: 0")
@@ -1242,21 +1246,21 @@ class simpleapp_tk(Tkinter.Tk):
             self.LabelNbQueries.config(fg="red")
         if mode == 1:
             self.LabelNbQueries.config(fg="gray")
-        self.LabelNbQueries.grid (column=1, row=24)
+        self.LabelNbQueries.grid (column=1, row=25)
 
         self.LabelTestLengthVariable = Tkinter.StringVar()
         self.LabelTestLengthVariable.set("How long will be the test:")
         self.LabelTestLength = Tkinter.Label(self, textvariable=self.LabelTestLengthVariable)
-        self.LabelTestLength.grid (column=1, row=21, sticky="W")
+        self.LabelTestLength.grid (column=1, row=22, sticky="W")
 
         self.labelVariable2 = Tkinter.StringVar()
         label2 = Tkinter.Label(self, textvariable=self.labelVariable2,
                               anchor="w", fg="white", bg="blue")
-        label2.grid(column=0, row=6, columnspan=2, sticky='EW')
+        label2.grid(column=0, row=7, columnspan=2, sticky='EW')
         self.labelVariable2.set(u"Hello !")
 
         self.LabelSystemPwd = Tkinter.Label(self, text="SYSTEM user password: ")
-        self.LabelSystemPwd.grid (column=0, row=9)
+        self.LabelSystemPwd.grid (column=0, row=10)
         if mode == 1:
             self.LabelSystemPwd.config(state='disabled')
 
@@ -1274,7 +1278,7 @@ class simpleapp_tk(Tkinter.Tk):
         """
         self.entryIpVariable = Tkinter.StringVar()
         self.Entry1 = Tkinter.Entry(self, textvariable=self.entryIpVariable)
-        self.Entry1.grid(column=0, row=3, sticky='EW')
+        self.Entry1.grid(column=0, row=4, sticky='EW')
         self.Entry1.bind('<Return>', self.OnPressEnter)
         ipVariable = ConfigSectionMap("Prefilled")['ip']
         self.entryIpVariable.set(ipVariable)
@@ -1284,7 +1288,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryPortVariable = Tkinter.StringVar()
         self.Entry2 = Tkinter.Entry(self, textvariable=self.entryPortVariable)
-        self.Entry2.grid(column=1, row=3, sticky='EW')
+        self.Entry2.grid(column=1, row=4, sticky='EW')
         self.Entry2.bind('<Return>', self.OnPressEnter)
         portVariable = ConfigSectionMap("Prefilled")['port']
         self.entryPortVariable.set(portVariable)
@@ -1295,7 +1299,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryUserVariable = Tkinter.StringVar()
         self.Entry3 = Tkinter.Entry(self, textvariable=self.entryUserVariable)
-        self.Entry3.grid(column=0, row=5, sticky='EW')
+        self.Entry3.grid(column=0, row=6, sticky='EW')
         self.Entry3.bind('<Return>', self.OnPressEnter)
         userVariable = ConfigSectionMap("Prefilled")['user']
         if mode == 1:
@@ -1306,7 +1310,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryPwdVariable = Tkinter.StringVar()
         self.Entry4 = Tkinter.Entry(self, textvariable=self.entryPwdVariable, show="*")
-        self.Entry4.grid(column=1, row=5, sticky='EW')
+        self.Entry4.grid(column=1, row=6, sticky='EW')
         self.Entry4.bind('<Return>', self.OnPressEnter)
         pwdVariable = ConfigSectionMap("Prefilled")['pwd']
         if mode == 1:
@@ -1317,7 +1321,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryConnectStringVariable = Tkinter.StringVar()
         self.Entry5 = Tkinter.Entry(self, textvariable=self.entryConnectStringVariable)
-        self.Entry5.grid(column=2, row=5, sticky='EW')
+        self.Entry5.grid(column=2, row=6, sticky='EW')
         self.Entry5.bind('<Return>', self.OnPressEnter)
         entryConnectStringVariable = ConfigSectionMap("Prefilled")['entryconnectstring']
         if mode == 1:
@@ -1328,7 +1332,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.entryConUsersVariable = Tkinter.IntVar()
         self.EntryConUsers = Tkinter.Entry(self, textvariable=self.entryConUsersVariable)
-        self.EntryConUsers.grid(column=1, row=20, sticky='EW')
+        self.EntryConUsers.grid(column=1, row=21, sticky='EW')
         self.EntryConUsers.bind('<Return>', self.OnPressEnter)
         self.entryConUsersVariable.set(4)
 
@@ -1337,13 +1341,13 @@ class simpleapp_tk(Tkinter.Tk):
         self.entryTestLengthVariable = Tkinter.IntVar()
         self.EntryTestLength = Tkinter.Entry(self, textvariable=self.entryTestLengthVariable, validate='key', \
                                              validatecommand=self.ValidateTestLength, state='disabled')
-        self.EntryTestLength.grid(column=2, row=21, sticky='E')
+        self.EntryTestLength.grid(column=2, row=22, sticky='E')
         self.entryTestLengthVariable.set(0)
 
         self.EntryPwdSysVariable = Tkinter.StringVar()
         self.EntryPwdSys = Tkinter.Entry(self, textvariable=self.EntryPwdSysVariable, \
                                          show="*", width=14, state='disabled')
-        self.EntryPwdSys.grid(column=1, row=9, sticky='EW')
+        self.EntryPwdSys.grid(column=1, row=10, sticky='EW')
         entryPwdSysVariable = ConfigSectionMap("Prefilled")['pwdsys']
         self.EntryPwdSysVariable.set(entryPwdSysVariable)
 
@@ -1359,32 +1363,32 @@ class simpleapp_tk(Tkinter.Tk):
         """
 
         buttonLess = Tkinter.Button(self, text=u"-", command=self.OnButtonLessClick, width=5)
-        buttonLess.grid(column=0, row=20, sticky=E)
+        buttonLess.grid(column=0, row=21, sticky=E)
 
         buttonMore = Tkinter.Button(self, text=u"+", command=self.OnButtonMoreClick, width=5)
-        buttonMore.grid(column=2, row=20, sticky=W)
+        buttonMore.grid(column=2, row=21, sticky=W)
 
 
 
 
         buttonTest = Tkinter.Button(self, text=u"Check User Connection", command=self.OnButtonClick, width=23)
-        buttonTest.grid(column=2, row=6, columnspan=2)
+        buttonTest.grid(column=2, row=7, columnspan=2)
 
         self.buttonStartLoad = Tkinter.Button(self, text=u"Start the load", command=self.OnButtonStartLoadClick \
                                               , width=14)
-        self.buttonStartLoad.grid(column=0, row=23, sticky=S)
+        self.buttonStartLoad.grid(column=0, row=24, sticky=S)
 
         buttonStopLoad = Tkinter.Button(self, text=u"Stop the load", command=self.OnButtonStopLoadClick \
                                         , width=14)
-        buttonStopLoad.grid(column=0, row=24, sticky=S)
+        buttonStopLoad.grid(column=0, row=25, sticky=S)
 
         buttonQuit = Tkinter.Button(self, text=u"Quit Application", command=self.QuitApps, width=14)
-        buttonQuit.grid(column=1, row=25, sticky=S)
+        buttonQuit.grid(column=1, row=26, sticky=S)
 
         self.buttonExtendedStat = Tkinter.Button(self, text=u"Extended Statistics", command=self.ExtendedStatistics \
                                                  , width=14)
 
-        self.buttonExtendedStat.grid(column=0, row=25, sticky=S)
+        self.buttonExtendedStat.grid(column=0, row=26, sticky=S)
         self.buttonExtendedStat.config(state=DISABLED)
 
         self.ButtonTestSystemConn = Tkinter.Button(self, text=u"Check System Connection", width=23, \
@@ -1392,25 +1396,25 @@ class simpleapp_tk(Tkinter.Tk):
                                                    self.test_SID("System"))
 
 
-        self.ButtonTestSystemConn.grid(column=2, row=9, columnspan=3)
+        self.ButtonTestSystemConn.grid(column=2, row=10, columnspan=3)
         self.ButtonTestSystemConn.config(state=DISABLED)
 
         self.ButtonCreateSchema = Tkinter.Button(self, text=u"Create Test Schema", width=23, \
                                                  command=self.CreateSchema)
-        self.ButtonCreateSchema.grid(column=2, row=10, columnspan=2)
+        self.ButtonCreateSchema.grid(column=2, row=11, columnspan=2)
         if mode == 0:
             self.ButtonCreateSchema.config(state=DISABLED)
 
         buttonGraph = Tkinter.Button(self, text=u"Graph", command=self.StartGraph, width=14)
-        buttonGraph.grid(column=2, row=23, columnspan=2)
+        buttonGraph.grid(column=2, row=24, columnspan=2)
         if mode == 1:
             buttonGraph.config(state=DISABLED)
 
         buttonAPropos = Tkinter.Button(self, text=u"A propos...", command=self.APropos, width=14)
-        buttonAPropos.grid(column=2, row=25, columnspan=2)
+        buttonAPropos.grid(column=2, row=26, columnspan=2)
 
         buttonNbThread = Tkinter.Button(self, text=u"Nb. of threads", command=self.NbThread, width=14)
-        buttonNbThread.grid(column=2, row=24, columnspan=2)
+        buttonNbThread.grid(column=2, row=25, columnspan=2)
 
 
         """ Balloon section
@@ -1432,7 +1436,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.SysdbaEnabled = IntVar()
         self.CheckSysdbaEnabled = Tkinter.Checkbutton(self, text="Enable SYSDBA mode?", variable=self.SysdbaEnabled, \
                                                       command=self.SysdbaEnabledMeth)
-        self.CheckSysdbaEnabled.grid(column=0, row=8, sticky=W)
+        self.CheckSysdbaEnabled.grid(column=0, row=9, sticky=W)
         self.CheckSysdbaEnabled.deselect()
         if mode == 1:
             self.CheckSysdbaEnabled.config(state='disabled')
@@ -1441,13 +1445,13 @@ class simpleapp_tk(Tkinter.Tk):
         self.TestLength = IntVar()
         self.TestLengthStatus = Tkinter.Checkbutton(self, text="Define Length of the test?", variable=self.TestLength, \
                                                     command=self.TestLengthMeth)
-        self.TestLengthStatus.grid(column=0, row=21, sticky=W)
+        self.TestLengthStatus.grid(column=0, row=22, sticky=W)
         self.TestLengthStatus.deselect()
 
         self.CheckAWRSnapshot = IntVar()
         self.CheckAWRSnapshotStatus = Tkinter.Checkbutton(self, text="Enable AWReport Snapshot", \
                                                           variable=self.CheckAWRSnapshot)
-        self.CheckAWRSnapshotStatus.grid(column=0, row=10, sticky=W)
+        self.CheckAWRSnapshotStatus.grid(column=0, row=11, sticky=W)
         self.CheckAWRSnapshotStatus.deselect()
         self.CheckAWRSnapshotStatus.configure(state='disabled')
 
