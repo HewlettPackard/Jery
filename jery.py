@@ -785,7 +785,6 @@ class OraLoadThread(threading.Thread):
                             avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
                 except cx_Oracle.OperationalError:
                     error_con = 1
-                    print cx_Oracle.OperationalError
                     return error_con
 
                 elapsedTimeQuery = int(time.time() - startTimeQuery)
@@ -854,17 +853,14 @@ class WatcherThread(threading.Thread):
 
                         #check if thrad is alive. If thread died -> restart a new one
                         for thread in self.existingThread:
-                            # sys.stdout.write("X ")
-                            # sys.stdout.flush()
+                            #sys.stdout.write("X ")
+                            #sys.stdout.flush()
                             if not thread.isAlive():
-                                print str(thread) + "  died. Restarting... "
-                                thread = OraLoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
-                                                           str(self.Entry1.get()), str(self.Entry2.get()),
-                                                           int(self.EntryTestLength.get()))
-                                thread.start()
-                        # sys.stdout.write("\n")
+                                print str(thread) + "  died. Restarting..."
+                                self.existingThread.remove(thread)
+                        #sys.stdout.write("\n")
 
-                        ActiveUsers = int(threading.activeCount()) - 2
+                        ActiveUsers = len(self.existingThread)-1
                         self.labelVariable.set("Number of active users: " + str(ActiveUsers))
 
                         # print self.existingThread
