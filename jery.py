@@ -179,7 +179,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                     CrSchemaWindow.VocableVariable.set("Schema already exists!")
 
                 cur.close()
-                CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port)
+                CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
                 con.close()
 
         elif mode == 1:
@@ -208,6 +208,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
                 except (psycopg2.DatabaseError, psycopg2.ProgrammingError) as e:
                     error = e.pgcode
+                    print e
                     con.rollback()
                     if error != '42P01':
                         print e
@@ -380,7 +381,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
             if CrSchemaWindow.i < CrSchemaWindow.LoopRatioVar:
                 CrSchemaWindow.after(500, lambda:
-                CrSchemaWindow.CreateSchemaProgress(SID, passwd, ip, port))
+                CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port))
             else:
                 con.close()
                 CrSchemaWindow.VocableVariable.set("Updating statistics, please wait...")
@@ -1226,6 +1227,8 @@ class simpleapp_tk(Tkinter.Tk):
         self.Label6 = Tkinter.Label(self, text='Select the number of virtual users')
         self.Label6.grid(column=0, row=19, columnspan=3)
 
+        if hasattr(self, 'LabelExecTime'):
+            self.LabelExecTime.destroy()
         self.LabelExecTimeVariable = Tkinter.StringVar()
         self.LabelExecTimeVariable.set("Avg. completion time: 0")
         self.LabelExecTime = Tkinter.Label(self, textvariable=self.LabelExecTimeVariable)
@@ -1235,8 +1238,10 @@ class simpleapp_tk(Tkinter.Tk):
             self.LabelExecTime.config(fg="red", state="disabled")
         self.LabelExecTime.grid (column=1, row=24)
 
+        if hasattr(self, 'LabelNbQueries'):
+            self.LabelNbQueries.destroy()
         self.LabelNbQueriesVariable = Tkinter.StringVar()
-        self.LabelNbQueriesVariable.set("        Nb Queries in last MM: 0        ")
+        self.LabelNbQueriesVariable.set("Nb Queries in last MM: 0")
         self.LabelNbQueries = Tkinter.Label(self, textvariable=self.LabelNbQueriesVariable)
         if mode == 0:
             self.LabelNbQueries.config(fg="red")
@@ -1674,7 +1679,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.buttonStartLoad.config(state=DISABLED)
         self.Mode1.config(state=DISABLED)
         self.Mode2.config(state=DISABLED)
-        self.LabelExecTimeVariable.set('           Ramping up           ')
+        self.LabelExecTimeVariable.set('Ramping up')
         self.existingThread = []
         #runStatus=  0
         error_con = 0
@@ -1931,12 +1936,12 @@ class simpleapp_tk(Tkinter.Tk):
                 curExec.execute('select count(*) from dwhstat where (sysdate - insdate)*60*60*24 <61')
                 for result in curExec:
                     NbExecTime = str(int(result[0]))
-                    self.LabelNbQueriesVariable.set('    Nb queries in last MM: {0}     '.format(NbExecTime))
+                    self.LabelNbQueriesVariable.set('Nb queries in last MM: {0}'.format(NbExecTime))
                 curExec.close()
                 con.close()
 
         if mode == 1:
-            self.LabelExecTimeVariable.set("          Running Load          ")
+            self.LabelExecTimeVariable.set("Running Load")
 
     def onSelect(self):
         global mode
