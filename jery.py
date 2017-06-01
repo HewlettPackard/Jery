@@ -14,10 +14,25 @@ import threading
 import time
 import tkMessageBox
 import ConfigParser
+import psycopg2
+
+########################  CONNECTION  ##########################
+def connectToOracle(ip, port, SID, user, passwd, threaded=False):
+    dsn = cx_Oracle.makedsn(host = ip, port = port, service_name = SID)
+    con = cx_Oracle.connect(user, passwd, dsn, threaded=threaded)
+    return con
+
+def connectToEDB(ip, dbname, user, passwd):
+    # print "ip " + ip
+    # print "dbname " + dbname
+    # print "user " + user
+    # print "passwd " + passwd
+    con = psycopg2.connect(host=ip, user=user, password=passwd, dbname=dbname)
+    return con
 
 ###########################  GUI  ##############################
 class CreateTestSchemaWindow(Tkinter.Toplevel):
-    def __init__(CrSchemaWindow, SID, passwd, ip, port):
+    def __init__(CrSchemaWindow, SID, user, passwd, ip, port):
         Tkinter.Toplevel.__init__(CrSchemaWindow)
 
         """ Test schema Creation class
@@ -916,7 +931,6 @@ class LoadThread(threading.Thread):
                 con = connectToOracle(self.OraIp, self.OraPort, self.OraConnect, self.OraUser, self.OraPwd, threaded=True)
             except cx_Oracle.DatabaseError:
                 error_con = 1
-                print cx_Oracle.DatabaseError
                 return error_con
 
             if error_con != 1:
@@ -973,7 +987,7 @@ class LoadThread(threading.Thread):
                     con.commit()
                     cur.close()
                     cur2.close()
-                    #app.ExecTime()
+                    app.ExecTime()
 
                     if time.time() > (StartTimeTest + self.LengthTest):
                         app.OnButtonStopLoadClick()
@@ -1034,17 +1048,14 @@ class WatcherThread(threading.Thread):
 
                         #check if thrad is alive. If thread died -> restart a new one
                         for thread in self.existingThread:
-                            # sys.stdout.write("X ")
-                            # sys.stdout.flush()
+                            #sys.stdout.write("X ")
+                            #sys.stdout.flush()
                             if not thread.isAlive():
-                                print str(thread) + "  died. Restarting... "
-                                thread = LoadThread(str(self.Entry3.get()), str(self.Entry4.get()), str(self.Entry5.get()),
-                                                           str(self.Entry1.get()), str(self.Entry2.get()),
-                                                           int(self.EntryTestLength.get()))
-                                thread.start()
-                        # sys.stdout.write("\n")
+                                print str(thread) + "  died. Restarting..."
+                                self.existingThread.remove(thread)
+                        #sys.stdout.write("\n")
 
-                        ActiveUsers = int(threading.activeCount()) - 2
+                        ActiveUsers = len(self.existingThread)-1
                         self.labelVariable.set("Number of active users: " + str(ActiveUsers))
 
                         # print self.existingThread
@@ -1221,16 +1232,16 @@ class simpleapp_tk(Tkinter.Tk):
         if mode == 0:
             self.LabelExecTime.config(fg="red")
         if mode == 1:
-            self.LabelExecTime.config(fg="gray")
+            self.LabelExecTime.config(fg="red", state="disabled")
         self.LabelExecTime.grid (column=1, row=24)
 
         self.LabelNbQueriesVariable = Tkinter.StringVar()
-        self.LabelNbQueriesVariable.set("Nb Queries in last MM: 0")
+        self.LabelNbQueriesVariable.set("        Nb Queries in last MM: 0        ")
         self.LabelNbQueries = Tkinter.Label(self, textvariable=self.LabelNbQueriesVariable)
         if mode == 0:
             self.LabelNbQueries.config(fg="red")
         if mode == 1:
-            self.LabelNbQueries.config(fg="gray")
+            self.LabelNbQueries.config(fg="red", state="disabled")
         self.LabelNbQueries.grid (column=1, row=25)
 
         self.LabelTestLengthVariable = Tkinter.StringVar()
@@ -1663,7 +1674,7 @@ class simpleapp_tk(Tkinter.Tk):
         self.buttonStartLoad.config(state=DISABLED)
         self.Mode1.config(state=DISABLED)
         self.Mode2.config(state=DISABLED)
-        self.LabelExecTimeVariable.set('        Ramping up        ')
+        self.LabelExecTimeVariable.set('           Ramping up           ')
         self.existingThread = []
         #runStatus=  0
         error_con = 0
@@ -1920,9 +1931,12 @@ class simpleapp_tk(Tkinter.Tk):
                 curExec.execute('select count(*) from dwhstat where (sysdate - insdate)*60*60*24 <61')
                 for result in curExec:
                     NbExecTime = str(int(result[0]))
-                    self.LabelNbQueriesVariable.set('Nb queries in last MM: {0}'.format(NbExecTime))
+                    self.LabelNbQueriesVariable.set('    Nb queries in last MM: {0}     '.format(NbExecTime))
                 curExec.close()
                 con.close()
+
+        if mode == 1:
+            self.LabelExecTimeVariable.set("          Running Load          ")
 
     def onSelect(self):
         global mode
