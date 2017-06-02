@@ -14,6 +14,9 @@ import threading
 import time
 import tkMessageBox
 import ConfigParser
+import datetime
+
+import datetime
 import psycopg2
 
 ########################  CONNECTION  ##########################
@@ -248,9 +251,10 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 con.commit()
 
                 try:
-                    cur.execute('CREATE SEQUENCE seq START WITH 1 INCREMENT BY 1 NOCACHE')
+                    cur.execute('CREATE SEQUENCE seq START WITH 1 INCREMENT BY 1')
                 except psycopg2.DatabaseError as e:
                     CrSchemaWindow.VocableVariable.set("Schema already exists!")
+                con.commit()
 
                 cur.close()
                 CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
@@ -983,8 +987,7 @@ class LoadThread(threading.Thread):
                         return error_con
 
                     elapsedTimeQuery = int(time.time() - startTimeQuery)
-                    #ToDo: fix dwhstat
-                    #cur2.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)',{"id":elapsedTimeQuery})
+                    cur2.execute("insert into dwhstat values (nextval('seq'), %s, now())", [elapsedTimeQuery])
                     con.commit()
                     cur.close()
                     cur2.close()
@@ -1231,22 +1234,14 @@ class simpleapp_tk(Tkinter.Tk):
             self.LabelExecTime.destroy()
         self.LabelExecTimeVariable = Tkinter.StringVar()
         self.LabelExecTimeVariable.set("Avg. completion time: 0")
-        self.LabelExecTime = Tkinter.Label(self, textvariable=self.LabelExecTimeVariable)
-        if mode == 0:
-            self.LabelExecTime.config(fg="red")
-        if mode == 1:
-            self.LabelExecTime.config(fg="red", state="disabled")
+        self.LabelExecTime = Tkinter.Label(self, textvariable=self.LabelExecTimeVariable, fg="red")
         self.LabelExecTime.grid (column=1, row=24)
 
         if hasattr(self, 'LabelNbQueries'):
             self.LabelNbQueries.destroy()
         self.LabelNbQueriesVariable = Tkinter.StringVar()
         self.LabelNbQueriesVariable.set("Nb Queries in last MM: 0")
-        self.LabelNbQueries = Tkinter.Label(self, textvariable=self.LabelNbQueriesVariable)
-        if mode == 0:
-            self.LabelNbQueries.config(fg="red")
-        if mode == 1:
-            self.LabelNbQueries.config(fg="red", state="disabled")
+        self.LabelNbQueries = Tkinter.Label(self, textvariable=self.LabelNbQueriesVariable, fg="red")
         self.LabelNbQueries.grid (column=1, row=25)
 
         self.LabelTestLengthVariable = Tkinter.StringVar()
@@ -1787,24 +1782,46 @@ class simpleapp_tk(Tkinter.Tk):
             - if the table exist, just truncate the table
         """    
         error_con = 0
-        try:
-            con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
-                                  str(self.Entry3.get()),
-                                  str(self.Entry4.get()))
-        except cx_Oracle.DatabaseError:
-            self.labelVariable2.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
-            error_con = 1
-        
-        if error_con != 1:
-            cur = con.cursor()
+        if mode == 0:
             try:
-                cur.execute('truncate table dwhstat')
-            except cx_Oracle.DatabaseError as e:
+                con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
+                                      str(self.Entry3.get()),
+                                      str(self.Entry4.get()))
+            except cx_Oracle.DatabaseError:
+                self.labelVariable2.set(self.entryConnectStringVariable.get() + ": Unable to connect!")
+                error_con = 1
+
+            if error_con != 1:
+                cur = con.cursor()
+                try:
+                    cur.execute('truncate table dwhstat')
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 942:
+                        self.labelVariable2.set(self.entryConnectStringVariable.get() + ": Test schema does not exist. Create it first!")
+                cur.close()
+                con.close()
+        elif mode == 1:
+            try:
+                con = connectToEDB(str(self.Entry1.get()), str(self.Entry5.get()),
+                                      str(self.Entry3.get()),
+                                      str(self.Entry4.get()))
+            except psycopg2.OperationalError as e:
                 error, = e.args
-                if error.code == 942:
-                    self.labelVariable2.set(self.entryConnectStringVariable.get() + ": Test schema does not exist. Create it first!")
-            cur.close()
-            con.close()
+                error = error.replace('FATAL:  ', '')
+                error = error.replace('\n', '')
+                self.labelVariable2.set(self.entryConnectStringVariable.get() + ": " + error)
+                error_con = 1
+
+            if error_con != 1:
+                cur = con.cursor()
+                try:
+                    cur.execute('truncate table dwhstat')
+                except psycopg2.DatabaseError as e:
+                    error, = e.args
+
+                cur.close()
+                con.close()
 
             
     def test_SID(self, origin):
@@ -1906,8 +1923,9 @@ class simpleapp_tk(Tkinter.Tk):
             - When more than 10 are in, start to print an average execution time.
                 Otherwise just print "Ramping up"
         """
+        error_con = 0
+
         if mode == 0:
-            error_con = 0
             try:
                 if self.Entry1 and self.Entry2 and self.Entry5 and self.Entry3 and self.Entry4:
                     con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()),
@@ -1940,8 +1958,41 @@ class simpleapp_tk(Tkinter.Tk):
                 curExec.close()
                 con.close()
 
-        if mode == 1:
-            self.LabelExecTimeVariable.set("Running Load")
+        elif mode == 1:
+            try:
+                if self.Entry1 and self.Entry2 and self.Entry5 and self.Entry3 and self.Entry4:
+                    con = connectToEDB(str(self.Entry1.get()), str(self.Entry5.get()),
+                                      str(self.Entry3.get()),
+                                      str(self.Entry4.get()))
+            except psycopg2.OperationalError as e:
+                error, = e.args
+                error = error.replace('FATAL:  ', '')
+                error = error.replace('\n', '')
+                self.labelVariable2.set(self.entryConnectStringVariable.get() + ": " + error)
+                error_con = 1
+
+            if error_con != 1:
+                # curRampUp = con.cursor()
+                # curRampUp.execute('select count(*) from dwhstat')
+                # for result in curRampUp:
+                #     curExecTime = con.cursor()
+                #     if int(result[0]) > 10:
+                #         curExecTime.execute('select (sum(elapsed))/10 from (select seq, elapsed from dwhstat) where seq>(select max(seq) - 10 from dwhstat)')
+                #         for result in curExecTime:
+                #             avgExecTime = str(int(result[0]))
+                #             self.LabelExecTimeVariable.set('Avg completion time: {0} S'.format(avgExecTime))
+                #     else:
+                #         self.LabelExecTimeVariable.set('Ramping up')
+                #     curExecTime.close()
+                # curRampUp.close()
+                #HERE
+                curExec = con.cursor()
+                curExec.execute('select count(*) from dwhstat where ((now()::date - insdate)*60*60*24) < 61')
+                for result in curExec:
+                    NbExecTime = str(int(result[0]))
+                    self.LabelNbQueriesVariable.set('Nb queries in last MM: {0}'.format(NbExecTime))
+                curExec.close()
+                con.close()
 
     def onSelect(self):
         global mode
