@@ -358,11 +358,10 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
                         error_con = 2
 
-                #ToDo: drop seq
-                # try:
-                #     cur.execute('drop SEQUENCE seq')
-                # except (psycopg2.DatabaseError, psycopg2.ProgrammingError):
-                #     error_con = 3
+                try:
+                    cur.execute('drop SEQUENCE seq')
+                except (psycopg2.DatabaseError, psycopg2.ProgrammingError):
+                    error_con = 3
 
                 cur.close()
                 con.close()
@@ -426,14 +425,10 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             con.close()
             CrSchemaWindow.VocableVariable.set("Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
 
-        elif mode == 1:
-            con = connectToEDB(str(ip), str(SID), str(user), str(passwd))
-            cur3 = con.cursor()
-            #Todo: fix statistics generation
-            #cur3.execute("exec DBMS_UTILITY.ANALYZE_SCHEMA(SCOTT)")
-            con.close()
-            CrSchemaWindow.VocableVariable.set(
-                "Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
+        # ToDo: fix statistics generation
+        # elif mode == 1:
+
+
         
     def CloseCrSchemaWindow(CrSchemaWindow):
         """Close the window and decrement the number of toplevel window counter
