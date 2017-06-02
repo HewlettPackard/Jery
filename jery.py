@@ -426,7 +426,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             CrSchemaWindow.VocableVariable.set("Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
 
         # ToDo: fix statistics generation
-        # elif mode == 1:
+        elif mode == 1:
+            CrSchemaWindow.VocableVariable.set("Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
 
 
         
@@ -528,35 +529,68 @@ class GraphWindow(Tkinter.Toplevel):
             x_gap = 20
             pos = 1
 
-            """Test the connection before printing the graph"""
-            try:
-                con = connectToOracle(GraphWindow.ip, GraphWindow.port, GraphWindow.SID, GraphWindow.user, GraphWindow.passwd)
-            except cx_Oracle.DatabaseError:
-                error_con = 1
-                return error_con
+            if mode == 0:
+                """Test the connection before printing the graph"""
+                try:
+                    con = connectToOracle(GraphWindow.ip, GraphWindow.port, GraphWindow.SID, GraphWindow.user, GraphWindow.passwd)
+                except cx_Oracle.DatabaseError:
+                    error_con = 1
+                    return error_con
 
-            """if the connection is established, read the latest events of the stat table -dwhstat- and print the graph"""
-            if error_con != 1:
-                curRampUp = con.cursor()
-                curRampUp.execute('select count(*) from dwhstat')
-                for result in curRampUp:
-                    curValue = con.cursor()
-                    if int(result[0]) > 0:
-                        curValue.execute('select elapsed from (select seq, elapsed from dwhstat) where seq>(select max(seq) - 20 from dwhstat) order by seq')
-                        for y in curValue:
-                            x0 = pos * 20 +10
-                            y0 = c_height - (int(y[0]) * y_stretch + y_gap)
-                            x1 = pos * 20 +25
-                            y1 = c_height - y_gap
-                            c.create_rectangle(x0, y0, x1, y1, fill="red")
-                            c.create_text(x0 + 2, y0, anchor=Tkinter.SW, text=str(int(y[0])))
-                            pos += 1
-                        
-                    curValue.close()
-                c.pack()
-                refresh = int(ConfigSectionMap("Settings")['refresh'])
-                time.sleep(refresh)
-                c.destroy()
+                """if the connection is established, read the latest events of the stat table -dwhstat- and print the graph"""
+                if error_con != 1:
+                    curRampUp = con.cursor()
+                    curRampUp.execute('select count(*) from dwhstat')
+                    for result in curRampUp:
+                        curValue = con.cursor()
+                        if int(result[0]) > 0:
+                            curValue.execute('select elapsed from (select seq, elapsed from dwhstat) where seq>(select max(seq) - 20 from dwhstat) order by seq')
+                            for y in curValue:
+                                x0 = pos * 20 +10
+                                y0 = c_height - (int(y[0]) * y_stretch + y_gap)
+                                x1 = pos * 20 +25
+                                y1 = c_height - y_gap
+                                c.create_rectangle(x0, y0, x1, y1, fill="red")
+                                c.create_text(x0 + 2, y0, anchor=Tkinter.SW, text=str(int(y[0])))
+                                pos += 1
+
+                        curValue.close()
+                    c.pack()
+                    refresh = int(ConfigSectionMap("Settings")['refresh'])
+                    time.sleep(refresh)
+                    c.destroy()
+
+            if mode == 1:
+                """Test the connection before printing the graph"""
+                try:
+                    con = connectToEDB(GraphWindow.ip, GraphWindow.SID, GraphWindow.user, GraphWindow.passwd)
+                except psycopg2.DatabaseError:
+                    error_con = 1
+                    return error_con
+
+                """if the connection is established, read the latest events of the stat table -dwhstat- and print the graph"""
+                if error_con != 1:
+                    curRampUp = con.cursor()
+                    curRampUp.execute('select count(*) from dwhstat')
+                    for result in curRampUp:
+                        curValue = con.cursor()
+                        if int(result[0]) > 0:
+                            curValue.execute(
+                                'select elapsed from (select seq, elapsed from dwhstat) AS derivedTable where seq>(select max(seq) - 20 from dwhstat) order by seq')
+                            for y in curValue:
+                                x0 = pos * 20 + 10
+                                y0 = c_height - (int(y[0]) * y_stretch + y_gap)
+                                x1 = pos * 20 + 25
+                                y1 = c_height - y_gap
+                                c.create_rectangle(x0, y0, x1, y1, fill="red")
+                                c.create_text(x0 + 2, y0, anchor=Tkinter.SW, text=str(int(y[0])))
+                                pos += 1
+
+                        curValue.close()
+                    c.pack()
+                    refresh = int(ConfigSectionMap("Settings")['refresh'])
+                    time.sleep(refresh)
+                    c.destroy()
                 
 
     def StopGraph(GraphWindow):
@@ -1397,8 +1431,6 @@ class simpleapp_tk(Tkinter.Tk):
 
         buttonGraph = Tkinter.Button(self, text=u"Graph", command=self.StartGraph, width=14)
         buttonGraph.grid(column=2, row=24, columnspan=2)
-        if mode == 1:
-            buttonGraph.config(state=DISABLED)
 
         buttonAPropos = Tkinter.Button(self, text=u"A propos...", command=self.APropos, width=14)
         buttonAPropos.grid(column=2, row=26, columnspan=2)
@@ -1681,6 +1713,8 @@ class simpleapp_tk(Tkinter.Tk):
         CheckSchemaVar = self.CheckSchema()
         if CheckSchemaVar <> 0:
             self.buttonStartLoad.config(state=NORMAL)
+            self.Mode1.config(state=NORMAL)
+            self.Mode2.config(state=NORMAL)
             return
         
         self.InitTableStat()
