@@ -1200,7 +1200,6 @@ class simpleapp_tk(Tkinter.Tk):
         elif mode == 1:
             self.labelVariable1.set(u"JERY - EDB MODE")
 
-        #TODO here
         self.Label0 = Tkinter.Label(self, text='Mode')
         self.Label0.grid(column=0, row=1, sticky=W)
         self.select = IntVar()
@@ -1972,20 +1971,20 @@ class simpleapp_tk(Tkinter.Tk):
                 error_con = 1
 
             if error_con != 1:
-                # curRampUp = con.cursor()
-                # curRampUp.execute('select count(*) from dwhstat')
-                # for result in curRampUp:
-                #     curExecTime = con.cursor()
-                #     if int(result[0]) > 10:
-                #         curExecTime.execute('select (sum(elapsed))/10 from (select seq, elapsed from dwhstat) where seq>(select max(seq) - 10 from dwhstat)')
-                #         for result in curExecTime:
-                #             avgExecTime = str(int(result[0]))
-                #             self.LabelExecTimeVariable.set('Avg completion time: {0} S'.format(avgExecTime))
-                #     else:
-                #         self.LabelExecTimeVariable.set('Ramping up')
-                #     curExecTime.close()
-                # curRampUp.close()
-                #HERE
+                curRampUp = con.cursor()
+                curRampUp.execute('select count(*) from dwhstat')
+                for result in curRampUp:
+                    curExecTime = con.cursor()
+                    if int(result[0]) > 10:
+                        curExecTime.execute('select (sum(elapsed))/10 from (select seq, elapsed from dwhstat) AS derivedTable where seq>(select max(seq) - 10 from dwhstat)')
+                        for result in curExecTime:
+                            avgExecTime = str(int(result[0]))
+                            self.LabelExecTimeVariable.set('Avg completion time: {0} S'.format(avgExecTime))
+                    else:
+                        self.LabelExecTimeVariable.set('Ramping up')
+                    curExecTime.close()
+                curRampUp.close()
+
                 curExec = con.cursor()
                 curExec.execute('select count(*) from dwhstat where ((now()::date - insdate)*60*60*24) < 61')
                 for result in curExec:
