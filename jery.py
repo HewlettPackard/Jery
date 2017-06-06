@@ -975,11 +975,11 @@ class simpleapp_tk(Tkinter.Tk):
         item = can1.create_image(66,32, image=self.logohp)
         can1.grid(column=1, row=24, rowspan = 5, padx=15, pady=15)
 
-        can2 = Canvas(self, width = 550, height=20)
+        can2 = Canvas(self, width = 552, height=20)
         can2.grid(column=0, row=15, columnspan=3, padx=10, pady=10)
         can2.create_line (10,10,540,10,width=3,fill='white')
 
-        can3 = Canvas(self, width = 550, height=20)
+        can3 = Canvas(self, width = 552, height=20)
         can3.grid(column=0, row=20, columnspan=3, padx=10, pady=10)
         can3.create_line (10,10,540,10,width=3,fill='white')
 
@@ -1092,7 +1092,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.EntryPwdSysVariable = Tkinter.StringVar()
         self.EntryPwdSys = Tkinter.Entry(self, textvariable=self.EntryPwdSysVariable, \
-                                         show="*", width=14, state='disabled')
+                                         show="*", state='disabled')
         self.EntryPwdSys.grid(column=1, row=7, sticky='EW')
         entryPwdSysVariable = ConfigSectionMap("Prefilled")['pwdsys']
         self.EntryPwdSysVariable.set(entryPwdSysVariable)
@@ -1117,8 +1117,8 @@ class simpleapp_tk(Tkinter.Tk):
 
 
 
-        buttonTest = Tkinter.Button(self, text=u"Check User Connection", command=self.OnButtonClick, width=23)
-        buttonTest.grid(column=2, row=4, columnspan=2)
+        buttonTest = Tkinter.Button(self, text=u"Check User Connection", command=self.OnButtonClick)
+        buttonTest.grid(column=2, row=4, columnspan=2, sticky=W+E+N+S)
 
         self.buttonStartLoad = Tkinter.Button(self, text=u"Start the load", command=self.OnButtonStartLoadClick \
                                               , width=14)
@@ -1137,17 +1137,17 @@ class simpleapp_tk(Tkinter.Tk):
         self.buttonExtendedStat.grid(column=0, row=23, sticky=S)
         self.buttonExtendedStat.config(state=DISABLED)
 
-        self.ButtonTestSystemConn = Tkinter.Button(self, text=u"Check System Connection", width=23, \
+        self.ButtonTestSystemConn = Tkinter.Button(self, text=u"Check System Connection", \
                                                    command=lambda:
                                                    self.test_SID("System"))
 
 
-        self.ButtonTestSystemConn.grid(column=2, row=7, columnspan=3)
+        self.ButtonTestSystemConn.grid(column=2, row=7, columnspan=3, sticky=W+E+N+S)
         self.ButtonTestSystemConn.config(state=DISABLED)
 
-        self.ButtonCreateSchema = Tkinter.Button(self, text=u"Create Test Schema", width=23, \
+        self.ButtonCreateSchema = Tkinter.Button(self, text=u"Create Test Schema", \
                                                  command=self.CreateSchema)
-        self.ButtonCreateSchema.grid(column=2, row=8, columnspan=2)
+        self.ButtonCreateSchema.grid(column=2, row=8, columnspan=2, sticky=W+E+N+S)
         self.ButtonCreateSchema.config(state=DISABLED)
 
         buttonGraph = Tkinter.Button(self, text=u"Graph", command=self.StartGraph, width=14)
