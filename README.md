@@ -66,6 +66,13 @@ Unable to find image 'hello-world:latest' locally
     For more examples and ideas, visit:
      http://docs.docker.com/userguide/
 ```
+> \* copied from http://docs.master.dockerproject.org/engine/installation/linux/rhel/
+
+Docker install guides for other linux distributions can be found under:
+- [Installation on Ubuntu](http://docs.master.dockerproject.org/engine/installation/linux/ubuntulinux/)
+- [Installation on CentOS](http://docs.master.dockerproject.org/engine/installation/linux/centos/)
+- [Installation on Oracle Linux](http://docs.master.dockerproject.org/engine/installation/linux/oracle/)
+
 <a name="Installation"/>
 ##Installation
 JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are discribed in the following.
