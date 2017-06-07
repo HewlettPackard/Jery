@@ -10,7 +10,7 @@ based on [CentOs 7](https://hub.docker.com/_/centos/)
 
 <a name="Build"/>
 ##Build
-For a tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
+For a built tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
 
 <a name="Dockerruncommand"/>
 ##Docker run command
