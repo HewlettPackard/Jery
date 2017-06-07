@@ -14,12 +14,12 @@ JERY is a Python 2.7 based simple database workload generator for Oracle and Ent
 ##Requirements
 JERY is meant to run on Linux Systems only (primarily RHEL and CentOs). For this reason the following installation guide is maily for RHEL. Since JERY is running in a Docker image, a recent version of Docker needs to be installed on the system.
 
-1. Log into your machine as a user with sudo or root privileges.   
-2. Make sure your existing yum packages are up-to-date.  
+1) Log into your machine as a user with sudo or root privileges.   
+2) Make sure your existing yum packages are up-to-date.  
 ```shell
 $ sudo yum update
 ```
-3. Add the yum repo yourself.  
+3) Add the yum repo yourself.  
 ```shell
 $ sudo tee /etc/yum.repos.d/docker.repo <<-EOF
 [dockerrepo]
@@ -30,15 +30,15 @@ gpgcheck=1
 gpgkey=https://yum.dockerproject.org/gpg
 EOF
 ```
-4. Install the Docker package.
+4) Install the Docker package.
  ```shell
 $ sudo yum install docker-engine
 ```
-5. Start the Docker daemon.
+5) Start the Docker daemon.
 ```shell
 $ sudo service docker start
 ```
-6. Verify docker is installed correctly by running a test image in a container.
+6) Verify docker is installed correctly by running a test image in a container.
 ```shell
 $ sudo docker run hello-world
 Unable to find image 'hello-world:latest' locally
