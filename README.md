@@ -1,78 +1,61 @@
-#Docker Image for deploying JERY
-based on [CentOs 7](https://hub.docker.com/_/centos/)
+# Jery
+A Python 2.7 based simple database workload generator for Oracle Databases
 
 <img src="./img/screenshot.jpg" height="500">
 
 ##Table of Contents
-- [Build](#Build)
-- [Pulling from Registry](#PullingfromRegistry)  
-- [Docker run command](#Dockerruncommand)  
-- [Dockerfile explained](#Dockerfileexplained)
-- [Issues](#Issues)
-- [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
+- [Download](#Download)
+- [What is Jery?](#WhatisJery)
+- [Used Libraries](#UsedLibraries)
+- [Oracle Client install](#OracleClientinstall)
+- [cx_Oracle python extension install](#cx_Oraclepythonextensioninstall)
 
-<a name="Build"/>
-##Build
-For a tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
 
-<a name="PullingfromRegistry"/>
-##Pulling from Registry
-####From within the EPC network
-1. [Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry](#AddinganinsecureDockerregistry)
-2. Execute the command: ```docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker```
+<a name="Download"/>
+##Download
+https://github.hpe.com/marcel-jakob/jery/tree/master/docker
 
-####From within the HPE network
-1. Login to HPE Docker Hub with your Windows NT credentials: ```Docker login hub.docker.hpecorp.net```
-2. Execute the command: ```docker pull hub.docker.hpecorp.net/oraclekc/jery:latest```
+<a name="WhatisJery?"/>
+##What is Jery?
 
-<a name="Dockerruncommand"/>
-##Docker run command
-Needs to be executed with superuser privileges: <br>
-```docker run -ti --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix jerydocker```
+- Dedicated to Oracle in phase 1
+- Mimic Business Intelligence workload (100% massive read)
+- Cluster aware
+- Create its own test schema based of “SCOTT” data
+- Generate CPU intensive activity
+- Generate high IO rate (tunable)
+- Can be user in user mode or in sysdba mode
+- Provide:
+    - execution time for critical query
+    - Number of transaction per minute
+    - Total number of transaction per run
+    - System statistics
+- Snapshot for AWR report
+- Ideal for:
+    - System demonstration
+    - Calibration
+    - Performance comparison
 
-- ```-ti```: run in interactive mode (attach to command line of container)
-- ```-rm```: Docker will automatically clean up the container and remove the file system when the container exits
-- ```-e DISPLAY=$DISPLAY```: Set the containers $DISPLAY environment variable to the hosts one. This results in access to the hosts display
-- ```-v /tmp/.X11-unix:/tmp/.X11-unix```: Connect a new volume with the hosts X11 binaries to the container
-- ```jerydocker```: Run the container jerydocker
+_However, JERY is not a benchmark tool_
 
-<a name="Dockerfileexplained"/>
-##Dockerfile explained
-####Enable Sources
-Add and install epel and ius sources. For installing libaio and tkinter with yum.
-####Install Oracle Client and cx_Oracle
-Is needed by Jery for establishing the connection to the Oracle DB. Both is added and installed. But at first libaio is installed as dependency of Oracle Client. In the end the environment variable for the Oracle Client is exported.
-####Install GUI + tkinter
- The base image of CentOs7 has some bugs in order to display graphical user interfaces. For this reason a font needs to be installed. In the end tkinter is installed via yum as UI python library.
-####Add new user "developer"
- Add a new user developer with root rights to the system. This one is needed to x11 forward the window out of the docker container.
-####Execute Jery
- Switch to this user and execute the Jery script.
+<a name="UsedLibraries"/>
+##Used Libraries
 
-<a name="Issues"/> 
-##Issues
-Excecuting Jery as root if not logged in as root
-```Error _tkinter.TclError: couldn't connect to display ":0"```</br></br>
-X-Server connection of other users (root) are rejected</br>
---> Solved with the command ```xhost local:root```
+- [Tkinter](http://tkinter.unpythonic.net/wiki/)
+- [cx_Oracle](https://cx-oracle.readthedocs.io/en/latest/)
+- [threading](https://docs.python.org/2/library/threading.html)
+- [ConfigParser](https://docs.python.org/2/library/configparser.html)
 
-<a name="AddinganinsecureDockerregistry"/>
-##Adding an insecure Docker registry
-There are two options for adding a registry with no authorization to docker running on RHEL7 (on client which wants to push/pull to registry)
-####Start docker daemon with --insecure-registry
-```$ dockerd --insecure-registry= dockerregistry.oracle.epc.ext.hpe.com:5000```
-####Edit config of service to add --insecure-registry <br>
-Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
-```$ sudo mkdir /etc/systemd/system/docker.service.d``` <br>
-```$ sudo nano /etc/systemd/system/docker.service.d/docker.conf``` <br><br>
-Add the following to docker.conf: <br>
-```
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.hpe.com:5000
-```
-And reload + restart the Docker daemon
-```$ sudo systemctl daemon-reload```<br>
-```$ sudo systemctl restart docker```<br><br>
-Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
-```$ docker info```
+_Oracle Client needs to be installed_
+
+<a name="OracleClientinstall"/>
+##Oracle Client install
+- copy file from /oracle
+- rpm -ivh oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
+- echo export LD_LIBRARY_PATH=/usr/lib/oracle/11.2/client64/lib
+
+<a name="cx_Oraclepythonextensioninstall"/>
+##cx_Oracle python extension install
+(Oracle Client needs to be installed)
+- copy file from /oracle
+- rpm -ivh ocx_Oracle-5.2.1-11g-py27-1.x86_64.rpm
