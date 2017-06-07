@@ -1,21 +1,35 @@
-# Jery
-A Python 2.7 based simple database workload generator for Oracle Databases
+#JERY
+JERY is a Python 2.7 based simple database workload generator for Oracle and Enterprise Databases. It is designed to run in a special Docker image and it is streaming it's GUI through x11 to your host OS.
 
 <img src="./img/screenshot.jpg" height="500">
 
 ##Table of Contents
-- [Download](#Download)
+- [Requirements](#Requirements)
+- [Installation](#Installation) 
 - [What is Jery?](#WhatisJery)
 - [Used Libraries](#UsedLibraries)
 - [Oracle Client install](#OracleClientinstall)
 - [cx_Oracle python extension install](#cx_Oraclepythonextensioninstall)
 
+<a name="Requirements"/>
+##Requirements
+JERY is meant to run on Linux Systems only (primarily RHEL and CentOs). For this reason the following installation guide is maily for RHEL. Since JERY is running in a Docker image, a recent version of Docker needs to be installed on the system.
 
-<a name="Download"/>
-##Download
-https://github.hpe.com/marcel-jakob/jery/tree/master/docker
+<a name="Installation"/>
+##Installation
+JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are discribed in the following.
 
-<a name="WhatisJery?"/>
+__1) Download latest build from GitHub page and import image__
+- download the latest [release](https://github.hpe.com/marcel-jakob/jery/releases) from this GitHub page
+- unzip the build file
+- open a new terminal and navigate to the unzipped file _(jerydocker.tar)_
+- import the unzipped file with ```docker load < jerydocker.tar```
+- download the run script and execute it
+
+__2) Download and import latest build from a the Docker registry__
+
+
+<a name="WhatisJery"/>
 ##What is Jery?
 
 - Dedicated to Oracle in phase 1
@@ -45,17 +59,4 @@ _However, JERY is not a benchmark tool_
 - [cx_Oracle](https://cx-oracle.readthedocs.io/en/latest/)
 - [threading](https://docs.python.org/2/library/threading.html)
 - [ConfigParser](https://docs.python.org/2/library/configparser.html)
-
-_Oracle Client needs to be installed_
-
-<a name="OracleClientinstall"/>
-##Oracle Client install
-- copy file from /oracle
-- rpm -ivh oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
-- echo export LD_LIBRARY_PATH=/usr/lib/oracle/11.2/client64/lib
-
-<a name="cx_Oraclepythonextensioninstall"/>
-##cx_Oracle python extension install
-(Oracle Client needs to be installed)
-- copy file from /oracle
-- rpm -ivh ocx_Oracle-5.2.1-11g-py27-1.x86_64.rpm
+- [psycopg2](http://initd.org/psycopg/)
