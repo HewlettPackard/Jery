@@ -1,5 +1,7 @@
-#Docker Image for deploying Jery
+#Docker Image for deploying JERY
 based on [CentOs 7](https://hub.docker.com/_/centos/)
+
+<img src="./img/screenshot.jpg" height="500">
 
 ##Table of Contents
 - [Build](#Build)
