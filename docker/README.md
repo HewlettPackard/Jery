@@ -3,7 +3,6 @@ based on [CentOs 7](https://hub.docker.com/_/centos/)
 
 ##Table of Contents
 - [Build](#Build)
-- [Pulling from Registry](#PullingfromRegistry)  
 - [Docker run command](#Dockerruncommand)  
 - [Dockerfile explained](#Dockerfileexplained)
 - [Issues](#Issues)
@@ -12,16 +11,6 @@ based on [CentOs 7](https://hub.docker.com/_/centos/)
 <a name="Build"/>
 ##Build
 For a tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
-
-<a name="PullingfromRegistry"/>
-##Pulling from Registry
-####From within the EPC network
-1. [Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry](#AddinganinsecureDockerregistry)
-2. Execute the command: ```docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker```
-
-####From within the HPE network
-1. Login to HPE Docker Hub with your Windows NT credentials: ```Docker login hub.docker.hpecorp.net```
-2. Execute the command: ```docker pull hub.docker.hpecorp.net/oraclekc/jery:latest```
 
 <a name="Dockerruncommand"/>
 ##Docker run command
