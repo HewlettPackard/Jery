@@ -20,14 +20,27 @@ JERY is meant to run on Linux Systems only (primarily RHEL and CentOs). For this
 JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are discribed in the following.
 
 __1) Download latest build from GitHub page and import image__
-- download the latest [release](https://github.hpe.com/marcel-jakob/jery/releases) from this GitHub page
+- download the latest release from this GitHub page [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases)
 - unzip the build file
 - open a new terminal and navigate to the unzipped file _(jerydocker.tar)_
 - import the unzipped file with ```docker load < jerydocker.tar```
-- download the run script and execute it
+- download the run script and execute it [_(download)_]()
 
 __2) Download and import latest build from a the Docker registry__
 
+_From within the HPE network_
+
+1. Open a new terminal and type ```sudo su```
+2. Login to HPE Docker Hub with your Windows NT credentials: ```Docker login hub.docker.hpecorp.net```
+3. Pull the jerydocker image with the command: ```docker pull hub.docker.hpecorp.net/oraclekc/jery:latest```
+
+_From within the EPC network_
+
+1. Open a new terminal and type ```sudo su```
+2. Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(howto)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry) 
+3. Execute the command: ```docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker```
+
+- download the run script and execute it [_(download)_]()
 
 <a name="WhatisJery"/>
 ##What is Jery?
