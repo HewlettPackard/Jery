@@ -1,9 +1,18 @@
 # Jery
-A Python 2.7 based simple database workload generator for Oracle Databases
+A Python 2.7 based simple database workload generator for Oracle and Enterpise DB Databases
 
+##Table of Contents
+- [Download](#Download)
+- [What is Jery?](#WhatisJery)  
+- [Used Libraries](#UsedLibraries)  
+- [Oracle Client install](#OracleClientinstall)
+- [cx_Oracle python extension install](#cx_Oraclepythonextensioninstall)
+
+<a name="Download"/>
 ##Download
 https://github.hpe.com/marcel-jakob/jery/tree/master/docker
 
+<a name="WhatisJery"/>
 ##What is Jery?
 
 - Dedicated to Oracle in phase 1
@@ -26,20 +35,22 @@ https://github.hpe.com/marcel-jakob/jery/tree/master/docker
 
 _However, JERY is not a benchmark tool_
 
+<a name="UsedLibraries"/>
 ##Used Libraries
 
 - [Tkinter](http://tkinter.unpythonic.net/wiki/)
 - [cx_Oracle](https://cx-oracle.readthedocs.io/en/latest/)
 - [threading](https://docs.python.org/2/library/threading.html)
 - [ConfigParser](https://docs.python.org/2/library/configparser.html)
+- [psycopg2](http://initd.org/psycopg/)
 
-_Oracle Client needs to be installed_
-
+<a name="OracleClientinstall"/>
 ##Oracle Client install
 - copy file from /oracle
 - rpm -ivh oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
 - echo export LD_LIBRARY_PATH=/usr/lib/oracle/11.2/client64/lib
 
+<a name="cx_Oraclepythonextensioninstall"/>
 ##cx_Oracle python extension install
 (Oracle Client needs to be installed)
 - copy file from /oracle
