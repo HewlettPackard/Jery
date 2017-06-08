@@ -1,20 +1,7 @@
-# Jery
-A Python 2.7 based simple database workload generator for Oracle Databases
 #JERY
 JERY is a Python 2.7 based simple database workload generator for Oracle and Enterprise Databases. It is designed to run in a special Docker image and it is streaming it's GUI through x11 to your host OS.
 
-##Download
-https://github.hpe.com/marcel-jakob/jery/tree/master/docker
 <img src="./img/screenshot.jpg" height="500">
-
-
-
-
-
-
-
-
-
 
 ##Table of Contents
 - [Requirements](#Requirements)
@@ -117,11 +104,9 @@ _From within the EPC network_
 <a name="WhatisJery"/>
 ##What is Jery?
 
-- Dedicated to Oracle in phase 1
 - Dedicated to Oracle and Enterprise DB
 - Mimic Business Intelligence workload (100% massive read)
 - Cluster aware
-- Create its own test schema based of “SCOTT” data
 - Create its own test schema based of "SCOTT" data
 - Generate CPU intensive activity
 - Generate high IO rate (tunable)
@@ -148,18 +133,6 @@ _However, JERY is not a benchmark tool_
 - [ConfigParser](https://docs.python.org/2/library/configparser.html)
 - [psycopg2](http://initd.org/psycopg/)
 
-_Oracle Client needs to be installed_
-
-
-##Oracle Client install
-- copy file from /oracle
-- rpm -ivh oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
-- echo export LD_LIBRARY_PATH=/usr/lib/oracle/11.2/client64/lib
-
-##cx_Oracle python extension install
-(Oracle Client needs to be installed)
-- copy file from /oracle
-- rpm -ivh ocx_Oracle-5.2.1-11g-py27-1.x86_64.rpm
 
 <a name="AddinganinsecureDockerregistry"/>
 ##Adding an insecure Docker registry
