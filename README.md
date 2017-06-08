@@ -4,7 +4,7 @@ JERY is a Python 2.7 based simple database workload generator for Oracle and Ent
 <img src="./img/screenshot.jpg" height="500">
 
 ##Info
-To download install instructions use the readme.pdf [_(right click here + "save link as")_](https://github.hpe.com/marcel-jakob/jery/blob/master/readme.pdf)
+To download install instructions use the readme.pdf [_(download)_](https://github.hpe.com/marcel-jakob/jery/raw/master/readme.pdf)
 
 ##Table of Contents
 - [Requirements](#Requirements)
@@ -81,7 +81,7 @@ Docker install guides for other linux distributions can be found under:
 JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are described in the following.
 
 __1) Download latest build from GitHub page and import image__
-- download the latest release from this GitHub page [_(right click here + "save link as")_](https://github.hpe.com/marcel-jakob/jery/releases)
+- download the latest release from this GitHub page [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases)
 - unzip the build file
 - open a new terminal and navigate to the unzipped file _(jerydocker.tar)_
 - import the unzipped file with 
@@ -89,7 +89,7 @@ __1) Download latest build from GitHub page and import image__
 ```shell
 docker load < jerydocker.tar
 ```
-- download the run script and execute it [_(right click here + "save link as")_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+- download the run script and execute it [_(right click here + "save link as")_](https://raw.github.hpe.com/marcel-jakob/jery/master/run.sh)
 
 __2) Download and import latest build from a the Docker registry__
 
@@ -117,7 +117,7 @@ _From within the HPE network_
 ```shell
  docker tag hub.docker.hpecorp.net/oraclekc/jery jerydocker
 ```
-5) Download the run script and execute it [_(right click here + "save link as")_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+5) Download the run script and execute it [_(download)_](https://raw.github.hpe.com/marcel-jakob/jery/master/run.sh)
 
 _From within the EPC network_
 
@@ -137,7 +137,7 @@ docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker
 ```shell
  docker tag dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker jerydocker
 ```
-4) Download the run script and execute it [_(right click here + "save link as")_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+4) Download the run script and execute it [_(download)_](https://raw.github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
 
 <a name="WhatisJery"/>
 ##What is Jery?
