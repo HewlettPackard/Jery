@@ -4,7 +4,7 @@ JERY is a Python 2.7 based simple database workload generator for Oracle and Ent
 <img src="./img/screenshot.jpg" height="500">
 
 ##Info
-To download install instructions use the readme.pdf [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/readme.pdf)
+To download install instructions use the readme.pdf [_(download)_](https://github.hpe.com/marcel-jakob/jery/raw/master/readme.pdf)
 
 ##Table of Contents
 - [Requirements](#Requirements)
@@ -84,25 +84,60 @@ __1) Download latest build from GitHub page and import image__
 - download the latest release from this GitHub page [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases)
 - unzip the build file
 - open a new terminal and navigate to the unzipped file _(jerydocker.tar)_
-- import the unzipped file with ```docker load < jerydocker.tar```
-- download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+- import the unzipped file with 
+
+```shell
+docker load < jerydocker.tar
+```
+- download the run script and execute it [_(right click here + "save link as")_](https://raw.github.hpe.com/marcel-jakob/jery/master/run.sh)
 
 __2) Download and import latest build from a the Docker registry__
 
 
 _From within the HPE network_
 
-1. Open a new terminal and type ```sudo su```
-2. Login to HPE Docker Hub with your Windows NT credentials: ```Docker login hub.docker.hpecorp.net```
-3. Pull the jerydocker image with the command: ```docker pull hub.docker.hpecorp.net/oraclekc/jery:latest```
+1) Open a new terminal and type 
+
+```shell
+ sudo su
+```
+2) Login to HPE Docker Hub with your Windows NT credentials:
+
+```shell
+ docker login hub.docker.hpecorp.net
+ ```
+3) Pull the jerydocker image with the command:
+
+```shell
+ docker pull hub.docker.hpecorp.net/oraclekc/jery:latest
+```
+
+4) Rename the pulled image to jerydocker
+
+```shell
+ docker tag hub.docker.hpecorp.net/oraclekc/jery jerydocker
+```
+5) Download the run script and execute it [_(download)_](https://raw.github.hpe.com/marcel-jakob/jery/master/run.sh)
 
 _From within the EPC network_
 
-1. Open a new terminal and type ```sudo su```
-2. Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(how to)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry) 
-3. Execute the command: ```docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker```
+1) Open a new terminal and type 
 
-- download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+```shell
+sudo su
+```
+2) Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(how to)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry) 
+3) Execute the command:
+
+```shell
+docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker
+```
+4) Rename the pulled image to jerydocker
+
+```shell
+ docker tag dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker jerydocker
+```
+4) Download the run script and execute it [_(download)_](https://raw.github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
 
 <a name="WhatisJery"/>
 ##What is Jery?
