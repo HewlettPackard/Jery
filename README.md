@@ -138,7 +138,7 @@ docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker
 ```shell
  docker tag dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker jerydocker
 ```
-4) Download the run script and execute it [_(download)_](https://raw.github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+4) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
 
 <a name="WhatisJery"/>
 ##What is Jery?
