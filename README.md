@@ -1,7 +1,10 @@
 #JERY
-JERY is a Python 2.7 based simple database workload generator for Oracle and Enterprise Databases. It is designed to run in a special Docker image and it is streaming it's GUI through x11 to your host OS.
+JERY is a Python 2.7 based simple database workload generator for Oracle and Enterprise Databases. It is designed to run in a special Docker image and it is streaming it's GUI through x11 to your host OS. 
 
 <img src="./img/screenshot.jpg" height="500">
+
+##Info
+To download install instructions use the readme.pdf [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/readme.pdf)
 
 ##Table of Contents
 - [Requirements](#Requirements)
@@ -82,7 +85,7 @@ __1) Download latest build from GitHub page and import image__
 - unzip the build file
 - open a new terminal and navigate to the unzipped file _(jerydocker.tar)_
 - import the unzipped file with ```docker load < jerydocker.tar```
-- download the run script and execute it [_(download)_]()
+- download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
 
 __2) Download and import latest build from a the Docker registry__
 
@@ -99,7 +102,7 @@ _From within the EPC network_
 2. Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(howto)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry) 
 3. Execute the command: ```docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker```
 
-- download the run script and execute it [_(download)_]()
+- download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
 
 <a name="WhatisJery"/>
 ##What is Jery?
