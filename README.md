@@ -89,7 +89,7 @@ __1) Download latest build from GitHub page and import image__
 ```shell
 docker load < jerydocker.tar
 ```
-- download the run script and execute it [_(right click here + "save link as")_](https://raw.github.hpe.com/marcel-jakob/jery/master/run.sh)
+- download the run script and execute it [_(download")_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
 
 __2) Download and import latest build from a the Docker registry__
 
@@ -117,7 +117,7 @@ _From within the HPE network_
 ```shell
  docker tag hub.docker.hpecorp.net/oraclekc/jery jerydocker
 ```
-5) Download the run script and execute it [_(download)_](https://raw.github.hpe.com/marcel-jakob/jery/master/run.sh)
+5) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
 
 _From within the EPC network_
 
@@ -126,7 +126,8 @@ _From within the EPC network_
 ```shell
 sudo su
 ```
-2) Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(how to)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry) 
+2) Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(how to)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry)
+
 3) Execute the command:
 
 ```shell
