@@ -146,19 +146,20 @@ There are two options for adding a registry with no authorization to Docker runn
 Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
 
 1) Create the Docker config file
+
 ```$ sudo mkdir /etc/systemd/system/docker.service.d``` <br>
 ```$ sudo nano /etc/systemd/system/docker.service.d/docker.conf``` <br><br>
-
 2) Add the following to the created docker.conf: <br>
+
 ```
 [Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.hpe.com:5000
 ```
-
 3) reload + restart the Docker daemon
+
 ```$ sudo systemctl daemon-reload```<br>
 ```$ sudo systemctl restart docker```<br><br>
-
 4) Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
+
 ```$ docker info```
