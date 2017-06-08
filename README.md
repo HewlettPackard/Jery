@@ -15,14 +15,14 @@ To download install instructions use the readme.pdf [_(download)_](https://githu
 
 <a name="Requirements"/>
 ##Requirements
-JERY is meant to run on Linux Systems only (primarily RHEL and CentOs). For this reason the following installation guide is maily for RHEL. Since JERY is running in a Docker image, a recent version of Docker needs to be installed on the system.
+JERY is meant to run on Linux Systems only (primarily RHEL and CentOS). For this reason the following installation guide is mainly for RHEL. Since JERY is running in a Docker image, a recent version of Docker needs to be installed on the system.
 
-1) Log into your machine as a user with sudo or root privileges.   
-2) Make sure your existing yum packages are up-to-date.  
+1) Log into your machine as a user with sudo or root privileges   
+2) Make sure your existing yum packages are up-to-date  
 ```shell
 $ sudo yum update
 ```
-3) Add the yum repo yourself.  
+3) Add the yum repo yourself  
 ```shell
 $ sudo tee /etc/yum.repos.d/docker.repo <<-EOF
 [dockerrepo]
@@ -33,15 +33,15 @@ gpgcheck=1
 gpgkey=https://yum.dockerproject.org/gpg
 EOF
 ```
-4) Install the Docker package.
+4) Install the Docker package
  ```shell
 $ sudo yum install docker-engine
 ```
-5) Start the Docker daemon.
+5) Start the Docker daemon
 ```shell
 $ sudo service docker start
 ```
-6) Verify docker is installed correctly by running a test image in a container.
+6) Verify docker is installed correctly by running a test image in a container
 ```shell
 $ sudo docker run hello-world
 Unable to find image 'hello-world:latest' locally
@@ -78,7 +78,7 @@ Docker install guides for other linux distributions can be found under:
 
 <a name="Installation"/>
 ##Installation
-JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are discribed in the following.
+JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are described in the following.
 
 __1) Download latest build from GitHub page and import image__
 - download the latest release from this GitHub page [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases)
@@ -99,7 +99,7 @@ _From within the HPE network_
 _From within the EPC network_
 
 1. Open a new terminal and type ```sudo su```
-2. Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(howto)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry) 
+2. Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(how to)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry) 
 3. Execute the command: ```docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker```
 
 - download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
@@ -139,21 +139,27 @@ _However, JERY is not a benchmark tool_
 
 <a name="AddinganinsecureDockerregistry"/>
 ##Adding an insecure Docker registry
-There are two options for adding a registry with no authorization to docker running on RHEL7 (on client which wants to push/pull to registry)
-####Start docker daemon with --insecure-registry
+There are two options for adding a registry with no authorization to Docker running on RHEL7 (on client which wants to push/pull to registry)
+####Start Docker daemon with --insecure-registry
 ```$ dockerd --insecure-registry= dockerregistry.oracle.epc.ext.hpe.com:5000```
 ####Edit config of service to add --insecure-registry <br>
 Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
+
+1) Create the Docker config file
+
 ```$ sudo mkdir /etc/systemd/system/docker.service.d``` <br>
 ```$ sudo nano /etc/systemd/system/docker.service.d/docker.conf``` <br><br>
-Add the following to docker.conf: <br>
+2) Add the following to the created docker.conf: <br>
+
 ```
 [Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.hpe.com:5000
 ```
-And reload + restart the Docker daemon
+3) reload + restart the Docker daemon
+
 ```$ sudo systemctl daemon-reload```<br>
 ```$ sudo systemctl restart docker```<br><br>
-Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
+4) Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
+
 ```$ docker info```
