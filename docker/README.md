@@ -3,25 +3,13 @@ based on [CentOs 7](https://hub.docker.com/_/centos/)
 
 ##Table of Contents
 - [Build](#Build)
-- [Pulling from Registry](#PullingfromRegistry)  
 - [Docker run command](#Dockerruncommand)  
 - [Dockerfile explained](#Dockerfileexplained)
 - [Issues](#Issues)
-- [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
 
 <a name="Build"/>
 ##Build
-For a tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
-
-<a name="PullingfromRegistry"/>
-##Pulling from Registry
-####From within the EPC network
-1. [Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry](#AddinganinsecureDockerregistry)
-2. Execute the command: ```docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker```
-
-####From within the HPE network
-1. Login to HPE Docker Hub with your Windows NT credentials: ```Docker login hub.docker.hpecorp.net```
-2. Execute the command: ```docker pull hub.docker.hpecorp.net/oraclekc/jery:latest```
+For a built tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
 
 <a name="Dockerruncommand"/>
 ##Docker run command
@@ -53,24 +41,3 @@ Excecuting Jery as root if not logged in as root
 ```Error _tkinter.TclError: couldn't connect to display ":0"```</br></br>
 X-Server connection of other users (root) are rejected</br>
 --> Solved with the command ```xhost local:root```
-
-<a name="AddinganinsecureDockerregistry"/>
-##Adding an insecure Docker registry
-There are two options for adding a registry with no authorization to docker running on RHEL7 (on client which wants to push/pull to registry)
-####Start docker daemon with --insecure-registry
-```$ dockerd --insecure-registry= dockerregistry.oracle.epc.ext.hpe.com:5000```
-####Edit config of service to add --insecure-registry <br>
-Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
-```$ sudo mkdir /etc/systemd/system/docker.service.d``` <br>
-```$ sudo nano /etc/systemd/system/docker.service.d/docker.conf``` <br><br>
-Add the following to docker.conf: <br>
-```
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.hpe.com:5000
-```
-And reload + restart the Docker daemon
-```$ sudo systemctl daemon-reload```<br>
-```$ sudo systemctl restart docker```<br><br>
-Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
-```$ docker info```
