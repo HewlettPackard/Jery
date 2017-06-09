@@ -177,9 +177,9 @@ _However, JERY is not a benchmark tool_
 <a name="AddinganinsecureDockerregistry"/>
 ##Adding an insecure Docker registry
 There are two options for adding a registry with no authorization to Docker running on RHEL7 (on client which wants to push/pull to registry)
-####Start Docker daemon with --insecure-registry
+####Option 1: Start Docker daemon with --insecure-registry
 ```$ dockerd --insecure-registry= dockerregistry.oracle.epc.ext.hpe.com:5000```
-####Edit config of service to add --insecure-registry <br>
+####Option 2: Edit config of service to add --insecure-registry <br>
 Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
 
 1) Create the Docker config file
