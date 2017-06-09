@@ -1,4 +1,5 @@
-#JERY <img src="./logo/jery.png" height="50">
+<img src="./logo/jery.png" height="50" style="margin-bottom: -20px">
+#JERY
 JERY is a Python 2.7 based simple database workload generator for Oracle and Enterprise Databases. It is designed to run in a special Docker image and it is streaming it's GUI through x11 to your host OS. 
 
 <img src="./img/screenshot.jpg" height="500">
