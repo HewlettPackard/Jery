@@ -43,6 +43,7 @@ _However, JERY is not a benchmark tool_
 ##Requirements
 JERY is meant to run on Linux Systems only (primarily RHEL and CentOS). For this reason the following installation guide is mainly for RHEL. Since JERY is running in a Docker image, a recent version of Docker needs to be installed on the system.
 
+###Docker installation on RHEL
 1) Log into your machine as a user with sudo or root privileges   
 2) Make sure your existing yum packages are up-to-date  
 ```shell
@@ -120,7 +121,7 @@ docker load < jerydocker.tar
 ###Option 2: Download and import latest build from a the Docker registry
 
 
-#####2.1) From within the HPE network
+####2.1) From within the HPE network
 
 1) Open a new terminal and type 
 
@@ -146,7 +147,7 @@ docker load < jerydocker.tar
 5) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
 
-#####2.2 From within the EPC network
+####2.2 From within the EPC network
 
 1) Open a new terminal and type 
 
