@@ -80,7 +80,7 @@ Docker install guides for other linux distributions can be found under:
 ##Installation
 JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are described in the following.
 
-__1) Download latest build from GitHub page and import image__
+###1) Download latest build from GitHub page and import image
 - download the latest release from this GitHub page [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases)
 - unzip the build file
 - open a new terminal and navigate to the unzipped file _(jerydocker.tar)_
@@ -89,12 +89,12 @@ __1) Download latest build from GitHub page and import image__
 ```shell
 docker load < jerydocker.tar
 ```
-- download the run script and execute it [_(download")_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
+- download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
-__2) Download and import latest build from a the Docker registry__
+###2) Download and import latest build from a the Docker registry
 
 
-_From within the HPE network_
+#####2.1) From within the HPE network_
 
 1) Open a new terminal and type 
 
@@ -119,7 +119,8 @@ _From within the HPE network_
 ```
 5) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
-_From within the EPC network_
+
+#####2.2 From within the EPC network
 
 1) Open a new terminal and type 
 
