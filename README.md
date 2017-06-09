@@ -3,15 +3,41 @@ JERY is a Python 2.7 based simple database workload generator for Oracle and Ent
 
 <img src="./img/screenshot.jpg" height="500">
 
+##Table of Contents
+- [What is Jery?](#WhatisJery)
+- [Info](#Info)
+- [Requirements](#Requirements)
+- [Installation](#Installation) 
+- [Used Libraries](#UsedLibraries)
+- [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
+
+<a name="Info"/>
 ##Info
 To download install instructions use the readme.pdf [_(download)_](https://github.hpe.com/marcel-jakob/jery/raw/master/readme.pdf)
 
-##Table of Contents
-- [Requirements](#Requirements)
-- [Installation](#Installation) 
-- [What is Jery?](#WhatisJery)
-- [Used Libraries](#UsedLibraries)
-- [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
+
+<a name="WhatisJery"/>
+##What is Jery?
+
+- Dedicated to Oracle and Enterprise DB
+- Mimic Business Intelligence workload (100% massive read)
+- Cluster aware
+- Create its own test schema based of "SCOTT" data
+- Generate CPU intensive activity
+- Generate high IO rate (tunable)
+- Can be user in user mode or in sysdba mode
+- Provide:
+    - execution time for critical query
+    - Number of transaction per minute
+    - Total number of transaction per run
+    - System statistics
+- Snapshot for AWR report
+- Ideal for:
+    - System demonstration
+    - Calibration
+    - Performance comparison
+
+_However, JERY is not a benchmark tool_
 
 <a name="Requirements"/>
 ##Requirements
@@ -141,28 +167,42 @@ docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker
 ```
 4) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
-<a name="WhatisJery"/>
-##What is Jery?
 
-- Dedicated to Oracle and Enterprise DB
-- Mimic Business Intelligence workload (100% massive read)
-- Cluster aware
-- Create its own test schema based of "SCOTT" data
-- Generate CPU intensive activity
-- Generate high IO rate (tunable)
-- Can be user in user mode or in sysdba mode
-- Provide:
-    - execution time for critical query
-    - Number of transaction per minute
-    - Total number of transaction per run
-    - System statistics
-- Snapshot for AWR report
-- Ideal for:
-    - System demonstration
-    - Calibration
-    - Performance comparison
+<a name="AddinganinsecureDockerregistry"/>
+##Adding an insecure Docker registry
+There are two options for adding a registry with no authorization to Docker running on RHEL7 (on client which wants to push/pull to registry)
+####Option 1: Start Docker daemon with --insecure-registry
 
-_However, JERY is not a benchmark tool_
+```shell
+$ dockerd --insecure-registry= dockerregistry.oracle.epc.ext.hpe.com:5000
+```
+####Option 2: Edit config of service to add --insecure-registry <br>
+Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
+
+1) Create the Docker config file
+
+```shell
+ $ sudo mkdir /etc/systemd/system/docker.service.d
+ $ sudo nano /etc/systemd/system/docker.service.d/docker.conf
+```
+2) Add the following to the created docker.conf: <br>
+
+```shell
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.hpe.com:5000
+```
+3) reload + restart the Docker daemon
+
+```shell
+ $ sudo systemctl daemon-reload
+ $ sudo systemctl restart docker
+```
+4) Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
+
+```shell
+ $ docker info
+```
 
 <a name="UsedLibraries"/>
 ##Used Libraries
@@ -172,31 +212,3 @@ _However, JERY is not a benchmark tool_
 - [threading](https://docs.python.org/2/library/threading.html)
 - [ConfigParser](https://docs.python.org/2/library/configparser.html)
 - [psycopg2](http://initd.org/psycopg/)
-
-
-<a name="AddinganinsecureDockerregistry"/>
-##Adding an insecure Docker registry
-There are two options for adding a registry with no authorization to Docker running on RHEL7 (on client which wants to push/pull to registry)
-####Option 1: Start Docker daemon with --insecure-registry
-```$ dockerd --insecure-registry= dockerregistry.oracle.epc.ext.hpe.com:5000```
-####Option 2: Edit config of service to add --insecure-registry <br>
-Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
-
-1) Create the Docker config file
-
-```$ sudo mkdir /etc/systemd/system/docker.service.d``` <br>
-```$ sudo nano /etc/systemd/system/docker.service.d/docker.conf``` <br><br>
-2) Add the following to the created docker.conf: <br>
-
-```
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.hpe.com:5000
-```
-3) reload + restart the Docker daemon
-
-```$ sudo systemctl daemon-reload```<br>
-```$ sudo systemctl restart docker```<br><br>
-4) Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
-
-```$ docker info```
