@@ -22,7 +22,7 @@ JERY is meant to run on Linux Systems only (primarily RHEL and CentOS). For this
 ```shell
 $ sudo yum update
 ```
-3) Add the yum repo yourself  
+3) Add the yum repo by yourself  
 ```shell
 $ sudo tee /etc/yum.repos.d/docker.repo <<-EOF
 [dockerrepo]
@@ -89,7 +89,7 @@ __1) Download latest build from GitHub page and import image__
 ```shell
 docker load < jerydocker.tar
 ```
-- download the run script and execute it [_(download")_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+- download the run script and execute it [_(download")_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
 __2) Download and import latest build from a the Docker registry__
 
@@ -117,7 +117,7 @@ _From within the HPE network_
 ```shell
  docker tag hub.docker.hpecorp.net/oraclekc/jery jerydocker
 ```
-5) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+5) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
 _From within the EPC network_
 
@@ -138,7 +138,7 @@ docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker
 ```shell
  docker tag dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker jerydocker
 ```
-4) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+4) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
 <a name="WhatisJery"/>
 ##What is Jery?
