@@ -2,27 +2,56 @@
 JERY is a Python 2.7 based simple database workload generator for Oracle and Enterprise Databases. It is designed to run in a special Docker image and it is streaming it's GUI through x11 to your host OS. 
 
 <img src="./img/screenshot.jpg" height="500">
+<br></br>
+<img src="./logo/jery.png" height="300">
 
+##Table of Contents
+- [What is Jery?](#WhatisJery)
+- [Info](#Info)
+- [Requirements](#Requirements)
+- [Installation](#Installation) 
+- [Used Libraries](#UsedLibraries)
+- [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
+
+<a name="Info"/>
 ##Info
 To download install instructions use the readme.pdf [_(download)_](https://github.hpe.com/marcel-jakob/jery/raw/master/readme.pdf)
 
-##Table of Contents
-- [Requirements](#Requirements)
-- [Installation](#Installation) 
-- [What is Jery?](#WhatisJery)
-- [Used Libraries](#UsedLibraries)
-- [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
+
+<a name="WhatisJery"/>
+##What is Jery?
+
+- Dedicated to Oracle and Enterprise DB
+- Mimic Business Intelligence workload (100% massive read)
+- Cluster aware
+- Create its own test schema based of "SCOTT" data
+- Generate CPU intensive activity
+- Generate high IO rate (tunable)
+- Can be user in user mode or in sysdba mode
+- Provide:
+    - execution time for critical query
+    - Number of transaction per minute
+    - Total number of transaction per run
+    - System statistics
+- Snapshot for AWR report
+- Ideal for:
+    - System demonstration
+    - Calibration
+    - Performance comparison
+
+_However, JERY is not a benchmark tool_
 
 <a name="Requirements"/>
 ##Requirements
 JERY is meant to run on Linux Systems only (primarily RHEL and CentOS). For this reason the following installation guide is mainly for RHEL. Since JERY is running in a Docker image, a recent version of Docker needs to be installed on the system.
 
+###Docker installation on RHEL
 1) Log into your machine as a user with sudo or root privileges   
 2) Make sure your existing yum packages are up-to-date  
 ```shell
 $ sudo yum update
 ```
-3) Add the yum repo yourself  
+3) Add the yum repo by yourself  
 ```shell
 $ sudo tee /etc/yum.repos.d/docker.repo <<-EOF
 [dockerrepo]
@@ -80,7 +109,7 @@ Docker install guides for other linux distributions can be found under:
 ##Installation
 JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are described in the following.
 
-__1) Download latest build from GitHub page and import image__
+###Option 1: Download latest build from GitHub page and import image
 - download the latest release from this GitHub page [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases)
 - unzip the build file
 - open a new terminal and navigate to the unzipped file _(jerydocker.tar)_
@@ -89,12 +118,12 @@ __1) Download latest build from GitHub page and import image__
 ```shell
 docker load < jerydocker.tar
 ```
-- download the run script and execute it [_(download")_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+- download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
-__2) Download and import latest build from a the Docker registry__
+###Option 2: Download and import latest build from a the Docker registry
 
 
-_From within the HPE network_
+####2.1) From within the HPE network
 
 1) Open a new terminal and type 
 
@@ -117,9 +146,10 @@ _From within the HPE network_
 ```shell
  docker tag hub.docker.hpecorp.net/oraclekc/jery jerydocker
 ```
-5) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+5) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
-_From within the EPC network_
+
+####2.2 From within the EPC network
 
 1) Open a new terminal and type 
 
@@ -138,30 +168,44 @@ docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker
 ```shell
  docker tag dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker jerydocker
 ```
-4) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/blob/master/run.sh)
+4) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
 
-<a name="WhatisJery"/>
-##What is Jery?
 
-- Dedicated to Oracle and Enterprise DB
-- Mimic Business Intelligence workload (100% massive read)
-- Cluster aware
-- Create its own test schema based of "SCOTT" data
-- Generate CPU intensive activity
-- Generate high IO rate (tunable)
-- Can be user in user mode or in sysdba mode
-- Provide:
-    - execution time for critical query
-    - Number of transaction per minute
-    - Total number of transaction per run
-    - System statistics
-- Snapshot for AWR report
-- Ideal for:
-    - System demonstration
-    - Calibration
-    - Performance comparison
+<a name="AddinganinsecureDockerregistry"/>
+##Adding an insecure Docker registry
+There are two options for adding a registry with no authorization to Docker running on RHEL7 (on client which wants to push/pull to registry)
+####Option 1: Start Docker daemon with --insecure-registry
 
-_However, JERY is not a benchmark tool_
+```shell
+$ dockerd --insecure-registry= dockerregistry.oracle.epc.ext.hpe.com:5000
+```
+####Option 2: Edit config of service to add --insecure-registry <br>
+Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
+
+1) Create the Docker config file
+
+```shell
+ $ sudo mkdir /etc/systemd/system/docker.service.d
+ $ sudo nano /etc/systemd/system/docker.service.d/docker.conf
+```
+2) Add the following to the created docker.conf: <br>
+
+```shell
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.hpe.com:5000
+```
+3) reload + restart the Docker daemon
+
+```shell
+ $ sudo systemctl daemon-reload
+ $ sudo systemctl restart docker
+```
+4) Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
+
+```shell
+ $ docker info
+```
 
 <a name="UsedLibraries"/>
 ##Used Libraries
@@ -171,31 +215,3 @@ _However, JERY is not a benchmark tool_
 - [threading](https://docs.python.org/2/library/threading.html)
 - [ConfigParser](https://docs.python.org/2/library/configparser.html)
 - [psycopg2](http://initd.org/psycopg/)
-
-
-<a name="AddinganinsecureDockerregistry"/>
-##Adding an insecure Docker registry
-There are two options for adding a registry with no authorization to Docker running on RHEL7 (on client which wants to push/pull to registry)
-####Start Docker daemon with --insecure-registry
-```$ dockerd --insecure-registry= dockerregistry.oracle.epc.ext.hpe.com:5000```
-####Edit config of service to add --insecure-registry <br>
-Refer to https://docs.docker.com/engine/admin/ (CentOS / Red Hat Enterprise Linux / Fedora > Configuring Docker) <br>
-
-1) Create the Docker config file
-
-```$ sudo mkdir /etc/systemd/system/docker.service.d``` <br>
-```$ sudo nano /etc/systemd/system/docker.service.d/docker.conf``` <br><br>
-2) Add the following to the created docker.conf: <br>
-
-```
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.hpe.com:5000
-```
-3) reload + restart the Docker daemon
-
-```$ sudo systemctl daemon-reload```<br>
-```$ sudo systemctl restart docker```<br><br>
-4) Check if “dockerregistry.oracle.epc.ext.hpe.com:5000” is added to point “Insecure Registries” of docker info:<br>
-
-```$ docker info```
