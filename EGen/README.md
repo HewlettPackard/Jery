@@ -10,8 +10,8 @@
 | -f number                  | 500       | Scale factor (customers per 1 tpsE)                             |
 | -w number                  | 300       | Number of Workdays (8-hour days) of initial trades to populate  |
 | -i dir                     | flat_in/  | Directory for input files                                       |
-| -l [FLAT|ODBC|CUSTOM|NULL] | FLAT      | Type of load                                                    |
-| -m [APPEND|OVERWRITE]      | OVERWRITE | Flat File output mode                                           |
+| -l [FLAT\|ODBC\|CUSTOM\|NULL] | FLAT      | Type of load                                                    |
+| -m [APPEND\|OVERWRITE]      | OVERWRITE | Flat File output mode                                           |
 | -o dir                     | flat_out/ | Directory for output files                                      |
 | -s string                  | localhost | Database server                                                 |
 | -d string                  | tpce      | Database name                                                   |
