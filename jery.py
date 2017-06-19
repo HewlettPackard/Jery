@@ -14,10 +14,9 @@ import threading
 import time
 import tkMessageBox
 import ConfigParser
-import datetime
+import subprocess
+import os
 
-import datetime
-import psycopg2
 
 ########################  CONNECTION  ##########################
 def connectToOracle(ip, port, SID, user, passwd, threaded=False):
@@ -47,7 +46,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         OpenToplevel += 1
 
         """ Toplevel window implementation"""
-        CrSchemaWindow.wm_title(" Test schema creation ")
+        CrSchemaWindow.wm_title("Benchmark schema creation")
         CrSchemaWindow.protocol("WM_DELETE_WINDOW", CrSchemaWindow.handler)
         CrSchemaWindow.SID = SID
         CrSchemaWindow.user = user
@@ -55,44 +54,38 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.ip = ip
         CrSchemaWindow.port = port
 
-        CrSchemaWindow.LabelTableRatio = Tkinter.Label(CrSchemaWindow, text="Select the scaling ratio ")
+        CrSchemaWindow.LabelTableRatio = Tkinter.Label(CrSchemaWindow, text="Select the parameters for the table generation", fg="white", bg="gray60", font=(15))
         CrSchemaWindow.LabelTableRatio.grid(column=0, row=0)
 
-        CrSchemaWindow.RatioVar = IntVar()
-        Ratio1 = Tkinter.Radiobutton(CrSchemaWindow, text='1: Disk space needed 11MB', variable=CrSchemaWindow.RatioVar, value=1)
-        Ratio2 = Tkinter.Radiobutton(CrSchemaWindow, text='2: Disk space needed 22MB', variable=CrSchemaWindow.RatioVar, value=2)
-        Ratio3 = Tkinter.Radiobutton(CrSchemaWindow, text='3: Disk space needed 43MB', variable=CrSchemaWindow.RatioVar, value=3)
-        Ratio4 = Tkinter.Radiobutton(CrSchemaWindow, text='4: Disk space needed 88MB', variable=CrSchemaWindow.RatioVar, value=4)
-        Ratio5 = Tkinter.Radiobutton(CrSchemaWindow, text='5: Disk space needed 176MB', variable=CrSchemaWindow.RatioVar, value=5)
-        Ratio6 = Tkinter.Radiobutton(CrSchemaWindow, text='6: Disk space needed 344MB', variable=CrSchemaWindow.RatioVar, value=6)
-        Ratio7 = Tkinter.Radiobutton(CrSchemaWindow, text='7: Disk space needed 680MB', variable=CrSchemaWindow.RatioVar, value=7)
-        Ratio8 = Tkinter.Radiobutton(CrSchemaWindow, text='8: Disk space needed 1.4GB', variable=CrSchemaWindow.RatioVar, value=8)
-        Ratio9 = Tkinter.Radiobutton(CrSchemaWindow, text='9: Disk space needed 2.7GB', variable=CrSchemaWindow.RatioVar, value=9)
-        Ratio10 = Tkinter.Radiobutton(CrSchemaWindow, text='10: Disk space needed 5.5GB', variable=CrSchemaWindow.RatioVar, value=10)
-        Ratio1.grid(row=1, column=0, sticky='W')
-        Ratio2.grid(row=2, column=0, sticky='W')
-        Ratio3.grid(row=3, column=0, sticky='W')
-        Ratio4.grid(row=4, column=0, sticky='W')
-        Ratio5.grid(row=5, column=0, sticky='W')
-        Ratio6.grid(row=6, column=0, sticky='W')
-        Ratio7.grid(row=7, column=0, sticky='W')
-        Ratio8.grid(row=8, column=0, sticky='W')
-        Ratio9.grid(row=9, column=0, sticky='W')
-        Ratio10.grid(row=10, column=0, sticky='W')
-        Ratio1.select()
+        CrSchemaWindow.LabelOut = Tkinter.Label(CrSchemaWindow, text="Directory for output files")
+        CrSchemaWindow.LabelOut.grid(column=0, row=1, sticky='W', pady=(10,0))
+
+        CrSchemaWindow.entryOutVariable = Tkinter.StringVar()
+        CrSchemaWindow.Entry1 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryOutVariable)
+        CrSchemaWindow.Entry1.grid(column=0, row=2, sticky='EW')
+        outVariable = "./EGen/flat_out/"
+        CrSchemaWindow.entryOutVariable.set(outVariable)
+
+        CrSchemaWindow.LabelOut = Tkinter.Label(CrSchemaWindow, text="Scale factor (customers per 1 tpsE)")
+        CrSchemaWindow.LabelOut.grid(column=0, row=3, sticky='W')
+
+        CrSchemaWindow.entryScaleVariable = Tkinter.StringVar()
+        CrSchemaWindow.Entry2 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryScaleVariable)
+        CrSchemaWindow.Entry2.grid(column=0, row=4, sticky='EW', pady=(0,20))
+        scaleVariable = "500"
+        CrSchemaWindow.entryScaleVariable.set(scaleVariable)
 
         
-        buttonQuit = Tkinter.Button(CrSchemaWindow,text=u"Close window", command=CrSchemaWindow.CloseCrSchemaWindow, width=39)
-        buttonQuit.grid (column=0, row=14, sticky=S)
+        buttonQuit = Tkinter.Button(CrSchemaWindow,text=u"Close window", command=CrSchemaWindow.CloseCrSchemaWindow)
+        buttonQuit.grid (column=0, row=14, sticky="NEWS")
 
         buttonCreate = Tkinter.Button(CrSchemaWindow,text=u"Create the data now", command=lambda:
-                                      CrSchemaWindow.CreateSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port,int(CrSchemaWindow.RatioVar.get())) \
-                                      , width=39)
-        buttonCreate.grid (column=0, row=12, sticky=S)
+                                      CrSchemaWindow.CreateSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port,0))
+        buttonCreate.grid (column=0, row=12, sticky="NEWS")
 
         buttonDrop = Tkinter.Button(CrSchemaWindow,text=u"Drop the test data now", command=lambda:
-                                      CrSchemaWindow.DropSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port), width=39)
-        buttonDrop.grid (column=0, row=13, sticky=S)
+                                      CrSchemaWindow.DropSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port))
+        buttonDrop.grid (column=0, row=13, sticky="NEWS")
 
         CrSchemaWindow.VocableVariable = Tkinter.StringVar()
         Vocable = Tkinter.Label(CrSchemaWindow,textvariable=CrSchemaWindow.VocableVariable, anchor="w", fg="white", bg="blue")
@@ -134,48 +127,55 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 error_con = 1
 
         if error_con != 1:
-            cur = con.cursor()
+            #     cur = con.cursor()
+            #
+            #     f = open('./queries/scott_ora.sql')
+            #     full_sql = f.read()
+            #     sql_commands = full_sql.split(';')
+            #
+            #     for sql_command in sql_commands:
+            #         try:
+            #             cur.execute(sql_command)
+            #         except cx_Oracle.DatabaseError as e:
+            #             error, = e.args
+            #
+            #
+            #     try:
+            #         cur.execute('create table scott.emp2 as select * from scott.emp')
+            #     except cx_Oracle.DatabaseError as e:
+            #         error, = e.args
+            #         if error.code == 3113:
+            #             cur.execute('drop table scott.emp2')
+            #             cur.execute('create table scott.emp2 as select * from scott.emp')
+            #         elif error.code == 955:
+            #             cur.execute('drop table scott.emp2')
+            #             cur.execute('create table scott.emp2 as select * from scott.emp')
+            #         else:
+            #             CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
+            #             cur.close()
+            #             return
+            #     try:
+            #         cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
+            #     except cx_Oracle.DatabaseError as e:
+            #         error, = e.args
+            #         if error.code == 955:
+            #             cur.execute('truncate table scott.dwhstat')
+            #
+            #     try:
+            #         cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
+            #     except cx_Oracle.DatabaseError as e:
+            #         CreateSchemaProgressSchema already exists!")
+            #
+            #     cur.close()
+            #     CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
+            #     con.close()
 
-            f = open('./queries/scott_ora.sql')
-            full_sql = f.read()
-            sql_commands = full_sql.split(';')
+            if os.name == 'nt':
+                loaderPath = "./EGen/EGenLoader.exe"
+            else:
+                loaderPath = "./EGen/EGenLoader"
 
-            for sql_command in sql_commands:
-                try:
-                    cur.execute(sql_command)
-                except cx_Oracle.DatabaseError as e:
-                    error, = e.args
-
-
-            try:
-                cur.execute('create table scott.emp2 as select * from scott.emp')
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 3113:
-                    cur.execute('drop table scott.emp2')
-                    cur.execute('create table scott.emp2 as select * from scott.emp')
-                elif error.code == 955:
-                    cur.execute('drop table scott.emp2')
-                    cur.execute('create table scott.emp2 as select * from scott.emp')
-                else:
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
-                    cur.close()
-                    return
-            try:
-                cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 955:
-                    cur.execute('truncate table scott.dwhstat')
-
-            try:
-                cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
-            except cx_Oracle.DatabaseError as e:
-                CrSchemaWindow.VocableVariable.set("Schema already exists!")
-
-            cur.close()
-            CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
-            con.close()
+            subprocess.call([loaderPath, "-i", "./EGen/flat_in/", "-o", "./EGen/flat_out/", "-f", "10"])
 
 
     def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
