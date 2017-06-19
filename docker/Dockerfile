@@ -30,10 +30,6 @@ RUN yum install -y abattis-cantarell-fonts.noarch && \
 	yum install -y tkinter && \
 	yum clean all
 
-#install psycopg2
-RUN yum -y update && yum -y install python-pip &&\
-	pip install psycopg2 &&\
-	yum clean all
 
 #new User "Developer"
 RUN export uid=0 gid=0 && \
