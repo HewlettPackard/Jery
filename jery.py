@@ -57,17 +57,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.LabelTableRatio = Tkinter.Label(CrSchemaWindow, text="Select the parameters for the table generation", fg="white", bg="gray60", font=(15))
         CrSchemaWindow.LabelTableRatio.grid(column=0, row=0)
 
-        CrSchemaWindow.LabelOut = Tkinter.Label(CrSchemaWindow, text="Directory for output files")
-        CrSchemaWindow.LabelOut.grid(column=0, row=1, sticky='W', pady=(10,0))
-
-        CrSchemaWindow.entryOutVariable = Tkinter.StringVar()
-        CrSchemaWindow.Entry1 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryOutVariable)
-        CrSchemaWindow.Entry1.grid(column=0, row=2, sticky='EW')
-        outVariable = "./EGen/flat_out/"
-        CrSchemaWindow.entryOutVariable.set(outVariable)
-
         CrSchemaWindow.LabelOut = Tkinter.Label(CrSchemaWindow, text="Scale factor (customers per 1 tpsE)")
-        CrSchemaWindow.LabelOut.grid(column=0, row=3, sticky='W')
+        CrSchemaWindow.LabelOut.grid(column=0, row=3, sticky='W', pady=(10,0))
 
         CrSchemaWindow.entryScaleVariable = Tkinter.StringVar()
         CrSchemaWindow.Entry2 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryScaleVariable)
@@ -172,10 +163,16 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
             if os.name == 'nt':
                 loaderPath = "./EGen/EGenLoader.exe"
+                outputPath = "C:\\tpce"
+
             else:
                 loaderPath = "./EGen/EGenLoader"
+                outputPath = "/tpce/"
 
-            subprocess.call([loaderPath, "-i", "./EGen/flat_in/", "-o", "./EGen/flat_out/", "-f", "10"])
+            if not os.path.exists(outputPath):
+                os.makedirs(outputPath)
+
+            subprocess.call([loaderPath, "-i", "./EGen/flat_in/", "-o", outputPath, "-f", "10"])
 
 
     def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
