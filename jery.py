@@ -118,8 +118,68 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 error_con = 1
 
         if error_con != 1:
-            #     cur = con.cursor()
+            cur = con.cursor()
+
+            """
+            1) create tablespace (works)
+            2) create user (works)
+            3) create tables
+            4) generate data (EGen)
+            5) import data into tables (+check for errors)
+            6) create indexes                
+            """
+
+            # create tablespace
+            f = open('./tpce/01tpce-create-tablespace.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
+
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+            if error_con == 0:
+                print "Created tablespace"
+
+            # create user
+            f = open('./tpce/03tpce-create-user.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
+
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+            if error_con == 0:
+                print "Created user"
+
+
+            # generate data (EGen) WORKS
+            # if os.name == 'nt':
+            #     loaderPath = "./EGen/EGenLoader.exe"
+            #     outputPath = "C:\\tpce"
             #
+            # else:
+            #     loaderPath = "./EGen/EGenLoader"
+            #     outputPath = "/tpce/"
+            #
+            # if not os.path.exists(outputPath):
+            #     os.makedirs(outputPath)
+            #
+            # subprocess.call([loaderPath, "-i", "./EGen/flat_in/", "-o", outputPath, "-f", "10"])
+
+
             #     f = open('./queries/scott_ora.sql')
             #     full_sql = f.read()
             #     sql_commands = full_sql.split(';')
@@ -157,22 +217,9 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             #     except cx_Oracle.DatabaseError as e:
             #         CreateSchemaProgressSchema already exists!")
             #
-            #     cur.close()
-            #     CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
-            #     con.close()
-
-            if os.name == 'nt':
-                loaderPath = "./EGen/EGenLoader.exe"
-                outputPath = "C:\\tpce"
-
-            else:
-                loaderPath = "./EGen/EGenLoader"
-                outputPath = "/tpce/"
-
-            if not os.path.exists(outputPath):
-                os.makedirs(outputPath)
-
-            subprocess.call([loaderPath, "-i", "./EGen/flat_in/", "-o", outputPath, "-f", "10"])
+            cur.close()
+            CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
+            con.close()
 
 
     def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
@@ -201,31 +248,43 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
         if error_con != 1:
             cur = con.cursor()
-            try:
-                cur.execute('drop table scott.emp2')
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 942:
-                    CrSchemaWindow.VocableVariable.set('Test schema does not exist')
-                else:
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
-                    error_con = 2
 
-            try:
-                cur.execute('drop table scott.dwhstat')
-            except cx_Oracle.DatabaseError as e:
-                error, = e.args
-                if error.code == 942:
-                    CrSchemaWindow.VocableVariable.set('Test schema does not exist')
-                    error_con = 2
-                else:
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
-                    error_con = 2
+            # drop user
+            f = open('./tpce/21tpce-drop-user.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
 
-            try:
-                cur.execute('drop SEQUENCE scott.seq')
-            except cx_Oracle.DatabaseError:
-                error_con = 3
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 1918:
+                        CrSchemaWindow.VocableVariable.set('Test schema does not exist')
+                        error_con = 2
+                    elif error.code != 900:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
+                        error_con = 2
+
+            # drop tablespace
+            f = open('./tpce/22tpce-drop-tbs.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
+
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 959:
+                        CrSchemaWindow.VocableVariable.set('Test schema does not exist')
+                        error_con = 2
+                    elif error.code != 900:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to drop the test schema")
+                        error_con = 2
+
 
             cur.close()
             con.close()
