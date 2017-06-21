@@ -1,0 +1,7 @@
+LOAD DATA INFILE '/tpce/NewsXRef.txt'
+TRUNCATE
+INTO TABLE NEWS_XREF 
+FIELDS TERMINATED BY '|'
+(  NX_NI_ID ,          
+ NX_CO_ID        
+)

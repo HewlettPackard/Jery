@@ -1,0 +1,20 @@
+LOAD DATA INFILE '/tpce/Trade.txt'
+TRUNCATE
+INTO TABLE TRADE 
+FIELDS TERMINATED BY '|'
+(  T_ID ,          
+ T_DTS TIMESTAMP "YYYY-MM-DD HH24:MI:SS.FF9" ,
+ T_ST_ID ,
+ T_TT_ID ,
+ T_IS_CASH ,
+ T_S_SYMB ,
+ T_QTY ,
+ T_BID_PRICE ,
+ T_CA_ID ,
+ T_EXEC_NAME ,
+ T_TRADE_PRICE ,
+ T_CHRG ,
+ T_COMM ,
+ T_TAX ,
+ T_LIFO        
+)

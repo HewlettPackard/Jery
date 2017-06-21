@@ -1,0 +1,11 @@
+LOAD DATA INFILE '/tpce/DailyMarket.txt'
+TRUNCATE
+INTO TABLE DAILY_MARKET 
+FIELDS TERMINATED BY '|'
+(  DM_DATE DATE "YYYY-MM-DD" ,          
+ DM_S_SYMB ,
+ DM_CLOSE ,
+ DM_HIGH ,
+ DM_LOW ,
+ DM_VOL        
+)
