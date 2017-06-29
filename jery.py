@@ -164,6 +164,23 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             if error_con == 0:
                 print "Created user"
 
+            # create tables
+            f = open('./tpce/05tpce-create-tables.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
+
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+            if error_con == 0:
+                print "Created tables"
+
 
             # generate data (EGen) WORKS
             # if os.name == 'nt':
@@ -218,7 +235,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             #         CreateSchemaProgressSchema already exists!")
             #
             cur.close()
-            CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
+            #CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
             con.close()
 
 
