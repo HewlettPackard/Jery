@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/WatchItem.txt'
+LOAD DATA INFILE '/tmp/jery/tables/WatchItem.txt'
 TRUNCATE
 INTO TABLE WATCH_ITEM 
 FIELDS TERMINATED BY '|'

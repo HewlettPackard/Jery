@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Charge.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Charge.txt'
 TRUNCATE
 INTO TABLE CHARGE 
 FIELDS TERMINATED BY '|'

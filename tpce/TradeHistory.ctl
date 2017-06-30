@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/TradeHistory.txt'
+LOAD DATA INFILE '/tmp/jery/tables/TradeHistory.txt'
 TRUNCATE
 INTO TABLE TRADE_HISTORY 
 FIELDS TERMINATED BY '|'

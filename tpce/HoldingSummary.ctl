@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/HoldingSummary.txt'
+LOAD DATA INFILE '/tmp/jery/tables/HoldingSummary.txt'
 TRUNCATE
 INTO TABLE HOLDING_SUMMARY 
 FIELDS TERMINATED BY '|'

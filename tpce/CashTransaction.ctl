@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/CashTransaction.txt'
+LOAD DATA INFILE '/tmp/jery/tables/CashTransaction.txt'
 TRUNCATE
 INTO TABLE cash_transaction 
 FIELDS TERMINATED BY '|'

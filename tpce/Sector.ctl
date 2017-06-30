@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Sector.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Sector.txt'
 TRUNCATE
 INTO TABLE SECTOR 
 FIELDS TERMINATED BY '|'

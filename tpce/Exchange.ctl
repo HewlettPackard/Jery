@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Exchange.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Exchange.txt'
 TRUNCATE
 INTO TABLE EXCHANGE 
 FIELDS TERMINATED BY '|'

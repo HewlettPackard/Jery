@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/CommissionRate.txt'
+LOAD DATA INFILE '/tmp/jery/tables/CommissionRate.txt'
 TRUNCATE
 INTO TABLE COMMISSION_RATE
 FIELDS TERMINATED BY '|'

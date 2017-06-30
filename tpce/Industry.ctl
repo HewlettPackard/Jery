@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Industry.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Industry.txt'
 TRUNCATE
 INTO TABLE INDUSTRY 
 FIELDS TERMINATED BY '|'

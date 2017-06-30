@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Settlement.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Settlement.txt'
 TRUNCATE
 INTO TABLE SETTLEMENT 
 FIELDS TERMINATED BY '|'

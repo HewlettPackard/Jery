@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/NewsItem.txt'
+LOAD DATA INFILE '/tmp/jery/tables/NewsItem.txt'
 TRUNCATE
 INTO TABLE NEWS_ITEM 
 FIELDS TERMINATED BY '|'

@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Financial.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Financial.txt'
 TRUNCATE
 INTO TABLE FINANCIAL 
 FIELDS TERMINATED BY '|'

@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/DailyMarket.txt'
+LOAD DATA INFILE '/tmp/jery/tables/DailyMarket.txt'
 TRUNCATE
 INTO TABLE DAILY_MARKET 
 FIELDS TERMINATED BY '|'

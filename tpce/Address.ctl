@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Address.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Address.txt'
 TRUNCATE
 INTO TABLE ADDRESS 
 FIELDS TERMINATED BY '|'

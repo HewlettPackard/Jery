@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Customer.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Customer.txt'
 TRUNCATE
 INTO TABLE CUSTOMER 
 FIELDS TERMINATED BY '|'

@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/ZipCode.txt'
+LOAD DATA INFILE '/tmp/jery/tables/ZipCode.txt'
 TRUNCATE
 INTO TABLE ZIP_CODE 
 FIELDS TERMINATED BY '|'

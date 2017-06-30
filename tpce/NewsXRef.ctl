@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/NewsXRef.txt'
+LOAD DATA INFILE '/tmp/jery/tables/NewsXRef.txt'
 TRUNCATE
 INTO TABLE NEWS_XREF 
 FIELDS TERMINATED BY '|'

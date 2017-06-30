@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/Security.txt'
+LOAD DATA INFILE '/tmp/jery/tables/Security.txt'
 TRUNCATE
 INTO TABLE SECURITY 
 FIELDS TERMINATED BY '|'

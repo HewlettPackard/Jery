@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/AccountPermission.txt'
+LOAD DATA INFILE '/tmp/jery/tables/AccountPermission.txt'
 TRUNCATE
 INTO TABLE ACCOUNT_PERMISSION 
 FIELDS TERMINATED BY '|'

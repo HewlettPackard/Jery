@@ -1,4 +1,4 @@
-LOAD DATA INFILE '/tpce/CompanyCompetitor.txt'
+LOAD DATA INFILE '/tmp/jery/tables/CompanyCompetitor.txt'
 TRUNCATE
 INTO TABLE COMPANY_COMPETITOR
 FIELDS TERMINATED BY '|'

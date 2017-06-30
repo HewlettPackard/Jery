@@ -14,6 +14,7 @@ import threading
 import time
 import tkMessageBox
 import ConfigParser
+import paramiko
 import subprocess
 import os
 
@@ -90,153 +91,323 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
 
     def CreateSchema(CrSchemaWindow, SID, user, passwd, ip, port, RatioVar):
-        """ Test if the connection parameters are valid.
-            - If the connection is valid print the db_name into the vocable label.
-                Otherwise print an error message.
         """
-        
-        error_con = 0
-        CrSchemaWindow.LoopRatioVar = RatioVar + 14
-        CrSchemaWindow.i = 1
-
-
-        try:
-            con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
-        except cx_Oracle.DatabaseError as e:
-            error, = e.args
-            if error.code == 1017:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
-                error_con = 1
-            elif error.code == 12154:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
-                error_con = 1
-            elif error.code == 12543:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
-                error_con = 1
-            else:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
-                error_con = 1
-
-        if error_con != 1:
-            cur = con.cursor()
-
-            """
             1) create tablespace (works)
             2) create user (works)
             3) create tables
             4) generate data (EGen)
             5) import data into tables (+check for errors)
-            6) create indexes                
-            """
+            6) create indexes
+        """
 
-            # create tablespace
-            f = open('./tpce/01tpce-create-tablespace.sql')
-            full_sql = f.read()
-            sql_commands = full_sql.split(';')
+        
+        error_con = 0
 
-            for sql_command in sql_commands:
-                try:
-                    cur.execute(sql_command)
+        # try:
+        #     con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+        # except cx_Oracle.DatabaseError as e:
+        #     error, = e.args
+        #     if error.code == 1017:
+        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+        #         error_con = 1
+        #     elif error.code == 12154:
+        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+        #         error_con = 1
+        #     elif error.code == 12543:
+        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+        #         error_con = 1
+        #     else:
+        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
+        #         error_con = 1
+        #
+        # if error_con != 1:
+        #     cur = con.cursor()
+        #
+        #     # create tablespace
+        #     f = open('./tpce/01tpce-create-tablespace.sql')
+        #     full_sql = f.read()
+        #     sql_commands = full_sql.split(';')
+        #
+        #     for sql_command in sql_commands:
+        #         try:
+        #             cur.execute(sql_command)
+        #
+        #         except cx_Oracle.DatabaseError as e:
+        #             error, = e.args
+        #             if error.code != 900:
+        #                 print error
+        #                 error_con = 2
+        #
+        #     if error_con == 0:
+        #         print "Created tablespace"
+        #
+        #     # create user
+        #     f = open('./tpce/03tpce-create-user.sql')
+        #     full_sql = f.read()
+        #     sql_commands = full_sql.split(';')
+        #
+        #     for sql_command in sql_commands:
+        #         try:
+        #             cur.execute(sql_command)
+        #         except cx_Oracle.DatabaseError as e:
+        #             error, = e.args
+        #             if error.code != 900:
+        #                 print error
+        #                 error_con = 2
+        #
+        #     if error_con == 0:
+        #         print "STEP 1: Created user"
+        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 1/8: Created user")
+        #
+        #     # create tables
+        #     f = open('./tpce/05tpce-create-tables.sql')
+        #     full_sql = f.read()
+        #     sql_commands = full_sql.split(';')
+        #
+        #     for sql_command in sql_commands:
+        #         try:
+        #             cur.execute(sql_command)
+        #         except cx_Oracle.DatabaseError as e:
+        #             error, = e.args
+        #             if error.code != 900:
+        #                 print error
+        #                 error_con = 2
+        #
+        #     if error_con == 0:
+        #         print "STEP 2: Created tables"
+        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 2/8: Created tables")
+        #
+        #
+        #     #     f = open('./queries/scott_ora.sql')
+        #     #     full_sql = f.read()
+        #     #     sql_commands = full_sql.split(';')
+        #     #
+        #     #     for sql_command in sql_commands:
+        #     #         try:
+        #     #             cur.execute(sql_command)
+        #     #         except cx_Oracle.DatabaseError as e:
+        #     #             error, = e.args
+        #     #
+        #     #
+        #     #     try:
+        #     #         cur.execute('create table scott.emp2 as select * from scott.emp')
+        #     #     except cx_Oracle.DatabaseError as e:
+        #     #         error, = e.args
+        #     #         if error.code == 3113:
+        #     #             cur.execute('drop table scott.emp2')
+        #     #             cur.execute('create table scott.emp2 as select * from scott.emp')
+        #     #         elif error.code == 955:
+        #     #             cur.execute('drop table scott.emp2')
+        #     #             cur.execute('create table scott.emp2 as select * from scott.emp')
+        #     #         else:
+        #     #             CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
+        #     #             cur.close()
+        #     #             return
+        #     #     try:
+        #     #         cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
+        #     #     except cx_Oracle.DatabaseError as e:
+        #     #         error, = e.args
+        #     #         if error.code == 955:
+        #     #             cur.execute('truncate table scott.dwhstat')
+        #     #
+        #     #     try:
+        #     #         cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
+        #     #     except cx_Oracle.DatabaseError as e:
+        #     #         CreateSchemaProgressSchema already exists!")
+        #     #
+        #     cur.close()
+        #     #CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
+        #     con.close()
+        #
+        # if error_con != 1:
+        #     hostname = '192.168.40.131'
+        #     username = 'oracle'
+        #     password = 'password'
+        #     port = 22
+        #     loaderSource = './EGen/EGenLoader'
+        #     loaderDestination = '/tmp/jery/EGenLoader'
+        #     inputSource = './EGen/flat_in.zip'
+        #     inputDestination = '/tmp/jery/flat_in.zip'
+        #     scriptSource = './tpce/tpce.zip'
+        #     scriptDestination = '/tmp/jery/tpce.zip'
+        #     inputUnzipped = "/tmp/jery/flat_in/"
+        #     scriptsUnzipped = "/tmp/jery/scripts/"
+        #     outputPath = "/tmp/jery/tables/"
+        #
+        #     def waitForTerminate(stdout):
+        #         # Wait for the command to terminate
+        #         while not stdout.channel.exit_status_ready():
+        #             # Only print data if there is data to read in the channel
+        #             if stdout.channel.recv_ready():
+        #                 if 'select' in locals():
+        #                     rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
+        #                     if len(rl) > 0:
+        #                         # Print data from stdout
+        #                         print stdout.channel.recv(1024),
+        #
+        #     ssh = paramiko.SSHClient()
+        #     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        #     ssh.connect(hostname=hostname, username=username, password=password)
+        #
+        #     transport = paramiko.Transport((hostname, 22))
+        #     transport.connect(username=username, password=password)
+        #
+        #     sftp = paramiko.SFTPClient.from_transport(transport)
+        #
+        #     print "STEP 3: Connected to %s" % hostname
+        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 3/8: Connected to " + hostname)
+        #
+        #     # Send commands for folder (re)creation (non-blocking)
+        #     stdin, stdout, stderr = ssh.exec_command("rm -r -d -f /tmp/jery/")
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("mkdir /tmp/jery/")
+        #     waitForTerminate(stdout)
+        #
+        #     # Copy files to remote
+        #     sftp.put(loaderSource, loaderDestination)
+        #     sftp.put(inputSource, inputDestination)
+        #     sftp.put(scriptSource, scriptDestination)
+        #     print "STEP 4: Copied files to server"
+        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 4/8: Copied files to server")
+        #
+        #
+        #     # Send commands for table generation (non-blocking)
+        #     stdin, stdout, stderr = ssh.exec_command("rm -r -d -f" + outputPath)
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("chmod +x " + loaderDestination)
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("unzip " + inputDestination + " -d " + inputUnzipped)
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("unzip " + scriptDestination + " -d " + scriptsUnzipped)
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("rm -f " + inputDestination)
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("rm -f " + scriptDestination)
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("A")
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("mkdir -p " + outputPath)
+        #     waitForTerminate(stdout)
+        #     print "STEP 5: Unzipped files on server"
+        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 5/8: Unzipped files on server")
+        #     stdin, stdout, stderr = ssh.exec_command(
+        #         loaderDestination + " -i " + inputUnzipped + " -o " + outputPath + " -f 1")
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("rm -f " + loaderDestination)
+        #     waitForTerminate(stdout)
+        #     print "STEP 6: Generated tables on server"
+        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 6/8: Generated tables on server")
+        #
+        #     # Send commands for table import (non-blocking)
+        #     stdin, stdout, stderr = ssh.exec_command("chmod +x " + scriptsUnzipped + "06ImportTPCETables.sh")
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("sed -i -e 's/\\r$//' " + scriptsUnzipped + "06ImportTPCETables.sh")
+        #     waitForTerminate(stdout)
+        #     stdin, stdout, stderr = ssh.exec_command("cd " + scriptsUnzipped + " && ./06ImportTPCETables.sh")
+        #     print "STEP 7: Imported tables in database"
+        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 7/8: Imported tables in database")
+        #
+        #     # print stderr.readlines()
+        #     # print stdout.readlines()
+        #
+        #     sftp.close()
+        #     transport.close()
+        #     ssh.close()
 
-                except cx_Oracle.DatabaseError as e:
-                    error, = e.args
-                    if error.code != 900:
-                        print error
-                        error_con = 2
+        if error_con != 1:
+            try:
+                con = connectToOracle(str(ip), str(port), str(SID), "TPCE", "TPCE")
+            except cx_Oracle.DatabaseError as e:
+                error, = e.args
+                if error.code == 1017:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+                    error_con = 1
+                elif error.code == 12154:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+                    error_con = 1
+                elif error.code == 12543:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+                    error_con = 1
+                else:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
+                    error_con = 1
 
-            if error_con == 0:
-                print "Created tablespace"
+            if error_con != 1:
+                cur = con.cursor()
+                # create indexes 1
+                f = open('./tpce/07tpce-create-pk.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
 
-            # create user
-            f = open('./tpce/03tpce-create-user.sql')
-            full_sql = f.read()
-            sql_commands = full_sql.split(';')
+                for sql_command in sql_commands:
+                    try:
+                        cur.execute(sql_command)
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code != 900:
+                            print error
+                            error_con = 2
 
-            for sql_command in sql_commands:
-                try:
-                    cur.execute(sql_command)
-                except cx_Oracle.DatabaseError as e:
-                    error, = e.args
-                    if error.code != 900:
-                        print error
-                        error_con = 2
+                # create indexes 2
+                f = open('./tpce/08_1tpce-create-fk.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
 
-            if error_con == 0:
-                print "Created user"
+                for sql_command in sql_commands:
+                    try:
+                        cur.execute(sql_command)
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code != 900:
+                            print error
+                            error_con = 2
 
-            # create tables
-            f = open('./tpce/05tpce-create-tables.sql')
-            full_sql = f.read()
-            sql_commands = full_sql.split(';')
+                # create indexes 3
+                f = open('./tpce/08_2tpce-create-fk.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
 
-            for sql_command in sql_commands:
-                try:
-                    cur.execute(sql_command)
-                except cx_Oracle.DatabaseError as e:
-                    error, = e.args
-                    if error.code != 900:
-                        print error
-                        error_con = 2
+                for sql_command in sql_commands:
+                    try:
+                        cur.execute(sql_command)
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code != 900:
+                            print error
+                            error_con = 2
 
-            if error_con == 0:
-                print "Created tables"
+                # create indexes 4
+                f = open('./tpce/08_3tpce-create-fk.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
+
+                for sql_command in sql_commands:
+                    try:
+                        cur.execute(sql_command)
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code != 900:
+                            print error
+                            error_con = 2
+
+                # create indexes 5
+                f = open('./tpce/08_4tpce-create-fk.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
+
+                for sql_command in sql_commands:
+                    try:
+                        cur.execute(sql_command)
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code != 900:
+                            print error
+                            error_con = 2
 
 
-            # generate data (EGen) WORKS
-            # if os.name == 'nt':
-            #     loaderPath = "./EGen/EGenLoader.exe"
-            #     outputPath = "C:\\tpce"
-            #
-            # else:
-            #     loaderPath = "./EGen/EGenLoader"
-            #     outputPath = "/tpce/"
-            #
-            # if not os.path.exists(outputPath):
-            #     os.makedirs(outputPath)
-            #
-            # subprocess.call([loaderPath, "-i", "./EGen/flat_in/", "-o", outputPath, "-f", "10"])
-
-
-            #     f = open('./queries/scott_ora.sql')
-            #     full_sql = f.read()
-            #     sql_commands = full_sql.split(';')
-            #
-            #     for sql_command in sql_commands:
-            #         try:
-            #             cur.execute(sql_command)
-            #         except cx_Oracle.DatabaseError as e:
-            #             error, = e.args
-            #
-            #
-            #     try:
-            #         cur.execute('create table scott.emp2 as select * from scott.emp')
-            #     except cx_Oracle.DatabaseError as e:
-            #         error, = e.args
-            #         if error.code == 3113:
-            #             cur.execute('drop table scott.emp2')
-            #             cur.execute('create table scott.emp2 as select * from scott.emp')
-            #         elif error.code == 955:
-            #             cur.execute('drop table scott.emp2')
-            #             cur.execute('create table scott.emp2 as select * from scott.emp')
-            #         else:
-            #             CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
-            #             cur.close()
-            #             return
-            #     try:
-            #         cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
-            #     except cx_Oracle.DatabaseError as e:
-            #         error, = e.args
-            #         if error.code == 955:
-            #             cur.execute('truncate table scott.dwhstat')
-            #
-            #     try:
-            #         cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
-            #     except cx_Oracle.DatabaseError as e:
-            #         CreateSchemaProgressSchema already exists!")
-            #
-            cur.close()
-            #CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
-            con.close()
+                if error_con == 0:
+                    print "STEP 8: Created indexes"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 8/8: Created indexes")
 
 
     def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
