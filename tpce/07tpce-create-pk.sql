@@ -1,8 +1,3 @@
--- PKs
-spool indexes.log
-
-connect TPCE/TPCE
-
 -- Clause 2.2.5.1
 ALTER TABLE account_permission
 ADD CONSTRAINT pk_account_permission

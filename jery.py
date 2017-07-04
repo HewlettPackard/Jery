@@ -58,30 +58,49 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.LabelTableRatio = Tkinter.Label(CrSchemaWindow, text="Select the parameters for the table generation", fg="white", bg="gray60", font=(15))
         CrSchemaWindow.LabelTableRatio.grid(column=0, row=0)
 
-        CrSchemaWindow.LabelOut = Tkinter.Label(CrSchemaWindow, text="Scale factor (customers per 1 tpsE)")
-        CrSchemaWindow.LabelOut.grid(column=0, row=3, sticky='W', pady=(10,0))
+        CrSchemaWindow.LabelPath = Tkinter.Label(CrSchemaWindow, text="Block file for tablespace")
+        CrSchemaWindow.LabelPath.grid(column=0, row=3, sticky='W', pady=(10, 0))
 
-        CrSchemaWindow.entryScaleVariable = Tkinter.StringVar()
-        CrSchemaWindow.Entry2 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryScaleVariable)
-        CrSchemaWindow.Entry2.grid(column=0, row=4, sticky='EW', pady=(0,20))
-        scaleVariable = "500"
-        CrSchemaWindow.entryScaleVariable.set(scaleVariable)
+        CrSchemaWindow.entryPathVariable = Tkinter.StringVar()
+        CrSchemaWindow.Entry2 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryPathVariable)
+        CrSchemaWindow.Entry2.grid(column=0, row=4, sticky='EW', pady=(0, 20))
+        CrSchemaWindow.entryPathVariable.set(ConfigSectionMap("Prefilled")['pathtoblock'])
+
+        CrSchemaWindow.LabelSSH = Tkinter.Label(CrSchemaWindow, text="Credentials for SSH")
+        CrSchemaWindow.LabelSSH.grid(column=0, row=5, sticky='NEWS')
+
+        CrSchemaWindow.LabelUserSSH = Tkinter.Label(CrSchemaWindow, text="Username")
+        CrSchemaWindow.LabelUserSSH.grid(column=0, row=6, sticky='W')
+
+        CrSchemaWindow.entryUserSSHVariable = Tkinter.StringVar()
+        CrSchemaWindow.Entry3 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryUserSSHVariable)
+        CrSchemaWindow.Entry3.grid(column=0, row=7, sticky='EW')
+        CrSchemaWindow.entryUserSSHVariable.set(ConfigSectionMap("Prefilled")['userssh'])
+
+
+        CrSchemaWindow.LabelPwSSH = Tkinter.Label(CrSchemaWindow, text="Password")
+        CrSchemaWindow.LabelPwSSH.grid(column=0, row=8, sticky='W')
+
+        CrSchemaWindow.entryPwSSHVariable = Tkinter.StringVar()
+        CrSchemaWindow.Entry4 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryUserSSHVariable, show="*")
+        CrSchemaWindow.Entry4.grid(column=0, row=9, sticky='EW', pady=(0, 20))
+        CrSchemaWindow.entryPwSSHVariable.set(ConfigSectionMap("Prefilled")['pwdssh'])
 
         
         buttonQuit = Tkinter.Button(CrSchemaWindow,text=u"Close window", command=CrSchemaWindow.CloseCrSchemaWindow)
-        buttonQuit.grid (column=0, row=14, sticky="NEWS")
+        buttonQuit.grid (column=0, row=19, sticky="NEWS")
 
         buttonCreate = Tkinter.Button(CrSchemaWindow,text=u"Create the data now", command=lambda:
                                       CrSchemaWindow.CreateSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port,0))
-        buttonCreate.grid (column=0, row=12, sticky="NEWS")
+        buttonCreate.grid (column=0, row=17, sticky="NEWS")
 
         buttonDrop = Tkinter.Button(CrSchemaWindow,text=u"Drop the test data now", command=lambda:
                                       CrSchemaWindow.DropSchema(CrSchemaWindow.SID,CrSchemaWindow.user,CrSchemaWindow.passwd,CrSchemaWindow.ip,CrSchemaWindow.port))
-        buttonDrop.grid (column=0, row=13, sticky="NEWS")
+        buttonDrop.grid (column=0, row=18, sticky="NEWS")
 
         CrSchemaWindow.VocableVariable = Tkinter.StringVar()
         Vocable = Tkinter.Label(CrSchemaWindow,textvariable=CrSchemaWindow.VocableVariable, anchor="w", fg="white", bg="blue")
-        Vocable.grid(column=0, row=11, columnspan=2, sticky='EW')
+        Vocable.grid(column=0, row=16, columnspan=2, sticky='EW')
         CrSchemaWindow.VocableVariable.set(u"Hello !")
         
         CrSchemaWindow.grid_columnconfigure(0,weight=1)
@@ -100,219 +119,260 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             6) create indexes
         """
 
-        
         error_con = 0
+        pathToBlock = CrSchemaWindow.entryPathVariable.get()
+        username = CrSchemaWindow.entryUserSSHVariable.get()
+        password = CrSchemaWindow.entryPwSSHVariable.get()
+        SSHport = 22
 
-        # try:
-        #     con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
-        # except cx_Oracle.DatabaseError as e:
-        #     error, = e.args
-        #     if error.code == 1017:
-        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
-        #         error_con = 1
-        #     elif error.code == 12154:
-        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
-        #         error_con = 1
-        #     elif error.code == 12543:
-        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
-        #         error_con = 1
-        #     else:
-        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
-        #         error_con = 1
-        #
-        # if error_con != 1:
-        #     cur = con.cursor()
-        #
-        #     # create tablespace
-        #     f = open('./tpce/01tpce-create-tablespace.sql')
-        #     full_sql = f.read()
-        #     sql_commands = full_sql.split(';')
-        #
-        #     for sql_command in sql_commands:
-        #         try:
-        #             cur.execute(sql_command)
-        #
-        #         except cx_Oracle.DatabaseError as e:
-        #             error, = e.args
-        #             if error.code != 900:
-        #                 print error
-        #                 error_con = 2
-        #
-        #     if error_con == 0:
-        #         print "Created tablespace"
-        #
-        #     # create user
-        #     f = open('./tpce/03tpce-create-user.sql')
-        #     full_sql = f.read()
-        #     sql_commands = full_sql.split(';')
-        #
-        #     for sql_command in sql_commands:
-        #         try:
-        #             cur.execute(sql_command)
-        #         except cx_Oracle.DatabaseError as e:
-        #             error, = e.args
-        #             if error.code != 900:
-        #                 print error
-        #                 error_con = 2
-        #
-        #     if error_con == 0:
-        #         print "STEP 1: Created user"
-        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 1/8: Created user")
-        #
-        #     # create tables
-        #     f = open('./tpce/05tpce-create-tables.sql')
-        #     full_sql = f.read()
-        #     sql_commands = full_sql.split(';')
-        #
-        #     for sql_command in sql_commands:
-        #         try:
-        #             cur.execute(sql_command)
-        #         except cx_Oracle.DatabaseError as e:
-        #             error, = e.args
-        #             if error.code != 900:
-        #                 print error
-        #                 error_con = 2
-        #
-        #     if error_con == 0:
-        #         print "STEP 2: Created tables"
-        #         CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 2/8: Created tables")
-        #
-        #
-        #     #     f = open('./queries/scott_ora.sql')
-        #     #     full_sql = f.read()
-        #     #     sql_commands = full_sql.split(';')
-        #     #
-        #     #     for sql_command in sql_commands:
-        #     #         try:
-        #     #             cur.execute(sql_command)
-        #     #         except cx_Oracle.DatabaseError as e:
-        #     #             error, = e.args
-        #     #
-        #     #
-        #     #     try:
-        #     #         cur.execute('create table scott.emp2 as select * from scott.emp')
-        #     #     except cx_Oracle.DatabaseError as e:
-        #     #         error, = e.args
-        #     #         if error.code == 3113:
-        #     #             cur.execute('drop table scott.emp2')
-        #     #             cur.execute('create table scott.emp2 as select * from scott.emp')
-        #     #         elif error.code == 955:
-        #     #             cur.execute('drop table scott.emp2')
-        #     #             cur.execute('create table scott.emp2 as select * from scott.emp')
-        #     #         else:
-        #     #             CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
-        #     #             cur.close()
-        #     #             return
-        #     #     try:
-        #     #         cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
-        #     #     except cx_Oracle.DatabaseError as e:
-        #     #         error, = e.args
-        #     #         if error.code == 955:
-        #     #             cur.execute('truncate table scott.dwhstat')
-        #     #
-        #     #     try:
-        #     #         cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
-        #     #     except cx_Oracle.DatabaseError as e:
-        #     #         CreateSchemaProgressSchema already exists!")
-        #     #
-        #     cur.close()
-        #     #CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port)
-        #     con.close()
-        #
-        # if error_con != 1:
-        #     hostname = '192.168.40.131'
-        #     username = 'oracle'
-        #     password = 'password'
-        #     port = 22
-        #     loaderSource = './EGen/EGenLoader'
-        #     loaderDestination = '/tmp/jery/EGenLoader'
-        #     inputSource = './EGen/flat_in.zip'
-        #     inputDestination = '/tmp/jery/flat_in.zip'
-        #     scriptSource = './tpce/tpce.zip'
-        #     scriptDestination = '/tmp/jery/tpce.zip'
-        #     inputUnzipped = "/tmp/jery/flat_in/"
-        #     scriptsUnzipped = "/tmp/jery/scripts/"
-        #     outputPath = "/tmp/jery/tables/"
-        #
-        #     def waitForTerminate(stdout):
-        #         # Wait for the command to terminate
-        #         while not stdout.channel.exit_status_ready():
-        #             # Only print data if there is data to read in the channel
-        #             if stdout.channel.recv_ready():
-        #                 if 'select' in locals():
-        #                     rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
-        #                     if len(rl) > 0:
-        #                         # Print data from stdout
-        #                         print stdout.channel.recv(1024),
-        #
-        #     ssh = paramiko.SSHClient()
-        #     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        #     ssh.connect(hostname=hostname, username=username, password=password)
-        #
-        #     transport = paramiko.Transport((hostname, 22))
-        #     transport.connect(username=username, password=password)
-        #
-        #     sftp = paramiko.SFTPClient.from_transport(transport)
-        #
-        #     print "STEP 3: Connected to %s" % hostname
-        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 3/8: Connected to " + hostname)
-        #
-        #     # Send commands for folder (re)creation (non-blocking)
-        #     stdin, stdout, stderr = ssh.exec_command("rm -r -d -f /tmp/jery/")
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("mkdir /tmp/jery/")
-        #     waitForTerminate(stdout)
-        #
-        #     # Copy files to remote
-        #     sftp.put(loaderSource, loaderDestination)
-        #     sftp.put(inputSource, inputDestination)
-        #     sftp.put(scriptSource, scriptDestination)
-        #     print "STEP 4: Copied files to server"
-        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 4/8: Copied files to server")
-        #
-        #
-        #     # Send commands for table generation (non-blocking)
-        #     stdin, stdout, stderr = ssh.exec_command("rm -r -d -f" + outputPath)
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("chmod +x " + loaderDestination)
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("unzip " + inputDestination + " -d " + inputUnzipped)
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("unzip " + scriptDestination + " -d " + scriptsUnzipped)
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("rm -f " + inputDestination)
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("rm -f " + scriptDestination)
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("A")
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("mkdir -p " + outputPath)
-        #     waitForTerminate(stdout)
-        #     print "STEP 5: Unzipped files on server"
-        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 5/8: Unzipped files on server")
-        #     stdin, stdout, stderr = ssh.exec_command(
-        #         loaderDestination + " -i " + inputUnzipped + " -o " + outputPath + " -f 1")
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("rm -f " + loaderDestination)
-        #     waitForTerminate(stdout)
-        #     print "STEP 6: Generated tables on server"
-        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 6/8: Generated tables on server")
-        #
-        #     # Send commands for table import (non-blocking)
-        #     stdin, stdout, stderr = ssh.exec_command("chmod +x " + scriptsUnzipped + "06ImportTPCETables.sh")
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("sed -i -e 's/\\r$//' " + scriptsUnzipped + "06ImportTPCETables.sh")
-        #     waitForTerminate(stdout)
-        #     stdin, stdout, stderr = ssh.exec_command("cd " + scriptsUnzipped + " && ./06ImportTPCETables.sh")
-        #     print "STEP 7: Imported tables in database"
-        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 7/8: Imported tables in database")
-        #
-        #     # print stderr.readlines()
-        #     # print stdout.readlines()
-        #
-        #     sftp.close()
-        #     transport.close()
-        #     ssh.close()
+        try:
+            con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+        except cx_Oracle.DatabaseError as e:
+            error, = e.args
+            if error.code == 1017:
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+                error_con = 1
+            elif error.code == 12154:
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+                error_con = 1
+            elif error.code == 12543:
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+                error_con = 1
+            else:
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
+                error_con = 1
+
+        if error_con != 1:
+            cur = con.cursor()
+
+            # create tablespace
+            try:
+                cur.execute("create bigfile tablespace \"TPCE\" datafile '" + pathToBlock + "' size 85G LOGGING EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO")
+
+            except cx_Oracle.DatabaseError as e:
+                error, = e.args
+                if error.code != 900:
+                    print error
+                    error_con = 2
+
+            if error_con == 0:
+                print "STEP 1: Created tablespace"
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 1/10: Created tablespace")
+                CrSchemaWindow.update()
+
+            # create user
+            f = open('./tpce/03tpce-create-user.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
+
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+            if error_con == 0:
+                print "STEP 2: Created user"
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 2/10: Created user")
+                CrSchemaWindow.update()
+
+            # create tables
+            f = open('./tpce/05tpce-create-tables.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
+
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+            if error_con == 0:
+                print "STEP 3: Created tables"
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 3/10: Created tables")
+                CrSchemaWindow.update()
+
+
+            #     f = open('./queries/scott_ora.sql')
+            #     full_sql = f.read()
+            #     sql_commands = full_sql.split(';')
+            #
+            #     for sql_command in sql_commands:
+            #         try:
+            #             cur.execute(sql_command)
+            #         except cx_Oracle.DatabaseError as e:
+            #             error, = e.args
+            #
+            #
+            #     try:
+            #         cur.execute('create table scott.emp2 as select * from scott.emp')
+            #     except cx_Oracle.DatabaseError as e:
+            #         error, = e.args
+            #         if error.code == 3113:
+            #             cur.execute('drop table scott.emp2')
+            #             cur.execute('create table scott.emp2 as select * from scott.emp')
+            #         elif error.code == 955:
+            #             cur.execute('drop table scott.emp2')
+            #             cur.execute('create table scott.emp2 as select * from scott.emp')
+            #         else:
+            #             CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
+            #             cur.close()
+            #             return
+            #     try:
+            #         cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
+            #     except cx_Oracle.DatabaseError as e:
+            #         error, = e.args
+            #         if error.code == 955:
+            #             cur.execute('truncate table scott.dwhstat')
+            #
+            #     try:
+            #         cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
+            #     except cx_Oracle.DatabaseError as e:
+            #         CreateSchemaProgressSchema already exists!")
+            #
+            cur.close()
+            con.close()
+
+        if error_con != 1:
+            #path definition
+            loaderSource = './EGen/EGenLoader'
+            loaderDestination = '/tmp/jery/EGenLoader'
+            inputSource = './EGen/flat_in.zip'
+            inputDestination = '/tmp/jery/flat_in.zip'
+            scriptSource = './tpce/tpce.zip'
+            scriptDestination = '/tmp/jery/tpce.zip'
+            inputUnzipped = "/tmp/jery/flat_in/"
+            scriptsUnzipped = "/tmp/jery/scripts/"
+            outputPath = "/tmp/jery/tables/"
+
+            def waitForTerminate(stdout):
+                # Wait for the command to terminate
+                while not stdout.channel.exit_status_ready():
+                    # Only print data if there is data to read in the channel
+                    if stdout.channel.recv_ready():
+                        if 'select' in locals():
+                            rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
+                            if len(rl) > 0:
+                                # Print data from stdout
+                                print stdout.channel.recv(1024),
+
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(hostname=ip, username=username, password=password)
+
+            transport = paramiko.Transport((ip, SSHport))
+            transport.connect(username=username, password=password)
+
+            sftp = paramiko.SFTPClient.from_transport(transport)
+
+            print "STEP 4: Connected to %s" % ip
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 4/10: Connected to " + ip)
+            CrSchemaWindow.update()
+
+            #Send commands for folder (re)creation (non-blocking)
+            stdin, stdout, stderr = ssh.exec_command("rm -r -d -f /tmp/jery/")
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("mkdir /tmp/jery/")
+            waitForTerminate(stdout)
+
+            # Copy files to remote
+            sftp.put(loaderSource, loaderDestination)
+            sftp.put(inputSource, inputDestination)
+            sftp.put(scriptSource, scriptDestination)
+            print "STEP 5: Copied files to server"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 5/10: Copied files to server")
+            CrSchemaWindow.update()
+
+
+            # Send commands for table generation (non-blocking)
+            stdin, stdout, stderr = ssh.exec_command("rm -r -d -f" + outputPath)
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("chmod +x " + loaderDestination)
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("unzip " + inputDestination + " -d " + inputUnzipped)
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("unzip " + scriptDestination + " -d " + scriptsUnzipped)
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("rm -f " + inputDestination)
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("rm -f " + scriptDestination)
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("A")
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("mkdir -p " + outputPath)
+            waitForTerminate(stdout)
+            print "STEP 6: Unzipped files on server"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 6/10: Unzipped files on server")
+            CrSchemaWindow.update()
+            stdin, stdout, stderr = ssh.exec_command(
+                loaderDestination + " -i " + inputUnzipped + " -o " + outputPath) # + " -f 1000")
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("rm -f " + loaderDestination)
+            waitForTerminate(stdout)
+            print "STEP 7: Generated tables on server"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 7/10: Generated tables on server")
+            CrSchemaWindow.update()
+
+            # Send commands for table import (non-blocking)
+            stdin, stdout, stderr = ssh.exec_command("chmod +x " + scriptsUnzipped + "06ImportTPCETables.sh")
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("sed -i -e 's/\\r$//' " + scriptsUnzipped + "06ImportTPCETables.sh")
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command("cd " + scriptsUnzipped + " && ./06ImportTPCETables.sh")
+            waitForTerminate(stdout)
+
+            # print stderr.readlines()
+            # print stdout.readlines()
+
+            try:
+                con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+            except cx_Oracle.DatabaseError as e:
+                error, = e.args
+                if error.code == 1017:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+                    error_con = 1
+                elif error.code == 12154:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+                    error_con = 1
+                elif error.code == 12543:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+                    error_con = 1
+                else:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
+                    error_con = 1
+
+            cur = con.cursor()
+
+            noProcesses = 100
+
+            # wait until import is finished
+            sys.stdout.write("Import is not finished yet. Waiting")
+            sys.stdout.flush()
+            while (noProcesses != 0):
+                sys.stdout.write(".")
+                sys.stdout.flush()
+                time.sleep(30)
+                cur.execute("select count(*) from v$session where program like '%sqlldr%'")
+
+                for result in cur:
+                    noProcesses = result[0]
+
+            print "\nSTEP 8: Imported tables in database"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 8/10: Imported tables in database")
+            CrSchemaWindow.update()
+
+            cur.close()
+            con.close()
+            sftp.close()
+            transport.close()
+            ssh.close()
+
 
         if error_con != 1:
             try:
@@ -406,8 +466,51 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
 
                 if error_con == 0:
-                    print "STEP 8: Created indexes"
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 8/8: Created indexes")
+                    print "STEP 9: Created indexes"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 9/10: Created indexes")
+                    CrSchemaWindow.update()
+
+                cur.close()
+                con.close()
+
+            if error_con != 1:
+                try:
+                    con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code == 1017:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+                        error_con = 1
+                    elif error.code == 12154:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+                        error_con = 1
+                    elif error.code == 12543:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+                        error_con = 1
+                    else:
+                        CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
+                        error_con = 1
+
+                cur = con.cursor()
+                # calculate statistics
+                f = open('./tpce/10tpce_calculate_statistics.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
+
+                for sql_command in sql_commands:
+                    try:
+                        cur.execute(sql_command)
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code != 900:
+                            print error
+                            error_con = 2
+
+
+                if error_con == 0:
+                    print "STEP 10: Calculated statistics"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 10/10: Calculated statistics")
+                    CrSchemaWindow.update()
 
 
     def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
@@ -478,27 +581,6 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             con.close()
             if error_con == 0:
                 CrSchemaWindow.VocableVariable.set(str(SID) + ": Test schema dropped!")
-
-
-    def CreateSchemaProgress(CrSchemaWindow, SID, user, passwd, ip, port):
-        """ Used as progress bar.
-            for each and every recursive insert done, a message is printed into the vocable blue bar
-        """
-        con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
-        cur2 = con.cursor()
-        cur2.execute('insert into scott.emp2 select * from scott.emp2')
-        con.commit()
-        CrSchemaWindow.i += 1
-        CrSchemaWindow.VocableVariable.set("Test schema processing step {0} out of {1}".format(str(CrSchemaWindow.i),
-                                                                str(CrSchemaWindow.LoopRatioVar - 1)))
-
-        if CrSchemaWindow.i < CrSchemaWindow.LoopRatioVar:
-            CrSchemaWindow.after(500, lambda:
-            CrSchemaWindow.CreateSchemaProgress(SID, user, passwd, ip, port))
-        else:
-            con.close()
-            CrSchemaWindow.VocableVariable.set("Updating statistics, please wait...")
-            CrSchemaWindow.Statistics(SID, user, passwd, ip, port)
 
 
     def Statistics(CrSchemaWindow, SID, user, passwd, ip, port):
