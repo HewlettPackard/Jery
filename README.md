@@ -18,11 +18,13 @@ JERY is a Python 2.7 based simple database workload generator for Oracle and Ent
 - [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
 
 <a name="Info"/>
+
 ## Info
 To download install instructions use the readme.pdf [_(download)_](https://github.com/HewlettPackard/Jery/raw/master/readme.pdf)
 
 
 <a name="WhatisJery"/>
+
 ## What is Jery?
 
 - Dedicated to Oracle and Enterprise DB
@@ -46,6 +48,7 @@ To download install instructions use the readme.pdf [_(download)_](https://githu
 _However, JERY is not a benchmark tool_
 
 <a name="Requirements"/>
+
 ## Requirements
 JERY is meant to run on Linux Systems only (primarily RHEL and CentOS). For this reason the following installation guide is mainly for RHEL. Since JERY is running in a Docker image, a recent version of Docker needs to be installed on the system.
 

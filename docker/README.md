@@ -1,4 +1,4 @@
-#Docker Image for deploying Jery
+# Docker Image for deploying Jery
 based on [CentOs 7](https://hub.docker.com/_/centos/)
 
 ## Table of Contents
@@ -8,10 +8,12 @@ based on [CentOs 7](https://hub.docker.com/_/centos/)
 - [Issues](#Issues)
 
 <a name="Build"/>
+
 ## Build
 For a built tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
 
 <a name="Dockerruncommand"/>
+
 ## Docker run command
 Needs to be executed with superuser privileges: <br>
 ```docker run -ti --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix jerydocker```
@@ -23,6 +25,7 @@ Needs to be executed with superuser privileges: <br>
 - ```jerydocker```: Run the container jerydocker
 
 <a name="Dockerfileexplained"/>
+
 ## Dockerfile explained
 #### Enable Sources
 Add and install epel and ius sources. For installing libaio and tkinter with yum.
@@ -36,6 +39,7 @@ Is needed by Jery for establishing the connection to the Oracle DB. Both is adde
  Switch to this user and execute the Jery script.
 
 <a name="Issues"/> 
+
 ## Issues
 Excecuting Jery as root if not logged in as root
 ```Error _tkinter.TclError: couldn't connect to display ":0"```</br></br>
