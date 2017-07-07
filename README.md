@@ -110,6 +110,7 @@ Docker install guides for other linux distributions can be found under:
 - [Installation on Oracle Linux](http://docs.master.dockerproject.org/engine/installation/linux/oracle/)
 
 <a name="Installation"/>
+
 ## Installation
 JERY can either be downloaded from a Docker registry or from this GitHub page. These possibilities are described in the following.
 
