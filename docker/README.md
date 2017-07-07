@@ -1,18 +1,18 @@
 #Docker Image for deploying Jery
 based on [CentOs 7](https://hub.docker.com/_/centos/)
 
-##Table of Contents
+## Table of Contents
 - [Build](#Build)
 - [Docker run command](#Dockerruncommand)  
 - [Dockerfile explained](#Dockerfileexplained)
 - [Issues](#Issues)
 
 <a name="Build"/>
-##Build
+## Build
 For a built tarball version of the docker image please refer to [releases](https://github.hpe.com/marcel-jakob/jery/releases)
 
 <a name="Dockerruncommand"/>
-##Docker run command
+## Docker run command
 Needs to be executed with superuser privileges: <br>
 ```docker run -ti --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix jerydocker```
 
@@ -23,20 +23,20 @@ Needs to be executed with superuser privileges: <br>
 - ```jerydocker```: Run the container jerydocker
 
 <a name="Dockerfileexplained"/>
-##Dockerfile explained
-####Enable Sources
+## Dockerfile explained
+#### Enable Sources
 Add and install epel and ius sources. For installing libaio and tkinter with yum.
-####Install Oracle Client and cx_Oracle
+#### Install Oracle Client and cx_Oracle
 Is needed by Jery for establishing the connection to the Oracle DB. Both is added and installed. But at first libaio is installed as dependency of Oracle Client. In the end the environment variable for the Oracle Client is exported.
-####Install GUI + tkinter
+#### Install GUI + tkinter
  The base image of CentOs7 has some bugs in order to display graphical user interfaces. For this reason a font needs to be installed. In the end tkinter is installed via yum as UI python library.
-####Add new user "developer"
+#### Add new user "developer"
  Add a new user developer with root rights to the system. This one is needed to x11 forward the window out of the docker container.
-####Execute Jery
+#### Execute Jery
  Switch to this user and execute the Jery script.
 
 <a name="Issues"/> 
-##Issues
+## Issues
 Excecuting Jery as root if not logged in as root
 ```Error _tkinter.TclError: couldn't connect to display ":0"```</br></br>
 X-Server connection of other users (root) are rejected</br>
