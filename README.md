@@ -186,6 +186,7 @@ docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker
 
 
 <a name="AddinganinsecureDockerregistry"/>
+
 ## Adding an insecure Docker registry
 There are two options for adding a registry with no authorization to Docker running on RHEL7 (on client which wants to push/pull to registry)
 #### Option 1: Start Docker daemon with --insecure-registry
@@ -222,6 +223,7 @@ ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.h
 ```
 
 <a name="UsedLibraries"/>
+
 ## Used Libraries
 
 - [Tkinter](http://tkinter.unpythonic.net/wiki/)
