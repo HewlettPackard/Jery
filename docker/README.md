@@ -1,4 +1,4 @@
-#Docker Image for deploying Jery
+# Docker Image for deploying Jery
 based on [CentOs 7](https://hub.docker.com/_/centos/)
 
 ## Table of Contents
