@@ -1,4 +1,5 @@
-[![GitHub Release](https://img.shields.io/github/downloads/HewlettPackard/Jery/total.svg)
+[![Github All Releases](https://img.shields.io/github/downloads/atom/atom/total.svg)](https://github.com/HewlettPackard/Jery)
+[![Docker Stars](https://img.shields.io/docker/stars/_/ubuntu.svg)](https://hub.docker.com/r/oraclekc/jery/)
 
 # JERY
 JERY is a Python 2.7 based simple database workload generator for Oracle and Enterprise Databases. It is designed to run in a special Docker image and it is streaming it's GUI through x11 to your host OS. 
@@ -17,7 +18,7 @@ JERY is a Python 2.7 based simple database workload generator for Oracle and Ent
 
 <a name="Info"/>
 ## Info
-To download install instructions use the readme.pdf [_(download)_](https://github.hpe.com/marcel-jakob/jery/raw/master/readme.pdf)
+To download install instructions use the readme.pdf [_(download)_](https://github.com/HewlettPackard/Jery/raw/master/readme.pdf)
 
 
 <a name="WhatisJery"/>
@@ -109,9 +110,18 @@ Docker install guides for other linux distributions can be found under:
 
 <a name="Installation"/>
 ## Installation
-JERY can either be downloaded from this GitHub page or from a Docker registry. These possibilities are described in the following.
+JERY can either be downloaded from a Docker registry or from this GitHub page. These possibilities are described in the following.
 
-### Option 1: Download latest build from GitHub page and import image
+### Option 1: RECOMMENDED Pull latest image from Docker Hub
+1) Open a new terminal and type 
+
+```shell
+ sudo docker pull oraclekc/jery
+```
+
+2) Download the run script and execute it [_(download)_](https://github.com/HewlettPackard/Jery/releases/download/v1.0a-script/run.sh)
+
+### Option 2: Download latest build from GitHub page and import image
 - download the latest release from this GitHub page [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases)
 - unzip the build file
 - open a new terminal and navigate to the unzipped file _(jerydocker.tar)_
@@ -120,9 +130,9 @@ JERY can either be downloaded from this GitHub page or from a Docker registry. T
 ```shell
 docker load < jerydocker.tar
 ```
-- download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
+- download the run script and execute it [_(download)_](https://github.com/HewlettPackard/Jery/releases/download/v1.0a-script/run.sh)
 
-### Option 2: Download and import latest build from a the Docker registry
+### Option 3: Download and import latest build from a private Docker registry
 
 
 #### 2.1) From within the HPE network
@@ -148,7 +158,7 @@ docker load < jerydocker.tar
 ```shell
  docker tag hub.docker.hpecorp.net/oraclekc/jery jerydocker
 ```
-5) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
+5) Download the run script and execute it [_(download)_](https://github.com/HewlettPackard/Jery/releases/download/v1.0a-script/run.sh)
 
 
 #### 2.2 From within the EPC network
@@ -158,7 +168,7 @@ docker load < jerydocker.tar
 ```shell
 sudo su
 ```
-2) Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(how to)_](https://github.hpe.com/marcel-jakob/jery/blob/master/docker/README.md#adding-an-insecure-docker-registry)
+2) Add dockerregistry.oracle.epc.ext.hpe.com:5000 as an insecure registry [_(how to)_](https://github.com/HewlettPackard/Jery/blob/master/docker/README.md#adding-an-insecure-docker-registry)
 
 3) Execute the command:
 
@@ -170,7 +180,7 @@ docker pull dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker
 ```shell
  docker tag dockerregistry.oracle.epc.ext.hpe.com:5000/jerydocker jerydocker
 ```
-4) Download the run script and execute it [_(download)_](https://github.hpe.com/marcel-jakob/jery/releases/download/v1.0a-script/run.sh)
+4) Download the run script and execute it [_(download)_](https://github.com/HewlettPackard/Jery/releases/download/v1.0a-script/run.sh)
 
 
 <a name="AddinganinsecureDockerregistry"/>
