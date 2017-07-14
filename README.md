@@ -26,6 +26,7 @@ To download install instructions use the readme.pdf [_(download)_](https://githu
 <a name="WhatisJery"/>
 
 ## What is Jery?
+[Usage Demo Video](https://youtu.be/6GQvk1VCgZA) 
 
 - Dedicated to Oracle and Enterprise DB
 - Mimic Business Intelligence workload (100% massive read)
@@ -115,6 +116,8 @@ Docker install guides for other linux distributions can be found under:
 <a name="Installation"/>
 
 ## Installation
+[Installation Guide Video](https://youtu.be/Ggx6Z_BtCaA) 
+
 JERY can either be downloaded from a Docker registry or from this GitHub page. These possibilities are described in the following.
 
 ### Option 1: RECOMMENDED Pull latest image from Docker Hub
