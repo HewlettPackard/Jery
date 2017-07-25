@@ -506,7 +506,16 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
-
+                try:
+                    cur.execute("""INSERT INTO TPCE.dwhstat(statid, brokervolumecount, customerpositioncount, marketfeedcount,
+                        marketwatchcount, securitydetailcount, tradelookupcount, tradeordercount, traderesultcount,
+                        tradestatuscount, tradeupdatecount, datamaintenancecount) 
+                        VALUES('0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0')""")
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
 
                 if error_con == 0:
                     print "STEP 10: Calculated statistics"
