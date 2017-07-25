@@ -1,6 +1,8 @@
+#-*- coding: iso-8859-1 -*-
+#© Copyright 2017 Hewlett Packard Enterprise Development LP
+
 from __future__ import division
 import numpy as np
-from enum import Enum
 import cx_Oracle
 
 ########################################################################################################################
