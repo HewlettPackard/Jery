@@ -1,11 +1,12 @@
 #!/usr/local/bin/python3
 #-*- coding: iso-8859-1 -*-
 
-########################################
+#############################################################
+## © Copyright 2017 Hewlett Packard Enterprise Development LP
 ## Author: Yann Allandit
 ## Contact: dwh2@hp.com
 ## Creation Date: 10th of March 2014
-########################################
+#############################################################
 
 import Tkinter
 from Tkinter import *
@@ -14,9 +15,6 @@ import threading
 import time
 import tkMessageBox
 import ConfigParser
-import datetime
-
-import datetime
 import psycopg2
 
 ########################  CONNECTION  ##########################
