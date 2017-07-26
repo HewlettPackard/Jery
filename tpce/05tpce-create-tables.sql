@@ -334,8 +334,8 @@ CREATE TABLE TPCE.zip_code (
     zc_town VARCHAR2(80) NOT NULL,
     zc_div VARCHAR2(80) NOT NULL);
 
--- DWHSTAT table for evaluation
-CREATE TABLE TPCE.dwhstat (
+-- TPCESTAT table for TPCE evaluation
+CREATE TABLE TPCE.tpcestat (
   statid INT NOT NULL,
   brokervolumecount INT NOT NULL,
   customerpositioncount INT NOT NULL,
@@ -349,4 +349,10 @@ CREATE TABLE TPCE.dwhstat (
   tradeupdatecount INT NOT NULL,
   datamaintenancecount INT NOT NULL);
 
-exit 
+CREATE TABLE TPCE.dwhstat (
+  seq int not null primary key,
+  elapsed int,
+  insdate date);
+
+
+exit

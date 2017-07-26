@@ -8,6 +8,7 @@
 ## Creation Date: 10th of March 2014
 #############################################################
 
+from __future__ import division
 import Tkinter
 from Tkinter import *
 import cx_Oracle
@@ -16,8 +17,7 @@ import time
 import tkMessageBox
 import ConfigParser
 import paramiko
-import subprocess
-import os
+import numpy as np
 
 
 ########################  CONNECTION  ##########################
@@ -408,6 +408,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+                print "created pks"
 
                 # create indexes 2
                 f = open('./tpce/08_1tpce-create-fk.sql')
@@ -422,6 +423,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+                print "created fks 1"
 
                 # create indexes 3
                 f = open('./tpce/08_2tpce-create-fk.sql')
@@ -436,6 +438,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+                print "created fks 2"
 
                 # create indexes 4
                 f = open('./tpce/08_3tpce-create-fk.sql')
@@ -450,6 +453,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+                print "created fks 3"
 
                 # create indexes 5
                 f = open('./tpce/08_4tpce-create-fk.sql')
@@ -464,7 +468,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
-
+                print "created fks 4"
 
                 if error_con == 0:
                     print "STEP 9: Created indexes"
@@ -506,11 +510,20 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+
                 try:
-                    cur.execute("""INSERT INTO TPCE.dwhstat(statid, brokervolumecount, customerpositioncount, marketfeedcount,
+                    cur.execute("""INSERT INTO TPCE.tpcestat(statid, brokervolumecount, customerpositioncount, marketfeedcount,
                         marketwatchcount, securitydetailcount, tradelookupcount, tradeordercount, traderesultcount,
                         tradestatuscount, tradeupdatecount, datamaintenancecount) 
                         VALUES('0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0')""")
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                try:
+                    cur.execute('CREATE SEQUENCE tpce.seq START WITH 1 INCREMENT BY 1 NOCACHE')
                 except cx_Oracle.DatabaseError as e:
                     error, = e.args
                     if error.code != 900:
@@ -1091,11 +1104,62 @@ class LoadThread(threading.Thread):
             self.LengthTest = self.LengthTest * 60
         self.runLoad = 0
 
-        
+    def brokervolumeTransaction(self, con):
+       if con:
+            cur = con.cursor()
+
+            # get a random sector name
+            cur.execute("""select SC_NAME from ( select SC_NAME, row_number() over (order by sc_name) 
+                        rno from sector order by rno) where  rno = ( select round (dbms_random.value (0,11)) from dual)""")
+
+            res = cur.fetchall()
+
+            if len(res) == 1 and len(res[0]):
+                in_sector_name = res[0][0]
+                cur.callproc("dbms_output.enable")
+                cur.execute("""
+                    DECLARE
+                    in_sector_name VARCHAR2(50);
+                    list_len INTEGER;
+                    status INTEGER;
+                    i INTEGER;
+
+                    in_broker_list  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
+                    broker_name  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
+                    volume Brokervolume_pkg.VOL_ARRAY := Brokervolume_pkg.VOL_ARRAY();
+                    brokervolframe1_tbl  Brokervolume_pkg.brokervolframe1_tab;
+
+                    BEGIN
+
+                    in_sector_name  := '""" + in_sector_name + """';
+                    SELECT b_name BULK COLLECT INTO in_broker_list FROM ( SELECT b_name , row_number() over (order by b_name) rno FROM broker )
+                            WHERE  rno < ( SELECT round (dbms_random.value (25,50)) FROM dual) 
+                            AND rno > ( SELECT round (dbms_random.value (0,25)) FROM dual);
+
+                    dbms_output.put_line('ins_sec: ' || in_sector_name);
+                    brokervolframe1_tbl := Brokervolume_pkg.BrokerVolumeFrame1(in_broker_list ,in_sector_name,broker_name,list_len,status,volume);
+
+                    dbms_output.put_line('list_len: ' || list_len);
+                    dbms_output.put_line('status_out: ' || status);
+                    --FOR i IN 1..30
+                    --LOOP
+                    --dbms_output.put_line('volume'|| volume(i));
+                    --END LOOP;
+                    END;
+                """)
+
+                # printDBMSoutput(cur)
+
+            cur.close()
+
+    def placeholder(self, con):
+        pass
+
+    # aka JeryTxnHarness
     def run(self):
         """
            The thread executes the same query in loop as long as:
-           - it cans be connected to the database
+           - it can be connected to the database
            - the test period is not over (time.time() < (StartTimeTest + self.LengthTest)
            - the flag self.runLoad == 0. This one is switched to 1 when:
                - the test period is over
@@ -1104,35 +1168,98 @@ class LoadThread(threading.Thread):
         global GlobalStop
         
         error_con = 0
+
+        txnNames = ["Broker-Volume",
+                    "Customer-Position",
+                    "Market-Feed",
+                    "Market-Watch",
+                    "Market-Watch",
+                    "Trade-Lookup",
+                    "Trade-Order",
+                    "Trade-Result",
+                    "Trade-Status",
+                    "Trade-Update",
+                    "Data-Maintenance"]
+        # ToDo: insert functions
+        txns = [LoadThread.brokervolumeTransaction,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder]
+        columnNames = ["BROKERVOLUMECOUNT",
+                       "CUSTOMERPOSITIONCOUNT",
+                       "MARKETFEEDCOUNT",
+                       "MARKETWATCHCOUNT",
+                       "SECURITYDETAILCOUNT",
+                       "TRADELOOKUPCOUNT",
+                       "TRADEORDERCOUNT",
+                       "TRADERESULTCOUNT",
+                       "TRADESTATUSCOUNT",
+                       "TRADEUPDATECOUNT",
+                       "DATAMAINTENANCECOUNT"]
+        weight = [100, 10, 5, 30, 4, 34, 12, 23, 10, 3, 24]
+
+        totalWeight = np.sum(weight)
+        probs = np.zeros(11)
+        absCounts = np.zeros(11)
+        relCounts = np.zeros(11)
+        
         StartTimeTest = time.time()
         """Test the connection. If valid, enter in a loop until the "stop load" button is hit
            or the test period is over
            app.ExecTime() call the statistics method
         """
         try:
-            con = connectToOracle(self.OraIp, self.OraPort, self.OraConnect, self.OraUser, self.OraPwd, threaded=True)
+            con = connectToOracle(self.OraIp, self.OraPort, self.OraConnect, "TPCE", "TPCE", threaded=True)
         except cx_Oracle.DatabaseError:
             error_con = 1
             return error_con
 
         if error_con != 1:
+            cur = con.cursor()
+
+            cur.execute("""UPDATE tpcestat 
+                                    SET BROKERVOLUMECOUNT = 0, CUSTOMERPOSITIONCOUNT = 0, MARKETFEEDCOUNT = 0, 
+                                    MARKETWATCHCOUNT = 0, SECURITYDETAILCOUNT = 0, TRADELOOKUPCOUNT = 0, TRADEORDERCOUNT = 0, 
+                                    TRADERESULTCOUNT = 0, TRADESTATUSCOUNT = 0, TRADEUPDATECOUNT = 0, DATAMAINTENANCECOUNT = 0
+                                    WHERE STATID = 0 """)
+            con.commit()
+            cur.close()
+
+            # calculate probabilities based on weighting
+            for i in range(0, len(weight)):
+                probs[i] = weight[i] / totalWeight
+
             while self.runLoad == 0:
                 cur = con.cursor()
                 cur2 = con.cursor()
-                startTimeQuery = time.time()
-                try:
-                    cur.execute('select e1.ename, min(e2.deptno), max(e2.deptno), avg(to_number(to_char(e2.sal))), \
-                            avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
-                except cx_Oracle.OperationalError:
-                    error_con = 1
-                    print cx_Oracle.OperationalError
-                    return error_con
+                cur3 = con.cursor()
+                # choosing values from 0-11 based on probabilities
+                choice = np.random.choice(11, 1, p=probs)[0]
 
+                startTimeQuery = time.time()
+                # execute selected transaction
+                txns[choice](self, con)
                 elapsedTimeQuery = int(time.time() - startTimeQuery)
-                cur2.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)',{"id":elapsedTimeQuery})
+
+                # increment selected transaction count
+                absCounts[choice] += 1
+
+                cur2.execute("""UPDATE tpcestat SET """ + columnNames[choice] + """ = ( SELECT """ \
+                             + columnNames[choice] + """ FROM tpcestat WHERE STATID = 0 ) + 1 WHERE STATID = 0 """)
+                con.commit()
+
+                cur3.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)', {"id": elapsedTimeQuery})
                 con.commit()
                 cur.close()
                 cur2.close()
+                cur3.close()
                 app.ExecTime()
 
                 if time.time() > (StartTimeTest + self.LengthTest):
@@ -1797,7 +1924,7 @@ class simpleapp_tk(Tkinter.Tk):
         if error_con != 1:
             cur = con.cursor()
             try:
-                cur.execute('select count(*) from emp2')
+                cur.execute('select count(*) from ADDRESS')
             except cx_Oracle.DatabaseError:
                 self.labelVariable2.set("Cannot access the test schema. Please create it again")
                 return 2

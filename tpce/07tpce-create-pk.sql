@@ -162,6 +162,6 @@ ADD CONSTRAINT pk_zip_code
 PRIMARY KEY (zc_code);
 
 -- DWHSTAT table for evaluation
-ALTER TABLE dwhstat
-ADD CONSTRAINT pk_dwhstat
+ALTER TABLE tpcestat
+ADD CONSTRAINT pk_tpcestat
 PRIMARY KEY (statid);
