@@ -788,7 +788,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
             Variable naming is static
         """    
 
-        statWindow.wm_title(" Extended Statistics")
+        statWindow.wm_title(" TPC-E Statistics")
         statWindow.SID = SID
         statWindow.passwd = passwd
         statWindow.ip = ip
@@ -802,179 +802,220 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
 
         """ Label and Entry definition  """
         
-        statWindow.LabelNodeName = Tkinter.Label(statWindow, text="Node name")
-        statWindow.LabelNodeName.grid(column=0, row=0)
+        statWindow.LabelTxnMix = Tkinter.Label(statWindow, text="Transaction Mix")
+        statWindow.LabelTxnMix.grid(column=0, row=0)
 
-        statWindow.LabelInstanceName = Tkinter.Label(statWindow, text="Instance")
-        statWindow.LabelInstanceName.grid(column=1, row=0)
+        statWindow.LabelTxnCount = Tkinter.Label(statWindow, text="Transaction Count")
+        statWindow.LabelTxnCount.grid(column=1, row=0)
 
-        statWindow.LabelNbUsers = Tkinter.Label(statWindow, text="Nb. Users")
-        statWindow.LabelNbUsers.grid(column=2, row=0)
+        statWindow.LabelMixPerc = Tkinter.Label(statWindow, text="Mix %")
+        statWindow.LabelMixPerc.grid(column=2, row=0)
+
+        statWindow.EntryTxnMix1var = Tkinter.StringVar()
+        statWindow.EntryTxnMix1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix1var,\
+                                                width=12)
+        statWindow.EntryTxnMix1.grid(column=0, row=1, sticky='EW')
+
+        statWindow.EntryTxnCount1var = Tkinter.StringVar()
+        statWindow.EntryTxnCount1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount1var,\
+                                                width=12)
+        statWindow.EntryTxnCount1.grid(column=1, row=1, sticky='EW')
+
+        statWindow.EntryMixPerc1var = Tkinter.StringVar()
+        statWindow.EntryMixPerc1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc1var,\
+                                                width=12)
+        statWindow.EntryMixPerc1.grid(column=2, row=1, sticky='EW')
+
+
+        statWindow.EntryTxnMix2var = Tkinter.StringVar()
+        statWindow.EntryTxnMix2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix2var,\
+                                                width=12)
+        statWindow.EntryTxnMix2.grid(column=0, row=2, sticky='EW')
+
+        statWindow.EntryTxnCount2var = Tkinter.StringVar()
+        statWindow.EntryTxnCount2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount2var,\
+                                                width=12)
+        statWindow.EntryTxnCount2.grid(column=1, row=2, sticky='EW')
+
+        statWindow.EntryMixPerc2var = Tkinter.StringVar()
+        statWindow.EntryMixPerc2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc2var,\
+                                                width=12)
+        statWindow.EntryMixPerc2.grid(column=2, row=2, sticky='EW')
+
+
+        statWindow.EntryTxnMix3var = Tkinter.StringVar()
+        statWindow.EntryTxnMix3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix3var,\
+                                                width=12)
+        statWindow.EntryTxnMix3.grid(column=0, row=3, sticky='EW')
+
+        statWindow.EntryTxnCount3var = Tkinter.StringVar()
+        statWindow.EntryTxnCount3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount3var,\
+                                                width=12)
+        statWindow.EntryTxnCount3.grid(column=1, row=3, sticky='EW')
+
+        statWindow.EntryMixPerc3var = Tkinter.StringVar()
+        statWindow.EntryMixPerc3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc3var,\
+                                                width=12)
+        statWindow.EntryMixPerc3.grid(column=2, row=3, sticky='EW')
         
-        statWindow.LabelBusyTime = Tkinter.Label(statWindow, text="% Busy Time")
-        statWindow.LabelBusyTime.grid(column=3, row=0)
 
-        statWindow.LabelSQLSec = Tkinter.Label(statWindow, text="SQL orders/Sec.")
-        statWindow.LabelSQLSec.grid(column=4, row=0)
-
-        statWindow.LabelIOMSec = Tkinter.Label(statWindow, text="IO MB/Sec.")
-        statWindow.LabelIOMSec.grid(column=5, row=0)
-
-        statWindow.LabelBlockRead = Tkinter.Label(statWindow, text="Blocks read/Sec.")
-        statWindow.LabelBlockRead.grid(column=6, row=0)
-
-        statWindow.EntryNodeName1var = Tkinter.StringVar()
-        statWindow.EntryNodeName1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName1var,\
+        statWindow.EntryTxnMix4var = Tkinter.StringVar()
+        statWindow.EntryTxnMix4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix4var,\
                                                 width=12)
-        statWindow.EntryNodeName1.grid(column=0, row=1, sticky='EW')
+        statWindow.EntryTxnMix4.grid(column=0, row=4, sticky='EW')
 
-        statWindow.EntryInstanceName1var = Tkinter.StringVar()
-        statWindow.EntryInstanceName1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName1var,\
+        statWindow.EntryTxnCount4var = Tkinter.StringVar()
+        statWindow.EntryTxnCount4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount4var,\
                                                 width=12)
-        statWindow.EntryInstanceName1.grid(column=1, row=1, sticky='EW')
+        statWindow.EntryTxnCount4.grid(column=1, row=4, sticky='EW')
 
-        statWindow.EntryNbUsers1var = Tkinter.StringVar()
-        statWindow.EntryNbUsers1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers1var,\
+        statWindow.EntryMixPerc4var = Tkinter.StringVar()
+        statWindow.EntryMixPerc4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc4var,\
                                                 width=12)
-        statWindow.EntryNbUsers1.grid(column=2, row=1, sticky='EW')
-        
-        statWindow.EntryBusyTime1var = Tkinter.StringVar()
-        statWindow.EntryBusyTime1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime1var,\
-                                                width=12)
-        statWindow.EntryBusyTime1.grid(column=3, row=1, sticky='EW')
-
-        statWindow.EntrySQLSec1var = Tkinter.StringVar()
-        statWindow.EntrySQLSec1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec1var,\
-                                                width=12)
-        statWindow.EntrySQLSec1.grid(column=4, row=1, sticky='EW')
-
-        statWindow.EntryIOMSec1var = Tkinter.StringVar()
-        statWindow.EntryIOMSec1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec1var,\
-                                                width=12)
-        statWindow.EntryIOMSec1.grid(column=5, row=1, sticky='EW')
-
-        statWindow.EntryBlockRead1var = Tkinter.StringVar()
-        statWindow.EntryBlockRead1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead1var,\
-                                                width=12)
-        statWindow.EntryBlockRead1.grid(column=6, row=1, sticky='EW')
+        statWindow.EntryMixPerc4.grid(column=2, row=4, sticky='EW')
         
 
-        statWindow.EntryNodeName2var = Tkinter.StringVar()
-        statWindow.EntryNodeName2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName2var,\
+        statWindow.EntryTxnMix5var = Tkinter.StringVar()
+        statWindow.EntryTxnMix5 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix5var, \
                                                 width=12)
-        statWindow.EntryNodeName2.grid(column=0, row=2, sticky='EW')
+        statWindow.EntryTxnMix5.grid(column=0, row=5, sticky='EW')
 
-        statWindow.EntryInstanceName2var = Tkinter.StringVar()
-        statWindow.EntryInstanceName2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName2var,\
-                                                width=12)
-        statWindow.EntryInstanceName2.grid(column=1, row=2, sticky='EW')
+        statWindow.EntryTxnCount5var = Tkinter.StringVar()
+        statWindow.EntryTxnCount5 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount5var, \
+                                                  width=12)
+        statWindow.EntryTxnCount5.grid(column=1, row=5, sticky='EW')
 
-        statWindow.EntryNbUsers2var = Tkinter.StringVar()
-        statWindow.EntryNbUsers2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers2var,\
-                                                width=12)
-        statWindow.EntryNbUsers2.grid(column=2, row=2, sticky='EW')
+        statWindow.EntryMixPerc5var = Tkinter.StringVar()
+        statWindow.EntryMixPerc5 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc5var, \
+                                                 width=12)
+        statWindow.EntryMixPerc5.grid(column=2, row=5, sticky='EW')
         
-        statWindow.EntryBusyTime2var = Tkinter.StringVar()
-        statWindow.EntryBusyTime2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime2var,\
-                                                width=12)
-        statWindow.EntryBusyTime2.grid(column=3, row=2, sticky='EW')
 
-        statWindow.EntrySQLSec2var = Tkinter.StringVar()
-        statWindow.EntrySQLSec2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec2var,\
+        statWindow.EntryTxnMix6var = Tkinter.StringVar()
+        statWindow.EntryTxnMix6 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix6var, \
                                                 width=12)
-        statWindow.EntrySQLSec2.grid(column=4, row=2, sticky='EW')
+        statWindow.EntryTxnMix6.grid(column=0, row=6, sticky='EW')
 
-        statWindow.EntryIOMSec2var = Tkinter.StringVar()
-        statWindow.EntryIOMSec2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec2var,\
-                                                width=12)
-        statWindow.EntryIOMSec2.grid(column=5, row=2, sticky='EW')
+        statWindow.EntryTxnCount6var = Tkinter.StringVar()
+        statWindow.EntryTxnCount6 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount6var, \
+                                                  width=12)
+        statWindow.EntryTxnCount6.grid(column=1, row=6, sticky='EW')
 
-        statWindow.EntryBlockRead2var = Tkinter.StringVar()
-        statWindow.EntryBlockRead2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead2var,\
-                                                width=12)
-        statWindow.EntryBlockRead2.grid(column=6, row=2, sticky='EW')
-
-
-        statWindow.EntryNodeName3var = Tkinter.StringVar()
-        statWindow.EntryNodeName3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName3var,\
-                                                width=12)
-        statWindow.EntryNodeName3.grid(column=0, row=3, sticky='EW')
-
-        statWindow.EntryInstanceName3var = Tkinter.StringVar()
-        statWindow.EntryInstanceName3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName3var,\
-                                                width=12)
-        statWindow.EntryInstanceName3.grid(column=1, row=3, sticky='EW')
-
-        statWindow.EntryNbUsers3var = Tkinter.StringVar()
-        statWindow.EntryNbUsers3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers3var,\
-                                                width=12)
-        statWindow.EntryNbUsers3.grid(column=2, row=3, sticky='EW')
+        statWindow.EntryMixPerc6var = Tkinter.StringVar()
+        statWindow.EntryMixPerc6 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc6var, \
+                                                 width=12)
+        statWindow.EntryMixPerc6.grid(column=2, row=6, sticky='EW')
         
-        statWindow.EntryBusyTime3var = Tkinter.StringVar()
-        statWindow.EntryBusyTime3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime3var,\
-                                                width=12)
-        statWindow.EntryBusyTime3.grid(column=3, row=3, sticky='EW')
 
-        statWindow.EntrySQLSec3var = Tkinter.StringVar()
-        statWindow.EntrySQLSec3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec3var,\
+        statWindow.EntryTxnMix7var = Tkinter.StringVar()
+        statWindow.EntryTxnMix7 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix7var, \
                                                 width=12)
-        statWindow.EntrySQLSec3.grid(column=4, row=3, sticky='EW')
+        statWindow.EntryTxnMix7.grid(column=0, row=7, sticky='EW')
 
-        statWindow.EntryIOMSec3var = Tkinter.StringVar()
-        statWindow.EntryIOMSec3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec3var,\
-                                                width=12)
-        statWindow.EntryIOMSec3.grid(column=5, row=3, sticky='EW')
+        statWindow.EntryTxnCount7var = Tkinter.StringVar()
+        statWindow.EntryTxnCount7 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount7var, \
+                                                  width=12)
+        statWindow.EntryTxnCount7.grid(column=1, row=7, sticky='EW')
 
-        statWindow.EntryBlockRead3var = Tkinter.StringVar()
-        statWindow.EntryBlockRead3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead3var,\
-                                                width=12)
-        statWindow.EntryBlockRead3.grid (column=6, row=3, sticky='EW')
-
-
-        statWindow.EntryNodeName4var = Tkinter.StringVar()
-        statWindow.EntryNodeName4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName4var,\
-                                                width=12)
-        statWindow.EntryNodeName4.grid(column=0, row=4, sticky='EW')
-
-        statWindow.EntryInstanceName4var = Tkinter.StringVar()
-        statWindow.EntryInstanceName4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName4var,\
-                                                width=12)
-        statWindow.EntryInstanceName4.grid(column=1, row=4, sticky='EW')
-
-        statWindow.EntryNbUsers4var = Tkinter.StringVar()
-        statWindow.EntryNbUsers4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers4var,\
-                                                width=12)
-        statWindow.EntryNbUsers4.grid(column=2, row=4, sticky='EW')
+        statWindow.EntryMixPerc7var = Tkinter.StringVar()
+        statWindow.EntryMixPerc7 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc7var, \
+                                                 width=12)
+        statWindow.EntryMixPerc7.grid(column=2, row=7, sticky='EW')
         
-        statWindow.EntryBusyTime4var = Tkinter.StringVar()
-        statWindow.EntryBusyTime4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime4var,\
-                                                width=12)
-        statWindow.EntryBusyTime4.grid(column=3, row=4, sticky='EW')
 
-        statWindow.EntrySQLSec4var = Tkinter.StringVar()
-        statWindow.EntrySQLSec4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec4var,\
+        statWindow.EntryTxnMix8var = Tkinter.StringVar()
+        statWindow.EntryTxnMix8 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix8var, \
                                                 width=12)
-        statWindow.EntrySQLSec4.grid(column=4, row=4, sticky='EW')
+        statWindow.EntryTxnMix8.grid(column=0, row=8, sticky='EW')
 
-        statWindow.EntryIOMSec4var = Tkinter.StringVar()
-        statWindow.EntryIOMSec4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec4var,\
+        statWindow.EntryTxnCount8var = Tkinter.StringVar()
+        statWindow.EntryTxnCount8 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount8var, \
+                                                  width=12)
+        statWindow.EntryTxnCount8.grid(column=1, row=8, sticky='EW')
+
+        statWindow.EntryMixPerc8var = Tkinter.StringVar()
+        statWindow.EntryMixPerc8 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc8var, \
+                                                 width=12)
+        statWindow.EntryMixPerc8.grid(column=2, row=8, sticky='EW')
+        
+
+        statWindow.EntryTxnMix9var = Tkinter.StringVar()
+        statWindow.EntryTxnMix9 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix9var, \
                                                 width=12)
-        statWindow.EntryIOMSec4.grid(column=5, row=4, sticky='EW')
+        statWindow.EntryTxnMix9.grid(column=0, row=9, sticky='EW')
 
-        statWindow.EntryBlockRead4var = Tkinter.StringVar()
-        statWindow.EntryBlockRead4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead4var,\
+        statWindow.EntryTxnCount9var = Tkinter.StringVar()
+        statWindow.EntryTxnCount9 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount9var, \
+                                                  width=12)
+        statWindow.EntryTxnCount9.grid(column=1, row=9, sticky='EW')
+
+        statWindow.EntryMixPerc9var = Tkinter.StringVar()
+        statWindow.EntryMixPerc9 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc9var, \
+                                                 width=12)
+        statWindow.EntryMixPerc9.grid(column=2, row=9, sticky='EW')
+        
+
+        statWindow.EntryTxnMix10var = Tkinter.StringVar()
+        statWindow.EntryTxnMix10 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix10var, \
                                                 width=12)
-        statWindow.EntryBlockRead4.grid(column=6, row=4, sticky='EW')
+        statWindow.EntryTxnMix10.grid(column=0, row=10, sticky='EW')
 
+        statWindow.EntryTxnCount10var = Tkinter.StringVar()
+        statWindow.EntryTxnCount10 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount10var, \
+                                                  width=12)
+        statWindow.EntryTxnCount10.grid(column=1, row=10, sticky='EW')
+
+        statWindow.EntryMixPerc10var = Tkinter.StringVar()
+        statWindow.EntryMixPerc10 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc10var, \
+                                                 width=12)
+        statWindow.EntryMixPerc10.grid(column=2, row=10, sticky='EW')
+        
+
+        statWindow.EntryTxnMix11var = Tkinter.StringVar()
+        statWindow.EntryTxnMix11 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix11var, \
+                                                width=12)
+        statWindow.EntryTxnMix11.grid(column=0, row=11, sticky='EW')
+
+        statWindow.EntryTxnCount11var = Tkinter.StringVar()
+        statWindow.EntryTxnCount11 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount11var, \
+                                                  width=12)
+        statWindow.EntryTxnCount11.grid(column=1, row=11, sticky='EW')
+
+        statWindow.EntryMixPerc11var = Tkinter.StringVar()
+        statWindow.EntryMixPerc11 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc11var, \
+                                                 width=12)
+        statWindow.EntryMixPerc11.grid(column=2, row=11, sticky='EW')
+
+        can1 = Canvas(statWindow, width=300, height=20)
+        can1.grid(column=0, row=12, columnspan=3, padx=10, pady=10)
+        can1.create_line(10, 10, 540, 10, width=3, fill='white')
+
+
+        statWindow.LabelTPCEscore = Tkinter.Label(statWindow, text="TPC-E Throughput:")
+        statWindow.LabelTPCEscore.grid(column=0, row=13, columnspan=2, sticky="W")
+
+        statWindow.EntryTPCEscorevar = Tkinter.StringVar()
+        statWindow.EntryTPCEscore = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTPCEscorevar, \
+                                                width=12)
+        statWindow.EntryTPCEscore.grid(column=2, row=13, sticky='EW')
+        
+
+        statWindow.LabelTotalNo = Tkinter.Label(statWindow, text="Total No. of Transactions Completed:")
+        statWindow.LabelTotalNo.grid(column=0, row=14, columnspan=2, sticky="W")
+
+        statWindow.EntryTotalNovar = Tkinter.StringVar()
+        statWindow.EntryTotalNo = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTotalNovar, \
+                                                   width=12)
+        statWindow.EntryTotalNo.grid(column=2, row=14, sticky='EW')
 
         """ Button definition  """
         buttonQuit = Tkinter.Button(statWindow,text=u"Quit Statistics", command=statWindow.StopStatWindow, width=12)
-        buttonQuit.grid (column=5, row=13, sticky=S)
+        buttonQuit.grid (column=2, row=23, sticky="NEWS")
 
         """ Vocable blue bar Entry definition  """
         statWindow.VocableVariable = Tkinter.StringVar()
         Vocable = Tkinter.Label(statWindow,textvariable=statWindow.VocableVariable, anchor="w", fg="white", bg="blue")
-        Vocable.grid(column=0, row=13, columnspan=4, sticky='EW')
+        Vocable.grid(column=0, row=23, columnspan=2, sticky='EW')
         statWindow.VocableVariable.set(u"Hello !")
 
         """ Start data collecting thread  """
@@ -991,15 +1032,24 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
         """ Test if the connection parameters are valid.
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
-        """        
-        #dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        #dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        #version_DB['text'] = str(self.Entry3.get())
+        """
+        txnNames = ["Broker-Volume",
+                    "Customer-Position",
+                    "Market-Feed",
+                    "Market-Watch",
+                    "Security-Detail",
+                    "Trade-Lookup",
+                    "Trade-Order",
+                    "Trade-Result",
+                    "Trade-Status",
+                    "Trade-Update",
+                    "Data-Maintenance"]
+
         while statWindow.LoopWindowVar == 0:
             error_con = 0
 
             try:
-                con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+                con = connectToOracle(str(ip), str(port), str(SID), "TPCE", "TPCE")
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -1017,45 +1067,76 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
                 
             if error_con != 1:
                 cur = con.cursor()
-                compteur = 0
-                cur.execute('select t.inst_id, t.value, q.value, c.value, io.value, count(u.username), substr (i.host_name,1,8), substr (i.instance_name,1,8) from gv$sysmetric t, gv$sysmetric q,  gv$sysmetric c, gv$sysmetric io, gv$session u, gv$instance i where t.metric_id=2121 and q.metric_id=2004 and c.metric_id=2057 and io.metric_id=2145 and t.group_id=3  and q.group_id=3 and c.group_id=3 and t.inst_id=q.inst_id and t.inst_id=c.inst_id and t.inst_id=i.inst_id and io.inst_id=i.inst_id and t.inst_id=u.inst_id and u.username like \'SCOTT\'  group by t.inst_id, t.value, q.value, c.value, io.value,  i.host_name, i.instance_name  order by t.inst_id')
-                for result in cur:
-                    compteur += 1
-                    if compteur == 1:
-                        statWindow.EntryNodeName1var.set(str(result[6]))
-                        statWindow.EntryInstanceName1var.set(str(result[7]))
-                        statWindow.EntryNbUsers1var.set(str(int(result[5])))
-                        statWindow.EntryBusyTime1var.set(str("{0:.2f}".format(float(result[3]))))
-                        statWindow.EntrySQLSec1var.set(str("{0:.1f}".format(float(result[1]))))
-                        statWindow.EntryIOMSec1var.set(str("{0:.1f}".format(float(result[4]))))
-                        statWindow.EntryBlockRead1var.set(str(int(result[2])))
-                    elif compteur == 2:
-                        statWindow.EntryNodeName2var.set(str(result[6]))
-                        statWindow.EntryInstanceName2var.set(str(result[7]))
-                        statWindow.EntryNbUsers2var.set(str(int(result[5])))
-                        statWindow.EntryBusyTime2var.set(str("{0:.2f}".format(float(result[3]))))
-                        statWindow.EntrySQLSec2var.set(str("{0:.1f}".format(float(result[1]))))
-                        statWindow.EntryIOMSec2var.set(str("{0:.1f}".format(float(result[4]))))
-                        statWindow.EntryBlockRead2var.set(str(int(result[2])))
-                    elif compteur == 3:
-                        statWindow.EntryNodeName3var.set(str(result[6]))
-                        statWindow.EntryInstanceName3var.set(str(result[7]))
-                        statWindow.EntryNbUsers3var.set(str(int(result[5])))
-                        statWindow.EntryBusyTime3var.set(str("{0:.2f}".format(float(result[3]))))
-                        statWindow.EntrySQLSec3var.set(str("{0:.1f}".format(float(result[1]))))
-                        statWindow.EntryIOMSec3var.set(str("{0:.1f}".format(float(result[4]))))
-                        statWindow.EntryBlockRead3var.set(str(int(result[2])))
-                    elif compteur == 4:
-                        statWindow.EntryNodeName4var.set(str(result[6]))
-                        statWindow.EntryInstanceName4var.set(str(result[7]))
-                        statWindow.EntryNbUsers4var.set(str(int(result[5])))
-                        statWindow.EntryBusyTime4var.set(str("{0:.2f}".format(float(result[3]))))
-                        statWindow.EntrySQLSec4var.set(str("{0:.1f}".format(float(result[1]))))
-                        statWindow.EntryIOMSec4var.set(str("{0:.1f}".format(float(result[4]))))
-                        statWindow.EntryBlockRead4var.set(str(int(result[2])))
-                
+                counter = 0
+                cur.execute('select BROKERVOLUMECOUNT, CUSTOMERPOSITIONCOUNT, MARKETFEEDCOUNT, MARKETWATCHCOUNT, SECURITYDETAILCOUNT,'
+                            'TRADELOOKUPCOUNT, TRADEORDERCOUNT, TRADERESULTCOUNT, TRADESTATUSCOUNT, TRADEUPDATECOUNT, DATAMAINTENANCECOUNT from tpcestat')
+                res = cur.fetchall()
 
-                    statWindow.VocableVariable.set("You are connected to {0}".format(str(SID)))
+                cur1 = con.cursor()
+                cur1.execute('select count(*) from dwhstat where (sysdate - insdate)*60*60*24 <61')
+                for result in cur1:
+                    NbExecTime = str(int(result[0]))
+                    tpceScore = int(NbExecTime) / 60
+                cur1.close()
+
+                if len(res) == 1:
+                    absCounts = map(int, res[0])
+                    totalCounts = np.sum(absCounts)
+                    relCounts = np.zeros(11)
+
+                    for i in range(0, len(absCounts)):
+                        relCounts[i] = absCounts[i] / totalCounts
+
+                    # print "\n{:<21} {:<21} {:<10}".format('Transaction Mix', 'Transaction Count', 'Mix %')
+                    # print "------------------------------------------------------------"
+                    # for i in range(0, len(txnNames)):
+                    #     print "{:<21} {:<21} {:<10}".format(txnNames[i], str(absCounts[i]), str(relCounts[i]))
+
+                    entrysFirstColumn = [statWindow.EntryTxnMix1var,
+                                         statWindow.EntryTxnMix2var,
+                                         statWindow.EntryTxnMix3var,
+                                         statWindow.EntryTxnMix4var,
+                                         statWindow.EntryTxnMix5var,
+                                         statWindow.EntryTxnMix6var,
+                                         statWindow.EntryTxnMix7var,
+                                         statWindow.EntryTxnMix8var,
+                                         statWindow.EntryTxnMix9var,
+                                         statWindow.EntryTxnMix10var,
+                                         statWindow.EntryTxnMix11var]
+
+                    entrysSecondColumn = [statWindow.EntryTxnCount1var,
+                                         statWindow.EntryTxnCount2var,
+                                         statWindow.EntryTxnCount3var,
+                                         statWindow.EntryTxnCount4var,
+                                         statWindow.EntryTxnCount5var,
+                                         statWindow.EntryTxnCount6var,
+                                         statWindow.EntryTxnCount7var,
+                                         statWindow.EntryTxnCount8var,
+                                         statWindow.EntryTxnCount9var,
+                                         statWindow.EntryTxnCount10var,
+                                         statWindow.EntryTxnCount11var]
+
+                    entrysThirdColumn = [statWindow.EntryMixPerc1var,
+                                          statWindow.EntryMixPerc2var,
+                                          statWindow.EntryMixPerc3var,
+                                          statWindow.EntryMixPerc4var,
+                                          statWindow.EntryMixPerc5var,
+                                          statWindow.EntryMixPerc6var,
+                                          statWindow.EntryMixPerc7var,
+                                          statWindow.EntryMixPerc8var,
+                                          statWindow.EntryMixPerc9var,
+                                          statWindow.EntryMixPerc10var,
+                                          statWindow.EntryMixPerc11var]
+                    
+                    for i in range(0, 11):
+                        entrysFirstColumn[i].set(str(txnNames[i]))
+                        entrysSecondColumn[i].set(str(absCounts[i]))
+                        entrysThirdColumn[i].set(str(relCounts[i]))
+                    
+                    statWindow.EntryTPCEscorevar.set(str(tpceScore))
+                    statWindow.EntryTotalNovar.set(str(totalCounts))
+
+                statWindow.VocableVariable.set("You are connected to {0}".format(str(SID)))
                 cur.close()
                 con.close()
                 time.sleep(2)
@@ -1169,17 +1250,6 @@ class LoadThread(threading.Thread):
         
         error_con = 0
 
-        txnNames = ["Broker-Volume",
-                    "Customer-Position",
-                    "Market-Feed",
-                    "Market-Watch",
-                    "Market-Watch",
-                    "Trade-Lookup",
-                    "Trade-Order",
-                    "Trade-Result",
-                    "Trade-Status",
-                    "Trade-Update",
-                    "Data-Maintenance"]
         # ToDo: insert functions
         txns = [LoadThread.brokervolumeTransaction,
                 LoadThread.placeholder,
@@ -1208,7 +1278,6 @@ class LoadThread(threading.Thread):
         totalWeight = np.sum(weight)
         probs = np.zeros(11)
         absCounts = np.zeros(11)
-        relCounts = np.zeros(11)
         
         StartTimeTest = time.time()
         """Test the connection. If valid, enter in a loop until the "stop load" button is hit
@@ -1610,11 +1679,10 @@ class simpleapp_tk(Tkinter.Tk):
         buttonQuit = Tkinter.Button(self, text=u"Quit Application", command=self.QuitApps, width=14)
         buttonQuit.grid(column=1, row=26, sticky=S)
 
-        self.buttonExtendedStat = Tkinter.Button(self, text=u"Extended Statistics", command=self.ExtendedStatistics \
+        self.buttonExtendedStat = Tkinter.Button(self, text=u"TPC-E Statistics", command=self.ExtendedStatistics \
                                                  , width=14)
 
         self.buttonExtendedStat.grid(column=0, row=26, sticky=S)
-        self.buttonExtendedStat.config(state=DISABLED)
 
         self.ButtonTestSystemConn = Tkinter.Button(self, text=u"Check System Connection", \
                                                    command=lambda:
