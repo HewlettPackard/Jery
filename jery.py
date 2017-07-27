@@ -1189,47 +1189,41 @@ class LoadThread(threading.Thread):
        if con:
             cur = con.cursor()
 
-            # get a random sector name
-            cur.execute("""select SC_NAME from ( select SC_NAME, row_number() over (order by sc_name) 
-                        rno from sector order by rno) where  rno = ( select round (dbms_random.value (0,11)) from dual)""")
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+                DECLARE
+                in_sector_name VARCHAR2(50);
+                list_len INTEGER;
+                status INTEGER;
+                i INTEGER;
 
-            res = cur.fetchall()
+                in_broker_list  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
+                broker_name  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
+                volume Brokervolume_pkg.VOL_ARRAY := Brokervolume_pkg.VOL_ARRAY();
+                brokervolframe1_tbl  Brokervolume_pkg.brokervolframe1_tab;
 
-            if len(res) == 1 and len(res[0]):
-                in_sector_name = res[0][0]
-                cur.callproc("dbms_output.enable")
-                cur.execute("""
-                    DECLARE
-                    in_sector_name VARCHAR2(50);
-                    list_len INTEGER;
-                    status INTEGER;
-                    i INTEGER;
+                BEGIN
+                
+                SELECT SC_NAME INTO in_sector_name FROM ( SELECT SC_NAME, row_number() OVER (ORDER BY sc_name) 
+                rno from sector order by rno) where  rno = ( select round (dbms_random.value (0,11)) from dual);
+                
+                SELECT b_name BULK COLLECT INTO in_broker_list FROM ( SELECT b_name , row_number() over (order by b_name) rno FROM broker )
+                        WHERE  rno < ( SELECT round (dbms_random.value (25,50)) FROM dual) 
+                        AND rno > ( SELECT round (dbms_random.value (0,25)) FROM dual);
 
-                    in_broker_list  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
-                    broker_name  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
-                    volume Brokervolume_pkg.VOL_ARRAY := Brokervolume_pkg.VOL_ARRAY();
-                    brokervolframe1_tbl  Brokervolume_pkg.brokervolframe1_tab;
+                dbms_output.put_line('ins_sec: ' || in_sector_name);
+                brokervolframe1_tbl := Brokervolume_pkg.BrokerVolumeFrame1(in_broker_list ,in_sector_name,broker_name,list_len,status,volume);
 
-                    BEGIN
+                dbms_output.put_line('list_len: ' || list_len);
+                dbms_output.put_line('status_out: ' || status);
+                --FOR i IN 1..30
+                --LOOP
+                --dbms_output.put_line('volume'|| volume(i));
+                --END LOOP;
+                END;
+            """)
 
-                    in_sector_name  := '""" + in_sector_name + """';
-                    SELECT b_name BULK COLLECT INTO in_broker_list FROM ( SELECT b_name , row_number() over (order by b_name) rno FROM broker )
-                            WHERE  rno < ( SELECT round (dbms_random.value (25,50)) FROM dual) 
-                            AND rno > ( SELECT round (dbms_random.value (0,25)) FROM dual);
-
-                    dbms_output.put_line('ins_sec: ' || in_sector_name);
-                    brokervolframe1_tbl := Brokervolume_pkg.BrokerVolumeFrame1(in_broker_list ,in_sector_name,broker_name,list_len,status,volume);
-
-                    dbms_output.put_line('list_len: ' || list_len);
-                    dbms_output.put_line('status_out: ' || status);
-                    --FOR i IN 1..30
-                    --LOOP
-                    --dbms_output.put_line('volume'|| volume(i));
-                    --END LOOP;
-                    END;
-                """)
-
-                # printDBMSoutput(cur)
+            # printDBMSoutput(cur)
 
             cur.close()
 

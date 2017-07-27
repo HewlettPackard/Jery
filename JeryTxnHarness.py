@@ -88,8 +88,9 @@ def brokervolumeTransaction():
                 brokervolframe1_tbl  Brokervolume_pkg.brokervolframe1_tab;
     
                 BEGIN
-    
-                in_sector_name  := '""" + in_sector_name + """';
+                SELECT SC_NAME INTO in_sector_name FROM ( SELECT SC_NAME, row_number() OVER (ORDER BY sc_name) 
+                    rno from sector order by rno) where  rno = ( select round (dbms_random.value (0,11)) from dual);
+                
                 SELECT b_name BULK COLLECT INTO in_broker_list FROM ( SELECT b_name , row_number() over (order by b_name) rno FROM broker )
                         WHERE  rno < ( SELECT round (dbms_random.value (25,50)) FROM dual) 
                         AND rno > ( SELECT round (dbms_random.value (0,25)) FROM dual);
@@ -106,7 +107,7 @@ def brokervolumeTransaction():
                 END;
             """)
 
-            #printDBMSoutput(cur)
+            printDBMSoutput(cur)
 
         cur.close()
         con.close()
