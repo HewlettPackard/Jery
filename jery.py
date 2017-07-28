@@ -1185,45 +1185,123 @@ class LoadThread(threading.Thread):
             self.LengthTest = self.LengthTest * 60
         self.runLoad = 0
 
+    def printDBMSoutput(self, cur):
+        statusVar = cur.var(cx_Oracle.NUMBER)
+        lineVar = cur.var(cx_Oracle.STRING)
+        while True:
+            cur.callproc("dbms_output.get_line", (lineVar, statusVar))
+            if statusVar.getvalue() != 0:
+                break
+            print lineVar.getvalue()
+
     def brokervolumeTransaction(self, con):
        if con:
             cur = con.cursor()
 
+            try:
+                cur.callproc("dbms_output.enable")
+                cur.execute("""
+                    DECLARE
+                    in_sector_name VARCHAR2(50);
+                    list_len INTEGER;
+                    status INTEGER;
+                    i INTEGER;
+    
+                    in_broker_list  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
+                    broker_name  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
+                    volume Brokervolume_pkg.VOL_ARRAY := Brokervolume_pkg.VOL_ARRAY();
+                    brokervolframe1_tbl  Brokervolume_pkg.brokervolframe1_tab;
+    
+                    BEGIN
+                    
+                    SELECT SC_NAME INTO in_sector_name FROM ( SELECT SC_NAME, row_number() OVER (ORDER BY sc_name) 
+                    rno from sector order by rno) where  rno = ( select round (dbms_random.value (0,11)) from dual);
+                    
+                    SELECT b_name BULK COLLECT INTO in_broker_list FROM ( SELECT b_name , row_number() over (order by b_name) rno FROM broker )
+                            WHERE  rno < ( SELECT round (dbms_random.value (25,50)) FROM dual) 
+                            AND rno > ( SELECT round (dbms_random.value (0,25)) FROM dual);
+    
+                    dbms_output.put_line('ins_sec: ' || in_sector_name);
+                    brokervolframe1_tbl := Brokervolume_pkg.BrokerVolumeFrame1(in_broker_list ,in_sector_name,broker_name,list_len,status,volume);
+    
+                    dbms_output.put_line('list_len: ' || list_len);
+                    dbms_output.put_line('status_out: ' || status);
+                    --FOR i IN 1..30
+                    --LOOP
+                    --dbms_output.put_line('volume'|| volume(i));
+                    --END LOOP;
+                    END;
+                """)
+            except cx_Oracle.DatabaseError:
+                pass
+
+            LoadThread.printDBMSoutput(self, cur)
+
+            cur.close()
+
+    def customerpositionTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
             cur.callproc("dbms_output.enable")
             cur.execute("""
-                DECLARE
-                in_sector_name VARCHAR2(50);
-                list_len INTEGER;
-                status INTEGER;
-                i INTEGER;
-
-                in_broker_list  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
-                broker_name  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
-                volume Brokervolume_pkg.VOL_ARRAY := Brokervolume_pkg.VOL_ARRAY();
-                brokervolframe1_tbl  Brokervolume_pkg.brokervolframe1_tab;
-
-                BEGIN
+                DECLARE 
+                cust_id   NUMBER(11);
+                tax_id  VARCHAR(20);
+                acct_len  INTEGER;
+                c_ad_id  NUMBER(11); 
+                c_area_1  VARCHAR(3);
+                c_area_2  VARCHAR(3);
+                c_area_3  VARCHAR(3);
+                c_ctry_1  VARCHAR(3); 
+                c_ctry_2  VARCHAR(3);
+                c_ctry_3  VARCHAR(3);
+                --	c_dob  DATE;
+                c_email_1  VARCHAR(50);
+                c_email_2  VARCHAR(50);
+                c_ext_1  VARCHAR(5);
+                c_ext_2  VARCHAR(5);
+                c_ext_3  VARCHAR(5);
+                c_f_name  VARCHAR(30);
+                c_gndr  VARCHAR(1);
+                c_l_name  VARCHAR(30);
+                c_local_1  VARCHAR(10);
+                c_local_2  VARCHAR(10);
+                c_local_3  VARCHAR(10);
+                c_m_name  VARCHAR(1);
+                c_st_id  VARCHAR(4);
+                c_tier  NUMBER(38);
+                status  INTEGER;
+                acct_id CustomerPosition_pkg.ID_ARRAY :=	CustomerPosition_pkg.ID_ARRAY();
+                asset_total CustomerPosition_pkg.TOT_ARRAY :=	CustomerPosition_pkg.TOT_ARRAY();
+                cash_bal CustomerPosition_pkg.TOT_ARRAY :=	CustomerPosition_pkg.TOT_ARRAY();	
+                c_dob DATE := SYSDATE ;
                 
-                SELECT SC_NAME INTO in_sector_name FROM ( SELECT SC_NAME, row_number() OVER (ORDER BY sc_name) 
-                rno from sector order by rno) where  rno = ( select round (dbms_random.value (0,11)) from dual);
+                customerPositionFrame1_tbl  CustomerPosition_pkg.CustomerPositionFrame1_tab := CustomerPosition_pkg.CustomerPositionFrame1_tab();
                 
-                SELECT b_name BULK COLLECT INTO in_broker_list FROM ( SELECT b_name , row_number() over (order by b_name) rno FROM broker )
-                        WHERE  rno < ( SELECT round (dbms_random.value (25,50)) FROM dual) 
-                        AND rno > ( SELECT round (dbms_random.value (0,25)) FROM dual);
-
-                dbms_output.put_line('ins_sec: ' || in_sector_name);
-                brokervolframe1_tbl := Brokervolume_pkg.BrokerVolumeFrame1(in_broker_list ,in_sector_name,broker_name,list_len,status,volume);
-
-                dbms_output.put_line('list_len: ' || list_len);
-                dbms_output.put_line('status_out: ' || status);
-                --FOR i IN 1..30
-                --LOOP
-                --dbms_output.put_line('volume'|| volume(i));
-                --END LOOP;
+                customerFramerec CustomerPosition_pkg.CustomerPositionFrame1_record ;
+                
+                
+                
+                BEGIN 
+                
+                select c_id into cust_id from ( select c_id, row_number() over (order by c_id) rno from customer order by rno) where  rno = ( select round (dbms_random.value (0,5000)) from dual);
+                select tx_id into tax_id from ( select tx_id, row_number() over (order by tx_id) rno from taxrate order by rno) where  rno = ( select round (dbms_random.value (0,320)) from dual);
+                
+                customerPositionFrame1_tbl := CustomerPosition_pkg.CustomerPositionFrame1(cust_id ,tax_id ,acct_id ,acct_len ,asset_total ,c_ad_id,c_area_1  ,c_area_2  ,c_area_3  ,	c_ctry_1  ,c_ctry_2  ,c_ctry_3  ,	c_dob ,c_email_1  ,	c_email_2  ,	c_ext_1  ,c_ext_2  ,c_ext_3  ,c_f_name  ,	c_gndr  ,c_l_name  ,c_local_1  ,c_local_2  ,	c_local_3  ,c_m_name  ,c_st_id ,c_tier ,cash_bal ,	status  );
+                
+                dbms_output.put_line('list_len: ' || acct_len); 
+                dbms_output.put_line('status_' || status);
+                FOR i IN 1 .. acct_len
+                LOOP 
+                dbms_output.put_line('acct_id '|| acct_id(i));
+                dbms_output.put_line('cash_bal '|| cash_bal(i));
+                dbms_output.put_line('asset_total '|| asset_total(i));
+                END LOOP; 
                 END;
-            """)
+             """)
 
-            # printDBMSoutput(cur)
+            LoadThread.printDBMSoutput(self, cur)
 
             cur.close()
 
@@ -1246,7 +1324,7 @@ class LoadThread(threading.Thread):
 
         # ToDo: insert functions
         txns = [LoadThread.brokervolumeTransaction,
-                LoadThread.placeholder,
+                LoadThread.customerpositionTransaction,
                 LoadThread.placeholder,
                 LoadThread.placeholder,
                 LoadThread.placeholder,
@@ -1285,16 +1363,6 @@ class LoadThread(threading.Thread):
             return error_con
 
         if error_con != 1:
-            cur = con.cursor()
-
-            cur.execute("""UPDATE tpcestat 
-                                    SET BROKERVOLUMECOUNT = 0, CUSTOMERPOSITIONCOUNT = 0, MARKETFEEDCOUNT = 0, 
-                                    MARKETWATCHCOUNT = 0, SECURITYDETAILCOUNT = 0, TRADELOOKUPCOUNT = 0, TRADEORDERCOUNT = 0, 
-                                    TRADERESULTCOUNT = 0, TRADESTATUSCOUNT = 0, TRADEUPDATECOUNT = 0, DATAMAINTENANCECOUNT = 0
-                                    WHERE STATID = 0 """)
-            con.commit()
-            cur.close()
-
             # calculate probabilities based on weighting
             for i in range(0, len(weight)):
                 probs[i] = weight[i] / totalWeight
@@ -1352,6 +1420,26 @@ class WatcherThread(threading.Thread):
 
 
     def run(self):
+        error_con = 0
+
+        try:
+            con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()), "TPCE",
+                                  "TPCE")
+        except cx_Oracle.DatabaseError:
+            error_con = 1
+            print "err"
+
+        if error_con != 1:
+            cur = con.cursor()
+
+            cur.execute("""UPDATE tpcestat 
+                                                        SET BROKERVOLUMECOUNT = 0, CUSTOMERPOSITIONCOUNT = 0, MARKETFEEDCOUNT = 0, 
+                                                        MARKETWATCHCOUNT = 0, SECURITYDETAILCOUNT = 0, TRADELOOKUPCOUNT = 0, TRADEORDERCOUNT = 0, 
+                                                        TRADERESULTCOUNT = 0, TRADESTATUSCOUNT = 0, TRADEUPDATECOUNT = 0, DATAMAINTENANCECOUNT = 0
+                                                        WHERE STATID = 0 """)
+            con.commit()
+            cur.close()
+
         i = 1
         while self.runWatch != 1:
             try:
