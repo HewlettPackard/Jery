@@ -1524,6 +1524,34 @@ class LoadThread(threading.Thread):
 
             cur.close()
 
+    def tradestatusTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE
+            acct_id NUMBER;
+            
+            TradeStatusFrame1_tbl  TradeStatusFrame1_Pkg.TradeStatusFrame1_tab := TradeStatusFrame1_Pkg.TradeStatusFrame1_tab(); 
+            TradeStatusFrame1rec TradeStatusFrame1_Pkg.TradeStatusFrame1_record ;
+            
+            BEGIN 
+            select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            
+            -- DEBUGGING
+            dbms_output.put_line('acct_id:  ' || acct_id);
+            
+            TradeStatusFrame1_tbl := TradeStatusFrame1_Pkg.TradeStatusFrame1(acct_id);
+            
+            END;
+            """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "ts"
+
+            cur.close()
+
     def placeholder(self, con):
         pass
 
@@ -1550,7 +1578,7 @@ class LoadThread(threading.Thread):
                 LoadThread.placeholder,
                 LoadThread.placeholder,
                 LoadThread.placeholder,
-                LoadThread.placeholder,
+                LoadThread.tradestatusTransaction,
                 LoadThread.placeholder,
                 LoadThread.datamaintenanceTransaction]
         columnNames = ["BROKERVOLUMECOUNT",
@@ -1564,7 +1592,7 @@ class LoadThread(threading.Thread):
                        "TRADESTATUSCOUNT",
                        "TRADEUPDATECOUNT",
                        "DATAMAINTENANCECOUNT"]
-        weight = [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1]
+        weight = [1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1]
 
         totalWeight = np.sum(weight)
         probs = np.zeros(11)
