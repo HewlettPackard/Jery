@@ -22,6 +22,8 @@ JERY is a Python 2.7 based simple database workload generator for Oracle and Ent
 ## Info
 To download install instructions use the readme.pdf [_(download)_](https://github.com/HewlettPackard/Jery/raw/master/readme.pdf)
 
+This branch provides JERY which is a basic workload generator. However there is another version implementing a [TPC-E](http://www.tpc.org/tpce/) like benchmark soltion called JERYe. If you are interested in JERYe, please refer to the branch [MasterJERYe](https://github.com/HewlettPackard/Jery/tree/masterJERYe).
+
 
 <a name="WhatisJery"/>
 
