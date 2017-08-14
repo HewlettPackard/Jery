@@ -1,4 +1,5 @@
 #!/bin/bash
+# © Copyright 2017 Hewlett Packard Enterprise Development LP
 FROM centos:7
 MAINTAINER Marcel Jakob <jery@hpe.com>
 

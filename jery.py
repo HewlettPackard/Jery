@@ -1,12 +1,14 @@
 #!/usr/local/bin/python3
 #-*- coding: iso-8859-1 -*-
 
-########################################
+#############################################################
+## © Copyright 2017 Hewlett Packard Enterprise Development LP
 ## Author: Yann Allandit
 ## Contact: dwh2@hp.com
 ## Creation Date: 10th of March 2014
-########################################
+#############################################################
 
+from __future__ import division
 import Tkinter
 from Tkinter import *
 import cx_Oracle
@@ -15,8 +17,7 @@ import time
 import tkMessageBox
 import ConfigParser
 import paramiko
-import subprocess
-import os
+import numpy as np
 
 
 ########################  CONNECTION  ##########################
@@ -407,6 +408,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+                print "created pks"
 
                 # create indexes 2
                 f = open('./tpce/08_1tpce-create-fk.sql')
@@ -421,6 +423,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+                print "created fks 1"
 
                 # create indexes 3
                 f = open('./tpce/08_2tpce-create-fk.sql')
@@ -435,6 +438,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+                print "created fks 2"
 
                 # create indexes 4
                 f = open('./tpce/08_3tpce-create-fk.sql')
@@ -449,6 +453,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
+                print "created fks 3"
 
                 # create indexes 5
                 f = open('./tpce/08_4tpce-create-fk.sql')
@@ -463,7 +468,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
-
+                print "created fks 4"
 
                 if error_con == 0:
                     print "STEP 9: Created indexes"
@@ -506,6 +511,24 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                             print error
                             error_con = 2
 
+                try:
+                    cur.execute("""INSERT INTO TPCE.tpcestat(statid, brokervolumecount, customerpositioncount, marketfeedcount,
+                        marketwatchcount, securitydetailcount, tradelookupcount, tradeordercount, traderesultcount,
+                        tradestatuscount, tradeupdatecount, datamaintenancecount) 
+                        VALUES('0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0')""")
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                try:
+                    cur.execute('CREATE SEQUENCE tpce.seq START WITH 1 INCREMENT BY 1 NOCACHE')
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
 
                 if error_con == 0:
                     print "STEP 10: Calculated statistics"
@@ -765,7 +788,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
             Variable naming is static
         """    
 
-        statWindow.wm_title(" Extended Statistics")
+        statWindow.wm_title(" TPC-E Statistics")
         statWindow.SID = SID
         statWindow.passwd = passwd
         statWindow.ip = ip
@@ -779,179 +802,220 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
 
         """ Label and Entry definition  """
         
-        statWindow.LabelNodeName = Tkinter.Label(statWindow, text="Node name")
-        statWindow.LabelNodeName.grid(column=0, row=0)
+        statWindow.LabelTxnMix = Tkinter.Label(statWindow, text="Transaction Mix")
+        statWindow.LabelTxnMix.grid(column=0, row=0)
 
-        statWindow.LabelInstanceName = Tkinter.Label(statWindow, text="Instance")
-        statWindow.LabelInstanceName.grid(column=1, row=0)
+        statWindow.LabelTxnCount = Tkinter.Label(statWindow, text="Transaction Count")
+        statWindow.LabelTxnCount.grid(column=1, row=0)
 
-        statWindow.LabelNbUsers = Tkinter.Label(statWindow, text="Nb. Users")
-        statWindow.LabelNbUsers.grid(column=2, row=0)
+        statWindow.LabelMixPerc = Tkinter.Label(statWindow, text="Mix %")
+        statWindow.LabelMixPerc.grid(column=2, row=0)
+
+        statWindow.EntryTxnMix1var = Tkinter.StringVar()
+        statWindow.EntryTxnMix1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix1var,\
+                                                width=12)
+        statWindow.EntryTxnMix1.grid(column=0, row=1, sticky='EW')
+
+        statWindow.EntryTxnCount1var = Tkinter.StringVar()
+        statWindow.EntryTxnCount1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount1var,\
+                                                width=12)
+        statWindow.EntryTxnCount1.grid(column=1, row=1, sticky='EW')
+
+        statWindow.EntryMixPerc1var = Tkinter.StringVar()
+        statWindow.EntryMixPerc1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc1var,\
+                                                width=12)
+        statWindow.EntryMixPerc1.grid(column=2, row=1, sticky='EW')
+
+
+        statWindow.EntryTxnMix2var = Tkinter.StringVar()
+        statWindow.EntryTxnMix2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix2var,\
+                                                width=12)
+        statWindow.EntryTxnMix2.grid(column=0, row=2, sticky='EW')
+
+        statWindow.EntryTxnCount2var = Tkinter.StringVar()
+        statWindow.EntryTxnCount2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount2var,\
+                                                width=12)
+        statWindow.EntryTxnCount2.grid(column=1, row=2, sticky='EW')
+
+        statWindow.EntryMixPerc2var = Tkinter.StringVar()
+        statWindow.EntryMixPerc2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc2var,\
+                                                width=12)
+        statWindow.EntryMixPerc2.grid(column=2, row=2, sticky='EW')
+
+
+        statWindow.EntryTxnMix3var = Tkinter.StringVar()
+        statWindow.EntryTxnMix3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix3var,\
+                                                width=12)
+        statWindow.EntryTxnMix3.grid(column=0, row=3, sticky='EW')
+
+        statWindow.EntryTxnCount3var = Tkinter.StringVar()
+        statWindow.EntryTxnCount3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount3var,\
+                                                width=12)
+        statWindow.EntryTxnCount3.grid(column=1, row=3, sticky='EW')
+
+        statWindow.EntryMixPerc3var = Tkinter.StringVar()
+        statWindow.EntryMixPerc3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc3var,\
+                                                width=12)
+        statWindow.EntryMixPerc3.grid(column=2, row=3, sticky='EW')
         
-        statWindow.LabelBusyTime = Tkinter.Label(statWindow, text="% Busy Time")
-        statWindow.LabelBusyTime.grid(column=3, row=0)
 
-        statWindow.LabelSQLSec = Tkinter.Label(statWindow, text="SQL orders/Sec.")
-        statWindow.LabelSQLSec.grid(column=4, row=0)
-
-        statWindow.LabelIOMSec = Tkinter.Label(statWindow, text="IO MB/Sec.")
-        statWindow.LabelIOMSec.grid(column=5, row=0)
-
-        statWindow.LabelBlockRead = Tkinter.Label(statWindow, text="Blocks read/Sec.")
-        statWindow.LabelBlockRead.grid(column=6, row=0)
-
-        statWindow.EntryNodeName1var = Tkinter.StringVar()
-        statWindow.EntryNodeName1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName1var,\
+        statWindow.EntryTxnMix4var = Tkinter.StringVar()
+        statWindow.EntryTxnMix4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix4var,\
                                                 width=12)
-        statWindow.EntryNodeName1.grid(column=0, row=1, sticky='EW')
+        statWindow.EntryTxnMix4.grid(column=0, row=4, sticky='EW')
 
-        statWindow.EntryInstanceName1var = Tkinter.StringVar()
-        statWindow.EntryInstanceName1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName1var,\
+        statWindow.EntryTxnCount4var = Tkinter.StringVar()
+        statWindow.EntryTxnCount4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount4var,\
                                                 width=12)
-        statWindow.EntryInstanceName1.grid(column=1, row=1, sticky='EW')
+        statWindow.EntryTxnCount4.grid(column=1, row=4, sticky='EW')
 
-        statWindow.EntryNbUsers1var = Tkinter.StringVar()
-        statWindow.EntryNbUsers1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers1var,\
+        statWindow.EntryMixPerc4var = Tkinter.StringVar()
+        statWindow.EntryMixPerc4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc4var,\
                                                 width=12)
-        statWindow.EntryNbUsers1.grid(column=2, row=1, sticky='EW')
-        
-        statWindow.EntryBusyTime1var = Tkinter.StringVar()
-        statWindow.EntryBusyTime1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime1var,\
-                                                width=12)
-        statWindow.EntryBusyTime1.grid(column=3, row=1, sticky='EW')
-
-        statWindow.EntrySQLSec1var = Tkinter.StringVar()
-        statWindow.EntrySQLSec1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec1var,\
-                                                width=12)
-        statWindow.EntrySQLSec1.grid(column=4, row=1, sticky='EW')
-
-        statWindow.EntryIOMSec1var = Tkinter.StringVar()
-        statWindow.EntryIOMSec1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec1var,\
-                                                width=12)
-        statWindow.EntryIOMSec1.grid(column=5, row=1, sticky='EW')
-
-        statWindow.EntryBlockRead1var = Tkinter.StringVar()
-        statWindow.EntryBlockRead1 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead1var,\
-                                                width=12)
-        statWindow.EntryBlockRead1.grid(column=6, row=1, sticky='EW')
+        statWindow.EntryMixPerc4.grid(column=2, row=4, sticky='EW')
         
 
-        statWindow.EntryNodeName2var = Tkinter.StringVar()
-        statWindow.EntryNodeName2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName2var,\
+        statWindow.EntryTxnMix5var = Tkinter.StringVar()
+        statWindow.EntryTxnMix5 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix5var, \
                                                 width=12)
-        statWindow.EntryNodeName2.grid(column=0, row=2, sticky='EW')
+        statWindow.EntryTxnMix5.grid(column=0, row=5, sticky='EW')
 
-        statWindow.EntryInstanceName2var = Tkinter.StringVar()
-        statWindow.EntryInstanceName2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName2var,\
-                                                width=12)
-        statWindow.EntryInstanceName2.grid(column=1, row=2, sticky='EW')
+        statWindow.EntryTxnCount5var = Tkinter.StringVar()
+        statWindow.EntryTxnCount5 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount5var, \
+                                                  width=12)
+        statWindow.EntryTxnCount5.grid(column=1, row=5, sticky='EW')
 
-        statWindow.EntryNbUsers2var = Tkinter.StringVar()
-        statWindow.EntryNbUsers2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers2var,\
-                                                width=12)
-        statWindow.EntryNbUsers2.grid(column=2, row=2, sticky='EW')
+        statWindow.EntryMixPerc5var = Tkinter.StringVar()
+        statWindow.EntryMixPerc5 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc5var, \
+                                                 width=12)
+        statWindow.EntryMixPerc5.grid(column=2, row=5, sticky='EW')
         
-        statWindow.EntryBusyTime2var = Tkinter.StringVar()
-        statWindow.EntryBusyTime2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime2var,\
-                                                width=12)
-        statWindow.EntryBusyTime2.grid(column=3, row=2, sticky='EW')
 
-        statWindow.EntrySQLSec2var = Tkinter.StringVar()
-        statWindow.EntrySQLSec2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec2var,\
+        statWindow.EntryTxnMix6var = Tkinter.StringVar()
+        statWindow.EntryTxnMix6 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix6var, \
                                                 width=12)
-        statWindow.EntrySQLSec2.grid(column=4, row=2, sticky='EW')
+        statWindow.EntryTxnMix6.grid(column=0, row=6, sticky='EW')
 
-        statWindow.EntryIOMSec2var = Tkinter.StringVar()
-        statWindow.EntryIOMSec2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec2var,\
-                                                width=12)
-        statWindow.EntryIOMSec2.grid(column=5, row=2, sticky='EW')
+        statWindow.EntryTxnCount6var = Tkinter.StringVar()
+        statWindow.EntryTxnCount6 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount6var, \
+                                                  width=12)
+        statWindow.EntryTxnCount6.grid(column=1, row=6, sticky='EW')
 
-        statWindow.EntryBlockRead2var = Tkinter.StringVar()
-        statWindow.EntryBlockRead2 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead2var,\
-                                                width=12)
-        statWindow.EntryBlockRead2.grid(column=6, row=2, sticky='EW')
-
-
-        statWindow.EntryNodeName3var = Tkinter.StringVar()
-        statWindow.EntryNodeName3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName3var,\
-                                                width=12)
-        statWindow.EntryNodeName3.grid(column=0, row=3, sticky='EW')
-
-        statWindow.EntryInstanceName3var = Tkinter.StringVar()
-        statWindow.EntryInstanceName3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName3var,\
-                                                width=12)
-        statWindow.EntryInstanceName3.grid(column=1, row=3, sticky='EW')
-
-        statWindow.EntryNbUsers3var = Tkinter.StringVar()
-        statWindow.EntryNbUsers3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers3var,\
-                                                width=12)
-        statWindow.EntryNbUsers3.grid(column=2, row=3, sticky='EW')
+        statWindow.EntryMixPerc6var = Tkinter.StringVar()
+        statWindow.EntryMixPerc6 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc6var, \
+                                                 width=12)
+        statWindow.EntryMixPerc6.grid(column=2, row=6, sticky='EW')
         
-        statWindow.EntryBusyTime3var = Tkinter.StringVar()
-        statWindow.EntryBusyTime3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime3var,\
-                                                width=12)
-        statWindow.EntryBusyTime3.grid(column=3, row=3, sticky='EW')
 
-        statWindow.EntrySQLSec3var = Tkinter.StringVar()
-        statWindow.EntrySQLSec3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec3var,\
+        statWindow.EntryTxnMix7var = Tkinter.StringVar()
+        statWindow.EntryTxnMix7 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix7var, \
                                                 width=12)
-        statWindow.EntrySQLSec3.grid(column=4, row=3, sticky='EW')
+        statWindow.EntryTxnMix7.grid(column=0, row=7, sticky='EW')
 
-        statWindow.EntryIOMSec3var = Tkinter.StringVar()
-        statWindow.EntryIOMSec3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec3var,\
-                                                width=12)
-        statWindow.EntryIOMSec3.grid(column=5, row=3, sticky='EW')
+        statWindow.EntryTxnCount7var = Tkinter.StringVar()
+        statWindow.EntryTxnCount7 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount7var, \
+                                                  width=12)
+        statWindow.EntryTxnCount7.grid(column=1, row=7, sticky='EW')
 
-        statWindow.EntryBlockRead3var = Tkinter.StringVar()
-        statWindow.EntryBlockRead3 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead3var,\
-                                                width=12)
-        statWindow.EntryBlockRead3.grid (column=6, row=3, sticky='EW')
-
-
-        statWindow.EntryNodeName4var = Tkinter.StringVar()
-        statWindow.EntryNodeName4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNodeName4var,\
-                                                width=12)
-        statWindow.EntryNodeName4.grid(column=0, row=4, sticky='EW')
-
-        statWindow.EntryInstanceName4var = Tkinter.StringVar()
-        statWindow.EntryInstanceName4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryInstanceName4var,\
-                                                width=12)
-        statWindow.EntryInstanceName4.grid(column=1, row=4, sticky='EW')
-
-        statWindow.EntryNbUsers4var = Tkinter.StringVar()
-        statWindow.EntryNbUsers4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryNbUsers4var,\
-                                                width=12)
-        statWindow.EntryNbUsers4.grid(column=2, row=4, sticky='EW')
+        statWindow.EntryMixPerc7var = Tkinter.StringVar()
+        statWindow.EntryMixPerc7 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc7var, \
+                                                 width=12)
+        statWindow.EntryMixPerc7.grid(column=2, row=7, sticky='EW')
         
-        statWindow.EntryBusyTime4var = Tkinter.StringVar()
-        statWindow.EntryBusyTime4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBusyTime4var,\
-                                                width=12)
-        statWindow.EntryBusyTime4.grid(column=3, row=4, sticky='EW')
 
-        statWindow.EntrySQLSec4var = Tkinter.StringVar()
-        statWindow.EntrySQLSec4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntrySQLSec4var,\
+        statWindow.EntryTxnMix8var = Tkinter.StringVar()
+        statWindow.EntryTxnMix8 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix8var, \
                                                 width=12)
-        statWindow.EntrySQLSec4.grid(column=4, row=4, sticky='EW')
+        statWindow.EntryTxnMix8.grid(column=0, row=8, sticky='EW')
 
-        statWindow.EntryIOMSec4var = Tkinter.StringVar()
-        statWindow.EntryIOMSec4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryIOMSec4var,\
+        statWindow.EntryTxnCount8var = Tkinter.StringVar()
+        statWindow.EntryTxnCount8 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount8var, \
+                                                  width=12)
+        statWindow.EntryTxnCount8.grid(column=1, row=8, sticky='EW')
+
+        statWindow.EntryMixPerc8var = Tkinter.StringVar()
+        statWindow.EntryMixPerc8 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc8var, \
+                                                 width=12)
+        statWindow.EntryMixPerc8.grid(column=2, row=8, sticky='EW')
+        
+
+        statWindow.EntryTxnMix9var = Tkinter.StringVar()
+        statWindow.EntryTxnMix9 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix9var, \
                                                 width=12)
-        statWindow.EntryIOMSec4.grid(column=5, row=4, sticky='EW')
+        statWindow.EntryTxnMix9.grid(column=0, row=9, sticky='EW')
 
-        statWindow.EntryBlockRead4var = Tkinter.StringVar()
-        statWindow.EntryBlockRead4 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryBlockRead4var,\
+        statWindow.EntryTxnCount9var = Tkinter.StringVar()
+        statWindow.EntryTxnCount9 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount9var, \
+                                                  width=12)
+        statWindow.EntryTxnCount9.grid(column=1, row=9, sticky='EW')
+
+        statWindow.EntryMixPerc9var = Tkinter.StringVar()
+        statWindow.EntryMixPerc9 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc9var, \
+                                                 width=12)
+        statWindow.EntryMixPerc9.grid(column=2, row=9, sticky='EW')
+        
+
+        statWindow.EntryTxnMix10var = Tkinter.StringVar()
+        statWindow.EntryTxnMix10 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix10var, \
                                                 width=12)
-        statWindow.EntryBlockRead4.grid(column=6, row=4, sticky='EW')
+        statWindow.EntryTxnMix10.grid(column=0, row=10, sticky='EW')
 
+        statWindow.EntryTxnCount10var = Tkinter.StringVar()
+        statWindow.EntryTxnCount10 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount10var, \
+                                                  width=12)
+        statWindow.EntryTxnCount10.grid(column=1, row=10, sticky='EW')
+
+        statWindow.EntryMixPerc10var = Tkinter.StringVar()
+        statWindow.EntryMixPerc10 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc10var, \
+                                                 width=12)
+        statWindow.EntryMixPerc10.grid(column=2, row=10, sticky='EW')
+        
+
+        statWindow.EntryTxnMix11var = Tkinter.StringVar()
+        statWindow.EntryTxnMix11 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnMix11var, \
+                                                width=12)
+        statWindow.EntryTxnMix11.grid(column=0, row=11, sticky='EW')
+
+        statWindow.EntryTxnCount11var = Tkinter.StringVar()
+        statWindow.EntryTxnCount11 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTxnCount11var, \
+                                                  width=12)
+        statWindow.EntryTxnCount11.grid(column=1, row=11, sticky='EW')
+
+        statWindow.EntryMixPerc11var = Tkinter.StringVar()
+        statWindow.EntryMixPerc11 = Tkinter.Entry(statWindow, textvariable=statWindow.EntryMixPerc11var, \
+                                                 width=12)
+        statWindow.EntryMixPerc11.grid(column=2, row=11, sticky='EW')
+
+        can1 = Canvas(statWindow, width=300, height=20)
+        can1.grid(column=0, row=12, columnspan=3, padx=10, pady=10)
+        can1.create_line(10, 10, 540, 10, width=3, fill='white')
+
+
+        statWindow.LabelTPCEscore = Tkinter.Label(statWindow, text="TPC-E Throughput:")
+        statWindow.LabelTPCEscore.grid(column=0, row=13, columnspan=2, sticky="W")
+
+        statWindow.EntryTPCEscorevar = Tkinter.StringVar()
+        statWindow.EntryTPCEscore = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTPCEscorevar, \
+                                                width=12)
+        statWindow.EntryTPCEscore.grid(column=2, row=13, sticky='EW')
+        
+
+        statWindow.LabelTotalNo = Tkinter.Label(statWindow, text="Total No. of Transactions Completed:")
+        statWindow.LabelTotalNo.grid(column=0, row=14, columnspan=2, sticky="W")
+
+        statWindow.EntryTotalNovar = Tkinter.StringVar()
+        statWindow.EntryTotalNo = Tkinter.Entry(statWindow, textvariable=statWindow.EntryTotalNovar, \
+                                                   width=12)
+        statWindow.EntryTotalNo.grid(column=2, row=14, sticky='EW')
 
         """ Button definition  """
         buttonQuit = Tkinter.Button(statWindow,text=u"Quit Statistics", command=statWindow.StopStatWindow, width=12)
-        buttonQuit.grid (column=5, row=13, sticky=S)
+        buttonQuit.grid (column=2, row=23, sticky="NEWS")
 
         """ Vocable blue bar Entry definition  """
         statWindow.VocableVariable = Tkinter.StringVar()
         Vocable = Tkinter.Label(statWindow,textvariable=statWindow.VocableVariable, anchor="w", fg="white", bg="blue")
-        Vocable.grid(column=0, row=13, columnspan=4, sticky='EW')
+        Vocable.grid(column=0, row=23, columnspan=2, sticky='EW')
         statWindow.VocableVariable.set(u"Hello !")
 
         """ Start data collecting thread  """
@@ -968,15 +1032,24 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
         """ Test if the connection parameters are valid.
             - If the connection is valid print the db_name into the vocable label.
                 Otherwise print an error message.
-        """        
-        #dsn_tns = cx_Oracle.makedsn('15.136.28.39', 1526, SID)
-        #dsn_tns = ('scott/tiger@' + str(self.Entry3.get()))
-        #version_DB['text'] = str(self.Entry3.get())
+        """
+        txnNames = ["Broker-Volume",
+                    "Customer-Position",
+                    "Market-Feed",
+                    "Market-Watch",
+                    "Security-Detail",
+                    "Trade-Lookup",
+                    "Trade-Order",
+                    "Trade-Result",
+                    "Trade-Status",
+                    "Trade-Update",
+                    "Data-Maintenance"]
+
         while statWindow.LoopWindowVar == 0:
             error_con = 0
 
             try:
-                con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
+                con = connectToOracle(str(ip), str(port), str(SID), "TPCE", "TPCE")
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code == 1017:
@@ -994,45 +1067,76 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
                 
             if error_con != 1:
                 cur = con.cursor()
-                compteur = 0
-                cur.execute('select t.inst_id, t.value, q.value, c.value, io.value, count(u.username), substr (i.host_name,1,8), substr (i.instance_name,1,8) from gv$sysmetric t, gv$sysmetric q,  gv$sysmetric c, gv$sysmetric io, gv$session u, gv$instance i where t.metric_id=2121 and q.metric_id=2004 and c.metric_id=2057 and io.metric_id=2145 and t.group_id=3  and q.group_id=3 and c.group_id=3 and t.inst_id=q.inst_id and t.inst_id=c.inst_id and t.inst_id=i.inst_id and io.inst_id=i.inst_id and t.inst_id=u.inst_id and u.username like \'SCOTT\'  group by t.inst_id, t.value, q.value, c.value, io.value,  i.host_name, i.instance_name  order by t.inst_id')
-                for result in cur:
-                    compteur += 1
-                    if compteur == 1:
-                        statWindow.EntryNodeName1var.set(str(result[6]))
-                        statWindow.EntryInstanceName1var.set(str(result[7]))
-                        statWindow.EntryNbUsers1var.set(str(int(result[5])))
-                        statWindow.EntryBusyTime1var.set(str("{0:.2f}".format(float(result[3]))))
-                        statWindow.EntrySQLSec1var.set(str("{0:.1f}".format(float(result[1]))))
-                        statWindow.EntryIOMSec1var.set(str("{0:.1f}".format(float(result[4]))))
-                        statWindow.EntryBlockRead1var.set(str(int(result[2])))
-                    elif compteur == 2:
-                        statWindow.EntryNodeName2var.set(str(result[6]))
-                        statWindow.EntryInstanceName2var.set(str(result[7]))
-                        statWindow.EntryNbUsers2var.set(str(int(result[5])))
-                        statWindow.EntryBusyTime2var.set(str("{0:.2f}".format(float(result[3]))))
-                        statWindow.EntrySQLSec2var.set(str("{0:.1f}".format(float(result[1]))))
-                        statWindow.EntryIOMSec2var.set(str("{0:.1f}".format(float(result[4]))))
-                        statWindow.EntryBlockRead2var.set(str(int(result[2])))
-                    elif compteur == 3:
-                        statWindow.EntryNodeName3var.set(str(result[6]))
-                        statWindow.EntryInstanceName3var.set(str(result[7]))
-                        statWindow.EntryNbUsers3var.set(str(int(result[5])))
-                        statWindow.EntryBusyTime3var.set(str("{0:.2f}".format(float(result[3]))))
-                        statWindow.EntrySQLSec3var.set(str("{0:.1f}".format(float(result[1]))))
-                        statWindow.EntryIOMSec3var.set(str("{0:.1f}".format(float(result[4]))))
-                        statWindow.EntryBlockRead3var.set(str(int(result[2])))
-                    elif compteur == 4:
-                        statWindow.EntryNodeName4var.set(str(result[6]))
-                        statWindow.EntryInstanceName4var.set(str(result[7]))
-                        statWindow.EntryNbUsers4var.set(str(int(result[5])))
-                        statWindow.EntryBusyTime4var.set(str("{0:.2f}".format(float(result[3]))))
-                        statWindow.EntrySQLSec4var.set(str("{0:.1f}".format(float(result[1]))))
-                        statWindow.EntryIOMSec4var.set(str("{0:.1f}".format(float(result[4]))))
-                        statWindow.EntryBlockRead4var.set(str(int(result[2])))
-                
+                counter = 0
+                cur.execute('select BROKERVOLUMECOUNT, CUSTOMERPOSITIONCOUNT, MARKETFEEDCOUNT, MARKETWATCHCOUNT, SECURITYDETAILCOUNT,'
+                            'TRADELOOKUPCOUNT, TRADEORDERCOUNT, TRADERESULTCOUNT, TRADESTATUSCOUNT, TRADEUPDATECOUNT, DATAMAINTENANCECOUNT from tpcestat')
+                res = cur.fetchall()
 
-                    statWindow.VocableVariable.set("You are connected to {0}".format(str(SID)))
+                cur1 = con.cursor()
+                cur1.execute('select count(*) from dwhstat where (sysdate - insdate)*60*60*24 <61')
+                for result in cur1:
+                    NbExecTime = str(int(result[0]))
+                    tpceScore = int(NbExecTime) / 60
+                cur1.close()
+
+                if len(res) == 1:
+                    absCounts = map(int, res[0])
+                    totalCounts = np.sum(absCounts)
+                    relCounts = np.zeros(11)
+
+                    for i in range(0, len(absCounts)):
+                        relCounts[i] = absCounts[i] / totalCounts
+
+                    # print "\n{:<21} {:<21} {:<10}".format('Transaction Mix', 'Transaction Count', 'Mix %')
+                    # print "------------------------------------------------------------"
+                    # for i in range(0, len(txnNames)):
+                    #     print "{:<21} {:<21} {:<10}".format(txnNames[i], str(absCounts[i]), str(relCounts[i]))
+
+                    entrysFirstColumn = [statWindow.EntryTxnMix1var,
+                                         statWindow.EntryTxnMix2var,
+                                         statWindow.EntryTxnMix3var,
+                                         statWindow.EntryTxnMix4var,
+                                         statWindow.EntryTxnMix5var,
+                                         statWindow.EntryTxnMix6var,
+                                         statWindow.EntryTxnMix7var,
+                                         statWindow.EntryTxnMix8var,
+                                         statWindow.EntryTxnMix9var,
+                                         statWindow.EntryTxnMix10var,
+                                         statWindow.EntryTxnMix11var]
+
+                    entrysSecondColumn = [statWindow.EntryTxnCount1var,
+                                         statWindow.EntryTxnCount2var,
+                                         statWindow.EntryTxnCount3var,
+                                         statWindow.EntryTxnCount4var,
+                                         statWindow.EntryTxnCount5var,
+                                         statWindow.EntryTxnCount6var,
+                                         statWindow.EntryTxnCount7var,
+                                         statWindow.EntryTxnCount8var,
+                                         statWindow.EntryTxnCount9var,
+                                         statWindow.EntryTxnCount10var,
+                                         statWindow.EntryTxnCount11var]
+
+                    entrysThirdColumn = [statWindow.EntryMixPerc1var,
+                                          statWindow.EntryMixPerc2var,
+                                          statWindow.EntryMixPerc3var,
+                                          statWindow.EntryMixPerc4var,
+                                          statWindow.EntryMixPerc5var,
+                                          statWindow.EntryMixPerc6var,
+                                          statWindow.EntryMixPerc7var,
+                                          statWindow.EntryMixPerc8var,
+                                          statWindow.EntryMixPerc9var,
+                                          statWindow.EntryMixPerc10var,
+                                          statWindow.EntryMixPerc11var]
+                    
+                    for i in range(0, 11):
+                        entrysFirstColumn[i].set(str(txnNames[i]))
+                        entrysSecondColumn[i].set(str(absCounts[i]))
+                        entrysThirdColumn[i].set(str(relCounts[i]))
+                    
+                    statWindow.EntryTPCEscorevar.set(str(tpceScore))
+                    statWindow.EntryTotalNovar.set(str(totalCounts))
+
+                statWindow.VocableVariable.set("You are connected to {0}".format(str(SID)))
                 cur.close()
                 con.close()
                 time.sleep(2)
@@ -1081,11 +1185,381 @@ class LoadThread(threading.Thread):
             self.LengthTest = self.LengthTest * 60
         self.runLoad = 0
 
+    def printDBMSoutput(self, cur):
+        statusVar = cur.var(cx_Oracle.NUMBER)
+        lineVar = cur.var(cx_Oracle.STRING)
+        while True:
+            cur.callproc("dbms_output.get_line", (lineVar, statusVar))
+            if statusVar.getvalue() != 0:
+                break
+            print lineVar.getvalue()
+
+    def brokervolumeTransaction(self, con):
+       if con:
+            cur = con.cursor()
+
+            try:
+                cur.callproc("dbms_output.enable")
+                cur.execute("""
+                    DECLARE
+                    in_sector_name VARCHAR2(50);
+                    list_len INTEGER;
+                    status INTEGER;
+                    i INTEGER;
+    
+                    in_broker_list  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
+                    broker_name  Brokervolume_pkg.B_NAME_ARRAY := Brokervolume_pkg.B_NAME_ARRAY ();
+                    volume Brokervolume_pkg.VOL_ARRAY := Brokervolume_pkg.VOL_ARRAY();
+                    brokervolframe1_tbl  Brokervolume_pkg.brokervolframe1_tab;
+    
+                    BEGIN
+                    
+                    SELECT SC_NAME INTO in_sector_name FROM ( SELECT SC_NAME, row_number() OVER (ORDER BY sc_name) 
+                    rno from sector order by rno) where  rno = ( select round (dbms_random.value (0,11)) from dual);
+                    
+                    SELECT b_name BULK COLLECT INTO in_broker_list FROM ( SELECT b_name , row_number() over (order by b_name) rno FROM broker )
+                            WHERE  rno < ( SELECT round (dbms_random.value (25,50)) FROM dual) 
+                            AND rno > ( SELECT round (dbms_random.value (0,25)) FROM dual);
+    
+                    dbms_output.put_line('ins_sec: ' || in_sector_name);
+                    brokervolframe1_tbl := Brokervolume_pkg.BrokerVolumeFrame1(in_broker_list ,in_sector_name,broker_name,list_len,status,volume);
+    
+                    dbms_output.put_line('list_len: ' || list_len);
+                    dbms_output.put_line('status_out: ' || status);
+                    --FOR i IN 1..30
+                    --LOOP
+                    --dbms_output.put_line('volume'|| volume(i));
+                    --END LOOP;
+                    END;
+                """)
+            except cx_Oracle.DatabaseError:
+                pass
+
+            #LoadThread.printDBMSoutput(self, cur)
+            print "bv"
+
+            cur.close()
+
+    def customerpositionTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+                DECLARE 
+                cust_id   NUMBER(11);
+                tax_id  VARCHAR(20);
+                acct_len  INTEGER;
+                c_ad_id  NUMBER(11); 
+                c_area_1  VARCHAR(3);
+                c_area_2  VARCHAR(3);
+                c_area_3  VARCHAR(3);
+                c_ctry_1  VARCHAR(3); 
+                c_ctry_2  VARCHAR(3);
+                c_ctry_3  VARCHAR(3);
+                --	c_dob  DATE;
+                c_email_1  VARCHAR(50);
+                c_email_2  VARCHAR(50);
+                c_ext_1  VARCHAR(5);
+                c_ext_2  VARCHAR(5);
+                c_ext_3  VARCHAR(5);
+                c_f_name  VARCHAR(30);
+                c_gndr  VARCHAR(1);
+                c_l_name  VARCHAR(30);
+                c_local_1  VARCHAR(10);
+                c_local_2  VARCHAR(10);
+                c_local_3  VARCHAR(10);
+                c_m_name  VARCHAR(1);
+                c_st_id  VARCHAR(4);
+                c_tier  NUMBER(38);
+                status  INTEGER;
+                acct_id CustomerPosition_pkg.ID_ARRAY :=	CustomerPosition_pkg.ID_ARRAY();
+                asset_total CustomerPosition_pkg.TOT_ARRAY :=	CustomerPosition_pkg.TOT_ARRAY();
+                cash_bal CustomerPosition_pkg.TOT_ARRAY :=	CustomerPosition_pkg.TOT_ARRAY();	
+                c_dob DATE := SYSDATE ;
+                
+                customerPositionFrame1_tbl  CustomerPosition_pkg.CustomerPositionFrame1_tab := CustomerPosition_pkg.CustomerPositionFrame1_tab();
+                
+                customerFramerec CustomerPosition_pkg.CustomerPositionFrame1_record ;
+                
+                
+                
+                BEGIN 
+                
+                select c_id into cust_id from ( select c_id, row_number() over (order by c_id) rno from customer order by rno) where  rno = ( select round (dbms_random.value (0,5000)) from dual);
+                select tx_id into tax_id from ( select tx_id, row_number() over (order by tx_id) rno from taxrate order by rno) where  rno = ( select round (dbms_random.value (0,320)) from dual);
+                
+                customerPositionFrame1_tbl := CustomerPosition_pkg.CustomerPositionFrame1(cust_id ,tax_id ,acct_id ,acct_len ,asset_total ,c_ad_id,c_area_1  ,c_area_2  ,c_area_3  ,	c_ctry_1  ,c_ctry_2  ,c_ctry_3  ,	c_dob ,c_email_1  ,	c_email_2  ,	c_ext_1  ,c_ext_2  ,c_ext_3  ,c_f_name  ,	c_gndr  ,c_l_name  ,c_local_1  ,c_local_2  ,	c_local_3  ,c_m_name  ,c_st_id ,c_tier ,cash_bal ,	status  );
+                
+                dbms_output.put_line('list_len: ' || acct_len); 
+                dbms_output.put_line('status_' || status);
+                FOR i IN 1 .. acct_len
+                LOOP 
+                dbms_output.put_line('acct_id '|| acct_id(i));
+                dbms_output.put_line('cash_bal '|| cash_bal(i));
+                dbms_output.put_line('asset_total '|| asset_total(i));
+                END LOOP; 
+                END;
+             """)
+
+            #LoadThread.printDBMSoutput(self, cur)
+            print "cp"
+
+            cur.close()
+
+    def marketwatchTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+                DECLARE 
+                acct_id NUMBER;
+                cust_id NUMBER;
+                ending_co_id NUMBER;
+                industry_name VARCHAR2(50);
+                starting_co_id 	NUMBER;
+                
+                marketWatchFrame1_tbl  MarketWatchFrame1_Pkg.MarketWatchFrame1_tab := MarketWatchFrame1_Pkg.MarketWatchFrame1_tab();
+                 
+                marketWatchFrame1rec MarketWatchFrame1_Pkg.MarketWatchFrame1_record ;
+                        
+                BEGIN
+                
+                select hs_ca_id into acct_id from ( select hs_ca_id, row_number() over (order by hs_ca_id) rno from holding_summary order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+                select wl_c_id  into cust_id from ( select wl_c_id, row_number() over (order by wl_c_id) rno from watch_list order by rno) where  rno = ( select round (dbms_random.value (1,5000)) from dual);
+                
+                --DEBUGGING
+                dbms_output.put_line('acct_id: ' || acct_id);
+                dbms_output.put_line('cust_id: ' || cust_id);
+                
+                marketWatchFrame1_tbl := MarketWatchFrame1_Pkg.MarketWatchFrame1(acct_id, cust_id, ending_co_id, industry_name, starting_co_id);
+                
+                END;
+             """)
+
+            #LoadThread.printDBMSoutput(self, cur)
+            print "mw"
+
+            cur.close()
+
+    def datamaintenanceTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+                DECLARE 
+                in_acct_id NUMBER;
+                in_c_id NUMBER;
+                in_co_id NUMBER;
+                day_of_month INTEGER;
+                symbol VARCHAR2(50);
+                table_name VARCHAR2(50);
+                in_tx_id VARCHAR2(50);
+                vol_incr INTEGER;
+                status INTEGER;
+                
+                dataMaintenanceFrame1_out INTEGER;
+                
+                BEGIN 
+                select ap_ca_id into in_acct_id from ( select ap_ca_id, row_number() over (order by ap_ca_id) rno from account_permission order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+                select c_id into in_c_id from ( select c_id, row_number() over (order by c_id) rno from customer order by rno) where  rno = ( select round (dbms_random.value (1,5000)) from dual);
+                select co_id into in_co_id from ( select co_id, row_number() over (order by co_id) rno from company order by rno) where  rno = ( select round (dbms_random.value (1,2500)) from dual);
+                select round (dbms_random.value (1, 31)) into day_of_month from dual;
+                select dm_s_symb into symbol from ( select dm_s_symb, row_number() over (order by dm_s_symb) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,3425)) from dual);
+                with tablenames as (
+                      select 'ACCOUNT_PERMISSION' as s from dual union all
+                      select 'ADDRESS' as s from dual union all
+                      select 'COMPANY' as s from dual union all
+                      select 'CUSTOMER' as s from dual union all
+                      select 'CUSTOMER_TAXRATE' as s from dual union all
+                      select 'DAILY_MARKET' as s from dual union all
+                      select 'FINANCIAL' as s from dual union all
+                      select 'NEWS_ITEM' as s from dual union all
+                      select 'SECURITY' as s from dual union all
+                      select 'TAXRATE' as s from dual union all
+                      select 'WATCH_ITEM' as s from dual
+                     )
+                select (select s
+                        from (select s from tablenames order by dbms_random.value) s
+                        where rownum = 1
+                       )
+                into table_name       
+                from dual;
+                select tx_id into in_tx_id from ( select tx_id, row_number() over (order by tx_id) rno from taxrate order by rno) where  rno = ( select round (dbms_random.value (0,320)) from dual);
+                select dm_vol into vol_incr from ( select dm_vol, row_number() over (order by dm_vol) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,4469625)) from dual);
+                
+                -- DEBUGGING
+                dbms_output.put_line('in_acct_id:   ' || in_acct_id);
+                dbms_output.put_line('in_c_id:      ' || in_c_id);
+                dbms_output.put_line('in_co_id:     ' || in_co_id);
+                dbms_output.put_line('day_of_month: ' || day_of_month);
+                dbms_output.put_line('symbol:       ' || symbol);
+                dbms_output.put_line('table_name:   ' || table_name);
+                dbms_output.put_line('in_tx_id:     ' || in_tx_id);
+                dbms_output.put_line('vol_incr:     ' || vol_incr);
+                
+                dataMaintenanceFrame1_out := DataMaintenanceFrame1_Pkg.DataMaintenanceFrame1(in_acct_id, in_c_id, in_co_id, day_of_month, symbol, table_name, in_tx_id, vol_incr, status);
+                
+                dbms_output.put_line('status ' || dataMaintenanceFrame1_out);
+                
+                END;
+             """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "dm"
+
+            cur.close()
+
+    def marketfeedTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE
+            MaxSize INTEGER;
+            status_submitted VARCHAR2(50);
+            type_limit_buy	VARCHAR2(50);
+            type_limit_sell	VARCHAR2(50);
+            type_stop_loss	VARCHAR2(50);
+            
+            price_quote	TPCE.MARKETFEEDFRAME1_PKG.PR_ARRAY := TPCE.MARKETFEEDFRAME1_PKG.PR_ARRAY();
+            symbol TPCE.MARKETFEEDFRAME1_PKG.SYM_ARRAY := TPCE.MARKETFEEDFRAME1_PKG.SYM_ARRAY();
+            trade_qty TPCE.MARKETFEEDFRAME1_PKG.TR_ARRAY := TPCE.MARKETFEEDFRAME1_PKG.TR_ARRAY();
+            
+            lowerBound INTEGER;
+            upperBound INTEGER;
+            
+            marketFeedFrame1_tbl  MarketFeedFrame1_Pkg.MarketFeedFrame1_tab := MarketFeedFrame1_Pkg.MarketFeedFrame1_tab();
+            marketFeedFrame1rec MarketFeedFrame1_Pkg.MarketFeedFrame1_record ;
+            
+            BEGIN
+            MaxSize := 2;
+            status_submitted := 'CMPT';
+            select tr_tt_id into type_limit_buy from ( select tr_tt_id, row_number() over (order by tr_tt_id) rno from trade_request order by rno) where  rno = ( select round (dbms_random.value (1,2)) from dual);
+            select tr_tt_id into type_limit_sell from ( select tr_tt_id, row_number() over (order by tr_tt_id) rno from trade_request order by rno) where  rno = ( select round (dbms_random.value (1,2)) from dual);
+            select tr_tt_id into type_stop_loss from ( select tr_tt_id, row_number() over (order by tr_tt_id) rno from trade_request order by rno) where  rno = ( select round (dbms_random.value (1,2)) from dual);
+            
+            lowerbound := 0;
+            upperbound := 3;
+            
+            SELECT tr_bid_price BULK COLLECT INTO price_quote FROM ( SELECT tr_bid_price , row_number() over (order by tr_bid_price) rno FROM trade_request )
+                                    WHERE  rno < upperBound 
+                                    AND rno > lowerBound;
+            SELECT tr_s_symb BULK COLLECT INTO symbol FROM ( SELECT tr_s_symb , row_number() over (order by tr_s_symb) rno FROM trade_request )
+                                    WHERE  rno < upperBound 
+                                    AND rno > lowerBound;
+            SELECT lt_vol BULK COLLECT INTO trade_qty FROM ( SELECT lt_vol , row_number() over (order by lt_vol) rno FROM last_trade )
+                                    WHERE  rno < upperBound 
+                                    AND rno > lowerBound;
+            
+            -- DEBUGGING
+            dbms_output.put_line('MaxSize:           ' || MaxSize);
+            dbms_output.put_line('status_submitted:  ' || status_submitted);
+            dbms_output.put_line('type_limit_buy:    ' || type_limit_buy);
+            dbms_output.put_line('type_limit_sell:   ' || type_limit_sell);
+            dbms_output.put_line('type_stop_loss:    ' || type_stop_loss);
+            dbms_output.put_line('lowerBound:        ' || lowerBound);
+            dbms_output.put_line('upperBound:        ' || upperBound);
+            
+            marketFeedFrame1_tbl := MarketFeedFrame1_Pkg.MarketFeedFrame1(MaxSize, price_quote, status_submitted, symbol, trade_qty, type_limit_buy, type_limit_sell, type_stop_loss);
+            
+            END;
+             """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "mf"
+
+            cur.close()
+
+    def securitydetailTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE 
         
+            access_lob_flag INTEGER;
+            max_rows_to_return INTEGER;
+            start_day DATE;
+            symbol VARCHAR2(50);
+            
+            end_date DATE;
+                    
+            securityDetailFrame1_tbl SecurityDetailFrame1_Pkg.SecurityDetailFrame1_tab := SecurityDetailFrame1_Pkg.SecurityDetailFrame1_tab();
+             
+            securityDetailFrame1rec SecurityDetailFrame1_Pkg.SecurityDetailFrame1_record1 ;
+            
+            BEGIN 
+            access_lob_flag := 1;
+            select round (dbms_random.value (5, 20)) into max_rows_to_return from dual;
+            end_date := DATE '2005-01-01';
+            end_date := end_date - max_rows_to_return;
+            select s_symb into symbol from ( select s_symb, row_number() over (order by s_symb) rno from security order by rno) where  rno = ( select round (dbms_random.value (1,3425)) from dual);
+            select TO_DATE(
+                          trunc(
+                               DBMS_RANDOM.VALUE(TO_CHAR(DATE '2000-01-03','J')
+                                                ,TO_CHAR(end_date,'J')
+                                                )
+                                ),'J'
+                           ) into start_day from DUAL;
+            
+            -- DEBUGGING
+            dbms_output.put_line('access_lob_flag:     ' || access_lob_flag);
+            dbms_output.put_line('max_rows_to_return:  ' || max_rows_to_return);
+            dbms_output.put_line('start_day:           ' || start_day);
+            dbms_output.put_line('symbol:              ' || symbol);
+            
+            
+            securityDetailFrame1_tbl := SecurityDetailFrame1_Pkg.SecurityDetailFrame1(access_lob_flag, max_rows_to_return, start_day, symbol);
+            
+            END;
+             """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "sd"
+
+            cur.close()
+
+    def tradestatusTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE
+            acct_id NUMBER;
+            
+            TradeStatusFrame1_tbl  TradeStatusFrame1_Pkg.TradeStatusFrame1_tab := TradeStatusFrame1_Pkg.TradeStatusFrame1_tab(); 
+            TradeStatusFrame1rec TradeStatusFrame1_Pkg.TradeStatusFrame1_record ;
+            
+            BEGIN 
+            select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            
+            -- DEBUGGING
+            dbms_output.put_line('acct_id:  ' || acct_id);
+            
+            TradeStatusFrame1_tbl := TradeStatusFrame1_Pkg.TradeStatusFrame1(acct_id);
+            
+            END;
+            """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "ts"
+
+            cur.close()
+
+    def placeholder(self, con):
+        pass
+
+    # aka JeryTxnHarness
     def run(self):
         """
            The thread executes the same query in loop as long as:
-           - it cans be connected to the database
+           - it can be connected to the database
            - the test period is not over (time.time() < (StartTimeTest + self.LengthTest)
            - the flag self.runLoad == 0. This one is switched to 1 when:
                - the test period is over
@@ -1094,35 +1568,76 @@ class LoadThread(threading.Thread):
         global GlobalStop
         
         error_con = 0
+
+        # ToDo: insert functions
+        txns = [LoadThread.brokervolumeTransaction,
+                LoadThread.customerpositionTransaction,
+                LoadThread.marketfeedTransaction,
+                LoadThread.marketwatchTransaction,
+                LoadThread.securitydetailTransaction,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.placeholder,
+                LoadThread.tradestatusTransaction,
+                LoadThread.placeholder,
+                LoadThread.datamaintenanceTransaction]
+        columnNames = ["BROKERVOLUMECOUNT",
+                       "CUSTOMERPOSITIONCOUNT",
+                       "MARKETFEEDCOUNT",
+                       "MARKETWATCHCOUNT",
+                       "SECURITYDETAILCOUNT",
+                       "TRADELOOKUPCOUNT",
+                       "TRADEORDERCOUNT",
+                       "TRADERESULTCOUNT",
+                       "TRADESTATUSCOUNT",
+                       "TRADEUPDATECOUNT",
+                       "DATAMAINTENANCECOUNT"]
+        weight = [1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1]
+
+        totalWeight = np.sum(weight)
+        probs = np.zeros(11)
+        absCounts = np.zeros(11)
+        
         StartTimeTest = time.time()
         """Test the connection. If valid, enter in a loop until the "stop load" button is hit
            or the test period is over
            app.ExecTime() call the statistics method
         """
         try:
-            con = connectToOracle(self.OraIp, self.OraPort, self.OraConnect, self.OraUser, self.OraPwd, threaded=True)
+            con = connectToOracle(self.OraIp, self.OraPort, self.OraConnect, "TPCE", "TPCE", threaded=True)
         except cx_Oracle.DatabaseError:
             error_con = 1
             return error_con
 
         if error_con != 1:
+            # calculate probabilities based on weighting
+            for i in range(0, len(weight)):
+                probs[i] = weight[i] / totalWeight
+
             while self.runLoad == 0:
                 cur = con.cursor()
                 cur2 = con.cursor()
-                startTimeQuery = time.time()
-                try:
-                    cur.execute('select e1.ename, min(e2.deptno), max(e2.deptno), avg(to_number(to_char(e2.sal))), \
-                            avg(e2.comm), max(to_number(to_char(e2.comm))) from emp2 e2, emp e1 where e1.ename=e2.ename group by e1.ename')
-                except cx_Oracle.OperationalError:
-                    error_con = 1
-                    print cx_Oracle.OperationalError
-                    return error_con
+                cur3 = con.cursor()
+                # choosing values from 0-11 based on probabilities
+                choice = np.random.choice(11, 1, p=probs)[0]
 
+                startTimeQuery = time.time()
+                # execute selected transaction
+                txns[choice](self, con)
                 elapsedTimeQuery = int(time.time() - startTimeQuery)
-                cur2.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)',{"id":elapsedTimeQuery})
+
+                # increment selected transaction count
+                absCounts[choice] += 1
+
+                cur2.execute("""UPDATE tpcestat SET """ + columnNames[choice] + """ = ( SELECT """ \
+                             + columnNames[choice] + """ FROM tpcestat WHERE STATID = 0 ) + 1 WHERE STATID = 0 """)
+                con.commit()
+
+                cur3.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)', {"id": elapsedTimeQuery})
                 con.commit()
                 cur.close()
                 cur2.close()
+                cur3.close()
                 app.ExecTime()
 
                 if time.time() > (StartTimeTest + self.LengthTest):
@@ -1152,6 +1667,26 @@ class WatcherThread(threading.Thread):
 
 
     def run(self):
+        error_con = 0
+
+        try:
+            con = connectToOracle(str(self.Entry1.get()), str(self.Entry2.get()), str(self.Entry5.get()), "TPCE",
+                                  "TPCE")
+        except cx_Oracle.DatabaseError:
+            error_con = 1
+            print "err"
+
+        if error_con != 1:
+            cur = con.cursor()
+
+            cur.execute("""UPDATE tpcestat 
+                                                        SET BROKERVOLUMECOUNT = 0, CUSTOMERPOSITIONCOUNT = 0, MARKETFEEDCOUNT = 0, 
+                                                        MARKETWATCHCOUNT = 0, SECURITYDETAILCOUNT = 0, TRADELOOKUPCOUNT = 0, TRADEORDERCOUNT = 0, 
+                                                        TRADERESULTCOUNT = 0, TRADESTATUSCOUNT = 0, TRADEUPDATECOUNT = 0, DATAMAINTENANCECOUNT = 0
+                                                        WHERE STATID = 0 """)
+            con.commit()
+            cur.close()
+
         i = 1
         while self.runWatch != 1:
             try:
@@ -1473,11 +2008,10 @@ class simpleapp_tk(Tkinter.Tk):
         buttonQuit = Tkinter.Button(self, text=u"Quit Application", command=self.QuitApps, width=14)
         buttonQuit.grid(column=1, row=26, sticky=S)
 
-        self.buttonExtendedStat = Tkinter.Button(self, text=u"Extended Statistics", command=self.ExtendedStatistics \
+        self.buttonExtendedStat = Tkinter.Button(self, text=u"TPC-E Statistics", command=self.ExtendedStatistics \
                                                  , width=14)
 
         self.buttonExtendedStat.grid(column=0, row=26, sticky=S)
-        self.buttonExtendedStat.config(state=DISABLED)
 
         self.ButtonTestSystemConn = Tkinter.Button(self, text=u"Check System Connection", \
                                                    command=lambda:
@@ -1787,7 +2321,7 @@ class simpleapp_tk(Tkinter.Tk):
         if error_con != 1:
             cur = con.cursor()
             try:
-                cur.execute('select count(*) from emp2')
+                cur.execute('select count(*) from ADDRESS')
             except cx_Oracle.DatabaseError:
                 self.labelVariable2.set("Cannot access the test schema. Please create it again")
                 return 2
