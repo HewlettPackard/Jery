@@ -1,5 +1,5 @@
 [![Github All Releases](https://img.shields.io/github/downloads/HewlettPackard/Jery/total.svg)](https://github.com/HewlettPackard/Jery)
-[![Docker Pulls](https://img.shields.io/docker/pulls/oraclekc/jery.svg)](https://hub.docker.com/r/oraclekc/jery/)
+[![Docker Pulls](https://img.shields.io/docker/pulls/oraclekc/jery.svg)](https://hub.docker.com/r/oraclekc/jery-e/)
  
 
 # JERYe
