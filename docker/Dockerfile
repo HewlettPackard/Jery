@@ -1,5 +1,4 @@
 #!/bin/bash
-# © Copyright 2017 Hewlett Packard Enterprise Development LP
 FROM centos:7
 MAINTAINER Marcel Jakob <jery@hpe.com>
 
@@ -22,7 +21,7 @@ RUN yum install -y libaio && \
 	echo export LD_LIBRARY_PATH=/usr/lib/oracle/11.2/client64/lib && \
 	rpm -ivh cx_Oracle.rpm && \
 	rm cx_Oracle.rpm
-	
+
 
 #install GUI (GNOME Desktop) + tkinter
 RUN yum install -y abattis-cantarell-fonts.noarch && \
@@ -31,6 +30,10 @@ RUN yum install -y abattis-cantarell-fonts.noarch && \
 	yum install -y tkinter && \
 	yum clean all
 
+#install paramiko (Python SSH)and numpy
+RUN yum -y install python-pip && \
+	pip install paramiko && \
+	pip install scipy
 
 #new User "Developer"
 RUN export uid=0 gid=0 && \
@@ -41,6 +44,9 @@ RUN export uid=0 gid=0 && \
 	chmod 0440  /etc/sudoers && \
 	chown ${uid}:${gid} -R /home/developer
 
+#install dev tools (needed for EGen)
+RUN yum install -y libstdc++ && \
+	yum clean all
 
 #set current user to developer
 USER developer
