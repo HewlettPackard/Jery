@@ -1085,7 +1085,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
                     relCounts = np.zeros(11)
 
                     for i in range(0, len(absCounts)):
-                        relCounts[i] = absCounts[i] / totalCounts
+                        relCounts[i] = round(absCounts[i] / totalCounts * 100, 2)
 
                     # print "\n{:<21} {:<21} {:<10}".format('Transaction Mix', 'Transaction Count', 'Mix %')
                     # print "------------------------------------------------------------"
