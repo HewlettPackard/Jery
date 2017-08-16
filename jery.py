@@ -1552,6 +1552,144 @@ class LoadThread(threading.Thread):
 
             cur.close()
 
+    def tradeorderTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE 
+            acct_id NUMBER;
+            
+            tradeOrderFrame1_tbl  TradeOrderFrame1_Pkg.TradeOrderFrame1_tab := TradeOrderFrame1_Pkg.TradeOrderFrame1_tab();
+            rec TradeOrderFrame1_Pkg.TradeOrderFrame1_record;
+            
+            BEGIN 
+            select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            
+            --DEBUGGING
+            dbms_output.put_line('acct_id:     ' || acct_id);
+            tradeOrderFrame1_tbl := TradeOrderFrame1_Pkg.TradeOrderFrame1(acct_id);
+            
+            FOR i IN 1..tradeOrderFrame1_tbl.count
+            LOOP 
+            dbms_output.put_line('acct_name   = ' || tradeOrderFrame1_tbl(i).acct_name);
+            dbms_output.put_line('broker_name = ' || tradeOrderFrame1_tbl(i).broker_name);
+            dbms_output.put_line('[...]');
+            END LOOP; 
+            END;
+            """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "to"
+
+            cur.close()
+
+    def tradeupdateTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE 
+            max_trades NUMBER; 
+            max_updates NUMBER; 
+            
+            trade_id TradeUpdateFrame1_Pkg.ARINT15;
+            
+            tradeUpdateFrame1_tbl  TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab := TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab();
+            
+            BEGIN
+            max_trades := 10;
+            max_updates := 10;
+            
+            SELECT t_id BULK COLLECT INTO trade_id FROM trade where rownum <=10; 
+            tradeUpdateFrame1_tbl := TradeUpdateFrame1_Pkg.TradeUpdateFrame1(max_trades, max_updates, trade_id);
+            
+            FOR i IN 1..tradeUpdateFrame1_tbl.count
+            LOOP 
+            dbms_output.put_line('num_updated   = ' || tradeUpdateFrame1_tbl(i).num_updated);
+            dbms_output.put_line('num_found = ' || tradeUpdateFrame1_tbl(i).num_found);
+            dbms_output.put_line('bid_price = ' || tradeUpdateFrame1_tbl(i).bid_price);
+            dbms_output.put_line('exec_name = ' || tradeUpdateFrame1_tbl(i).exec_name);
+            dbms_output.put_line('is_cash = ' || tradeUpdateFrame1_tbl(i).is_cash);
+            dbms_output.put_line('[...]');
+            END LOOP;
+            END;
+            """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "tu"
+
+            cur.close()
+
+    def traderesultTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE
+            trade_id NUMBER;
+        
+            tradeResultFrame1_tbl  TradeResultFrame1_Pkg.TradeResultFrame1_tab := TradeResultFrame1_Pkg.TradeResultFrame1_tab();
+            rec TradeResultFrame1_Pkg.TradeResultFrame1_record;
+            
+            BEGIN 
+            select t_id into trade_id from ( select t_id, row_number() over (order by t_id) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
+            
+            --DEBUGGING
+            dbms_output.put_line('trade_id:   ' || trade_id);
+            tradeResultFrame1_tbl := TradeResultFrame1_Pkg.TradeResultFrame1(trade_id);
+            
+            FOR i IN 1..tradeResultFrame1_tbl.count
+            LOOP 
+            dbms_output.put_line('acct_id     = ' || tradeResultFrame1_tbl(i).acct_id);
+            dbms_output.put_line('charge      = ' || tradeResultFrame1_tbl(i).charge);
+            dbms_output.put_line('holdsum_qty = ' || tradeResultFrame1_tbl(i).holdsum_qty);
+            dbms_output.put_line('is_lifo     = ' || tradeResultFrame1_tbl(i).is_lifo);
+            dbms_output.put_line('[...]');
+            END LOOP; 
+            END;
+            """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "tr"
+
+            cur.close()
+
+    def tradelookupTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE
+            max_trades INTEGER;
+            trade_id TradeLookupFrame1_Pkg.ARINT15 ;
+            
+            tradeLookupFrame1_tbl  TradeLookupFrame1_Pkg.TradeLookupFrame1_tab := TradeLookupFrame1_Pkg.TradeLookupFrame1_tab();
+            
+            BEGIN 
+            max_trades :=10;
+            SELECT t_id BULK COLLECT INTO trade_id FROM trade where rownum <=10; 
+            tradeLookupFrame1_tbl := TradeLookupFrame1_Pkg.TradeLookupFrame1(max_trades, trade_id);
+            for i in 1 .. tradeLookupFrame1_tbl.count
+            loop 
+            
+            DBMS_OUTPUT.PUT_LINE('bid_price here in ' || tradeLookupFrame1_tbl(i).bid_price);
+            DBMS_OUTPUT.PUT_LINE('exec_name here in ' || tradeLookupFrame1_tbl(i).exec_name);
+            end loop;
+            
+            
+            END;
+            """)
+
+            # LoadThread.printDBMSoutput(self, cur)
+            print "tl"
+
+            cur.close()
+
     def placeholder(self, con):
         pass
 
@@ -1575,11 +1713,11 @@ class LoadThread(threading.Thread):
                 LoadThread.marketfeedTransaction,
                 LoadThread.marketwatchTransaction,
                 LoadThread.securitydetailTransaction,
-                LoadThread.placeholder,
-                LoadThread.placeholder,
-                LoadThread.placeholder,
+                LoadThread.tradelookupTransaction,
+                LoadThread.tradeorderTransaction,
+                LoadThread.traderesultTransaction,
                 LoadThread.tradestatusTransaction,
-                LoadThread.placeholder,
+                LoadThread.tradeupdateTransaction,
                 LoadThread.datamaintenanceTransaction]
         columnNames = ["BROKERVOLUMECOUNT",
                        "CUSTOMERPOSITIONCOUNT",
@@ -1592,7 +1730,7 @@ class LoadThread(threading.Thread):
                        "TRADESTATUSCOUNT",
                        "TRADEUPDATECOUNT",
                        "DATAMAINTENANCECOUNT"]
-        weight = [1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1]
+        weight = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         totalWeight = np.sum(weight)
         probs = np.zeros(11)
