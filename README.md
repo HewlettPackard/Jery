@@ -13,7 +13,8 @@ JERY is a Python 2.7 based simple database workload generator for Oracle and Ent
 - [What is Jery?](#WhatisJery)
 - [Info](#Info)
 - [Requirements](#Requirements)
-- [Installation](#Installation) 
+- [Installation](#Installation)
+- [Run with own configuration file](#RunOwnConfig) 
 - [Used Libraries](#UsedLibraries)
 - [Adding an insecure Docker registry](#AddinganinsecureDockerregistry)
 
@@ -229,6 +230,18 @@ ExecStart=/usr/bin/dockerd -–insecure-registry=dockerregistry.oracle.epc.ext.h
 ```shell
  $ docker info
 ```
+
+<a name="RunOwnConfig"/>
+
+## Run with own configuration file
+
+The provided [startup script](https://github.com/HewlettPackard/Jery/releases/download/v1.0a-script/run.sh) offers the possibility to run JERY with an own configuration file in order to load predefined values. This can be done by downloading and editing the config.ini template. [_(download)_]( https://github.com/HewlettPackard/Jery/releases/download/v1.0a/config.ini)
+
+You can pass your own configuration to JERY with the command:
+```shell
+ $ ./run.sh /your/path/to/config.ini
+```
+
 
 <a name="UsedLibraries"/>
 
