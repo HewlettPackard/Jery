@@ -13,7 +13,7 @@ symbol VARCHAR2(20);
 trade_id TradeUpdateFrame1_Pkg.ARINT15;
 
 tradeUpdateFrame1_tbl  TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab := TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab();
-tradeUpdateFrame2_tbl  TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab := TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab();
+tradeUpdateFrame2_tbl  TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab1 := TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab1();
 tradeUpdateFrame3_tbl  TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab2 := TradeUpdateFrame1_Pkg.TradeUpdateFrame1_tab2();
 
 BEGIN
@@ -33,6 +33,7 @@ select t_s_symb into symbol from ( select t_s_symb, row_number() over (order by 
 SELECT t_id BULK COLLECT INTO trade_id FROM trade where rownum <=10; 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+frameno := 2;
 
 --execute frame 1 -> is working
 IF frameno = 1 then
@@ -49,13 +50,13 @@ IF frameno = 1 then
     dbms_output.put_line('[...]');
     END LOOP;
 
--- execute frame 2 -> is not working yet
+-- execute frame 2 -> is working
 ELSIF frameno = 2 then
     dbms_output.put_line('Execute frame 2');
     
     tradeUpdateFrame2_tbl := TradeUpdateFrame1_Pkg.TradeUpdateFrame2(acct_id, max_trades, max_updates, trade_dts);
 
---execute frame 3 -> is not working yet   
+--execute frame 3 -> is working   
 ELSIF frameno = 3 then
     dbms_output.put_line('Execute frame 3');
     

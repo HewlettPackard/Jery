@@ -18,7 +18,7 @@ tradeLookupFrame4_tbl  TradeLookupFrame1_Pkg.TradeLookupFrame1_tab3 := TradeLook
 BEGIN
 --generate random number between 1 and 4
 select dbms_random.value(1,4) num into frameno from dual;
-frameno := 2;
+frameno := 4;
 
 max_trades := 10;
 SELECT t_id BULK COLLECT INTO trade_id FROM trade where rownum <=10;

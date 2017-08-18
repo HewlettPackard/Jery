@@ -2,8 +2,10 @@ CONNECT TPCE/TPCE;
 SET SERVEROUTPUT ON;
 DECLARE 
 trade_id NUMBER;
+trade_price NUMBER;
 
 tradeResultFrame1_tbl  TradeResultFrame1_Pkg.TradeResultFrame1_tab := TradeResultFrame1_Pkg.TradeResultFrame1_tab();
+tradeResultFrame2_tbl  TradeResultFrame1_Pkg.TradeResultFrame1_tab1 := TradeResultFrame1_Pkg.TradeResultFrame1_tab1();
 rec TradeResultFrame1_Pkg.TradeResultFrame1_record;
 
 BEGIN 
@@ -20,6 +22,11 @@ dbms_output.put_line('charge      = ' || tradeResultFrame1_tbl(i).charge);
 dbms_output.put_line('holdsum_qty = ' || tradeResultFrame1_tbl(i).holdsum_qty);
 dbms_output.put_line('is_lifo     = ' || tradeResultFrame1_tbl(i).is_lifo);
 dbms_output.put_line('[...]');
+
+select distinct t_trade_price into trade_price from trade where t_id = trade_id;
+
+tradeResultFrame2_tbl := TradeResultFrame1_Pkg.TradeResultFrame2(tradeResultFrame1_tbl(i).acct_id, tradeResultFrame1_tbl(i).holdsum_qty, tradeResultFrame1_tbl(i).is_lifo,	tradeResultFrame1_tbl(i).symbol, trade_id, trade_price, tradeResultFrame1_tbl(i).trade_qty, tradeResultFrame1_tbl(i).type_is_sell);
+
 END LOOP; 
 END;
 /
