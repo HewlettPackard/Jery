@@ -18,10 +18,10 @@ FUNCTION BrokerVolumeFrame1 (
 		volume OUT VOL_ARRAY)
 RETURN brokervolframe1_tab ;
 
-function myANY (in_broker_list IN B_NAME_ARRAY) 
-return varchar2; 
+function myANY (in_broker_list IN B_NAME_ARRAY)
+return varchar2;
 
-function in_list( p_string in varchar2 ) 
+function in_list( p_string in varchar2 )
 return myTableType;
 
 END Brokervolume_pkg ;

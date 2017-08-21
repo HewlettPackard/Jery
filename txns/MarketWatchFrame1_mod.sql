@@ -24,6 +24,7 @@ AS
 	--TYPE EmpCurTyp IS REF CURSOR RETURN emp%ROWTYPE;
 	--stock_list	refcursor;
 BEGIN
+	symbol :='';
 	IF cust_id != 0 
 	THEN
 		OPEN	stock_list 
@@ -57,7 +58,6 @@ BEGIN
             rec.pct_change := pct_change;
 			MarketWatchFrame1_tbl(1) := rec;
 		
-			CLOSE stock_list;
 		RETURN MarketWatchFrame1_tbl;
 	END IF;
 
@@ -65,29 +65,72 @@ BEGIN
 	new_mkt_cap := 0.0;
 	pct_change := 0.0;
 
+	 
 	FETCH	stock_list
 	INTO	symbol;
 
+	DBMS_OUTPUT.PUT_LINE('symbol  ==  '  || symbol);
+	
+	IF stock_list%NOTFOUND THEN
+            DBMS_OUTPUT.PUT_LINE('SQL DATA NOT FOUND');
+			MarketWatchFrame1_tbl.extend;
+	        rec.status  := '-1::smallint';
+            rec.status_desc := '0.0  -- status fail';
+            rec.pct_change := pct_change;
+			MarketWatchFrame1_tbl(1) := rec;
+			RETURN MarketWatchFrame1_tbl;
+	END IF;
+
 	WHILE stock_list%FOUND 
 	LOOP
+	    BEGIN
+		
 		SELECT	LT_PRICE
 		INTO	new_price
 		FROM	LAST_TRADE
-		WHERE	LT_S_SYMB = symbol;
-
+		WHERE	LT_S_SYMB = TRIM(symbol);
+		
+		exception when NO_DATA_FOUND then
+		dbms_output.put_line ('(MarketWatchFrame1 LAST_TRADE) SQLERRM: ' || sqlerrm || '  for  symbol ' ||  symbol );
+		FETCH	stock_list
+		    INTO	symbol;
+		CONTINUE;
+	
+		END;
+		
+		BEGIN
+		
 		SELECT	S_NUM_OUT
 		INTO	sec_num_out
 		FROM	SECURITY
-		WHERE	S_SYMB = symbol;
+		WHERE	S_SYMB = TRIM(symbol);
+		
+		
+		exception when NO_DATA_FOUND then
+		dbms_output.put_line ('(MarketWatchFrame1 SECURITY) SQLERRM: ' || sqlerrm || '  for  symbol ' ||  symbol );
+		FETCH	stock_list
+		    INTO	symbol;
+		CONTINUE;
+	
+		END;
 		
 		-- Only want one row, the most recent closing price for this security.
-
+		BEGIN
+		
 		SELECT	DM_CLOSE
 		INTO	old_price
 		FROM	DAILY_MARKET
-		WHERE	DM_S_SYMB = symbol
+		WHERE	DM_S_SYMB = trim(symbol)
 		and rownum <=1
 		ORDER BY DM_DATE desc;
+		
+		exception when NO_DATA_FOUND then
+		dbms_output.put_line ('(MarketWatchFrame1 DAILY_MARKET) SQLERRM: ' || sqlerrm || '  for  symbol ' ||  symbol );
+		FETCH	stock_list
+		    INTO	symbol;
+		CONTINUE;
+	
+		END;
 	--	LIMIT 1;
 
 		old_mkt_cap := old_mkt_cap + (sec_num_out * old_price);
@@ -95,6 +138,11 @@ BEGIN
 
 		FETCH	stock_list
 		INTO	symbol;
+		
+		
+		
+
+		
 	END LOOP;
 	
 	IF old_mkt_cap != 0 THEN
@@ -115,5 +163,3 @@ BEGIN
 END MarketWatchFrame1;
 END MarketWatchFrame1_Pkg;
 /
-
-

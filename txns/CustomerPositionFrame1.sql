@@ -192,6 +192,6 @@ BEGIN
 
 	RETURN CustomerPositionFrame2_tbl;
     END  CustomerPositionFrame2;
-END CustomerPosition_pkg ;
+END CustomerPosition_pkg;
 /
 
