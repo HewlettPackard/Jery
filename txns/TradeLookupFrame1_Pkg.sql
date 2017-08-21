@@ -186,4 +186,3 @@ FUNCTION TradeLookupFrame4(acct_id	IN NUMBER,trade_dts	 IN timestamp)
 RETURN TradeLookupFrame1_tab3;
 
 END TradeLookupFrame1_Pkg;
-/

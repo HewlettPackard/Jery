@@ -67,4 +67,3 @@ FUNCTION CustomerPositionFrame2(
 RETURN CustomerPositionFrame2_tab;	
 
 END CustomerPosition_pkg ;
-/

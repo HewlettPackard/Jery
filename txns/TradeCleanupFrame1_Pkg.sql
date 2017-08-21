@@ -7,4 +7,3 @@ FUNCTION TradeCleanupFrame1 (
 						start_trade_id	IN NUMBER)
 RETURN INTEGER;		
 END TradeCleanupFrame1_Pkg ;
-/	

@@ -535,6 +535,304 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                     CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 10/10: Calculated statistics")
                     CrSchemaWindow.update()
 
+        if error_con != 1:
+            try:
+                con = connectToOracle(str(ip), str(port), str(SID), "TPCE", "TPCE")
+            except cx_Oracle.DatabaseError as e:
+                error, = e.args
+                if error.code == 1017:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+                    error_con = 1
+                elif error.code == 12154:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+                    error_con = 1
+                elif error.code == 12543:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+                    error_con = 1
+                else:
+                    print("Unable to connect")
+                    error_con = 1
+
+            if error_con != 1:
+                cur = con.cursor()
+                # drop all functions
+                f = open('./txns/drop_all_functions.sql')
+                full_sql = f.read()
+                sql_commands = full_sql.split(';')
+
+                for sql_command in sql_commands:
+                    try:
+                        cur.execute(sql_command)
+                    except cx_Oracle.DatabaseError as e:
+                        error, = e.args
+                        if error.code != 900 and error.code != 1435 and error.code != 4043 and error.code != 1031:
+                            print error
+                            error_con = 2
+                if error_con == 0:
+                    print "dropped all functions"
+
+                cur.close()
+                con.close()
+
+            try:
+                con = connectToOracle(str(ip), str(port), str(SID), "TPCE", "TPCE")
+            except cx_Oracle.DatabaseError as e:
+                error, = e.args
+                if error.code == 1017:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Invalid username or password")
+                    error_con = 1
+                elif error.code == 12154:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": TNS couldn't resolve the SID")
+                    error_con = 1
+                elif error.code == 12543:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Destination host not available")
+                    error_con = 1
+                else:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
+                    error_con = 1
+
+            if error_con != 1:
+                cur = con.cursor()
+                # create packages
+                f = open('./txns/Brokervolume_pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/CustomerPosition_pkg.sql')
+                full_sql = f.read()
+
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/DataMaintenanceFrame1_Pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/MarketFeedFrame1_Pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/MarketWatchFrame1_Pkg.sql')
+                full_sql = f.read()
+
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/SecurityDetailFrame1_Pkg.sql')
+                full_sql = f.read()
+
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/TradeCleanupFrame1_Pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/TradeLookupFrame1_Pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/TradeOrderFrame1_Pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/TradeResultFrame1_Pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/TradeStatusFrame1_Pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+                f = open('./txns/TradeUpdateFrame1_Pkg.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                if error_con == 0:
+                    print "created packages"
+
+                # create functions
+
+                f = open('./txns/broker_volume.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/CustomerPositionFrame1.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/DataMaintenance_mod.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/MarketFeedFrame1.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/MarketWatchFrame1_mod.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/SecurityDetailFrame1_mod.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/TradeCleanupFrame1.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/TradeLookupFrame1.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/TradeOrderFrame1.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/TradeResultFrame1.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/TradeStatusFrame1.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                f = open('./txns/TradeUpdateFrame1.sql')
+                full_sql = f.read()
+                try:
+                    cur.execute(full_sql)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
+
+                if error_con == 0:
+                    print "created functions"
 
     def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
         """ Test if the connection parameters are valid.

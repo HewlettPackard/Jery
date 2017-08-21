@@ -632,5 +632,3 @@ BEGIN
 END TradeResultFrame6;
 
 END TradeResultFrame1_Pkg;
-/
-

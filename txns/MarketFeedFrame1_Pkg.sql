@@ -25,5 +25,3 @@ FUNCTION MarketFeedFrame1 (
 RETURN MarketFeedFrame1_tab;
 
 END MarketFeedFrame1_Pkg;
-/
-

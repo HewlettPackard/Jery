@@ -23,4 +23,3 @@ TYPE TradeStatusFrame1_tab is TABLE OF TradeStatusFrame1_record;
 FUNCTION TradeStatusFrame1 (acct_id IN NUMBER)
 RETURN TradeStatusFrame1_tab;
 END TradeStatusFrame1_Pkg;
-/

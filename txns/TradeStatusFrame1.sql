@@ -65,5 +65,3 @@ BEGIN
 	RETURN TradeStatusFrame1_tbl;
 	END TradeStatusFrame1;
 END TradeStatusFrame1_Pkg;
-/
-

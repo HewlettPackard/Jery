@@ -83,4 +83,3 @@ FUNCTION TradeResultFrame6(
 				type_name		IN VARCHAR2) 
 RETURN NUMBER;
 END TradeResultFrame1_Pkg;
-/

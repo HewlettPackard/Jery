@@ -32,7 +32,7 @@ TYPE TradeOrderFrame1_tab1 IS TABLE OF TradeOrderFrame1_record1;
 
 FUNCTION TradeOrderFrame1 (acct_id IN NUMBER)
 RETURN TradeOrderFrame1_tab ;
-FUNCTION TradeOrderFrame2(acct_id IN NUMBER(11),
+FUNCTION TradeOrderFrame2(acct_id IN NUMBER,
 						 exec_f_name IN varchar2,
 						 exec_l_name IN varchar2,
 						 exec_tax_id IN varchar2)
@@ -68,4 +68,3 @@ FUNCTION TradeOrderFrame4(
 				 type_is_market     IN NUMBER) 
 RETURN NUMBER;
 END TradeOrderFrame1_Pkg;
-/

@@ -93,7 +93,3 @@ return l_data;
  end in_list;
  
 END Brokervolume_pkg;
-/
-
-
-
