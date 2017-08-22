@@ -328,8 +328,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             stdin, stdout, stderr = ssh.exec_command("cd " + scriptsUnzipped + " && ./06ImportTPCETables.sh")
             waitForTerminate(stdout)
 
-            # print stderr.readlines()
-            # print stdout.readlines()
+            print stderr.readlines()
+            print stdout.readlines()
 
             try:
                 con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
@@ -363,6 +363,15 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
                 for result in cur:
                     noProcesses = result[0]
+
+            try:
+                cur.execute("""
+                insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087263998','TLS','ZICAPRA','23','123','4300000028');
+                insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087263999','TMS','CTAC','12','344','4300000039');
+                insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087264000','TLB','THDO','34','34','4300000018');
+                """);
+            except:
+                pass
 
             print "\nSTEP 8: Imported tables in database"
             CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 8/10: Imported tables in database")
@@ -791,7 +800,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         print error
                         error_con = 2
 
-                f = open('./txns/TradeOrderFrame1.sql')
+                f = open('./txns/TradeOrderFrame1_mod.sql')
                 full_sql = f.read()
                 try:
                     cur.execute(full_sql)
@@ -922,7 +931,6 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.VocableVariable.set("Test schema created with ratio: {0}".format(str(CrSchemaWindow.RatioVar.get())))
 
 
-        
     def CloseCrSchemaWindow(CrSchemaWindow):
         """Close the window and decrement the number of toplevel window counter
         """
@@ -1534,7 +1542,7 @@ class LoadThread(threading.Thread):
                 pass
 
             #LoadThread.printDBMSoutput(self, cur)
-            print "bv"
+            #print "bv"
 
             cur.close()
 
@@ -1612,7 +1620,7 @@ class LoadThread(threading.Thread):
              """)
 
             #LoadThread.printDBMSoutput(self, cur)
-            print "cp"
+            #print "cp"
 
             cur.close()
 
@@ -1648,7 +1656,7 @@ class LoadThread(threading.Thread):
              """)
 
             #LoadThread.printDBMSoutput(self, cur)
-            print "mw"
+            #print "mw"
 
             cur.close()
 
@@ -1717,7 +1725,7 @@ class LoadThread(threading.Thread):
              """)
 
             # LoadThread.printDBMSoutput(self, cur)
-            print "dm"
+            #print "dm"
 
             cur.close()
 
@@ -1779,7 +1787,7 @@ class LoadThread(threading.Thread):
              """)
 
             # LoadThread.printDBMSoutput(self, cur)
-            print "mf"
+            #print "mf"
 
             cur.close()
 
@@ -1829,7 +1837,7 @@ class LoadThread(threading.Thread):
              """)
 
             # LoadThread.printDBMSoutput(self, cur)
-            print "sd"
+            #print "sd"
 
             cur.close()
 
@@ -1857,7 +1865,7 @@ class LoadThread(threading.Thread):
             """)
 
             # LoadThread.printDBMSoutput(self, cur)
-            print "ts"
+            #print "ts"
 
             cur.close()
 
@@ -1890,7 +1898,7 @@ class LoadThread(threading.Thread):
             """)
 
             # LoadThread.printDBMSoutput(self, cur)
-            print "to"
+            #print "to"
 
             cur.close()
 
@@ -1966,7 +1974,7 @@ class LoadThread(threading.Thread):
             """)
 
             # LoadThread.printDBMSoutput(self, cur)
-            print "tu"
+            #print "tu"
 
             cur.close()
 
@@ -2001,7 +2009,7 @@ class LoadThread(threading.Thread):
             """)
 
             # LoadThread.printDBMSoutput(self, cur)
-            print "tr"
+            #print "tr"
 
             cur.close()
 
@@ -2070,8 +2078,44 @@ class LoadThread(threading.Thread):
             END;
             """)
 
+            #LoadThread.printDBMSoutput(self, cur)
+            #print "tl"
+
+            cur.close()
+
+    def tradecleanupTransaction(self, con):
+        if con:
+            cur = con.cursor()
+
+            cur.callproc("dbms_output.enable")
+            cur.execute("""
+            DECLARE
+            st_canceled_id VARCHAR2(20);
+            st_pending_id VARCHAR2(20);
+            st_submitted_id VARCHAR2(20);
+            start_trade_id NUMBER;
+            
+            TradeCleanupFrame1_res  INTEGER;
+            
+            BEGIN
+            select T_ST_ID, T_ID into st_canceled_id, start_trade_id from ( select T_ST_ID, T_ID, row_number() over (order by T_ST_ID) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
+            st_pending_id := st_canceled_id;
+            st_submitted_id := st_canceled_id;
+            
+            --DEBUGGING
+            dbms_output.put_line('st_canceled_id   = ' || st_canceled_id);
+            dbms_output.put_line('st_pending_id    = ' || st_pending_id);
+            dbms_output.put_line('st_submitted_id  = ' || st_submitted_id);
+            dbms_output.put_line('start_trade_id   = ' || start_trade_id);
+            
+            TradeCleanupFrame1_res := TradeCleanupFrame1_Pkg.TradeCleanupFrame1(st_canceled_id,	st_pending_id, st_submitted_id,	start_trade_id);
+            dbms_output.put_line('TradeCleanupFrame1_res   = ' || TradeCleanupFrame1_res);
+                
+            END;
+            """)
+
             # LoadThread.printDBMSoutput(self, cur)
-            print "tl"
+            print "tc"
 
             cur.close()
 
@@ -2146,18 +2190,21 @@ class LoadThread(threading.Thread):
 
                 startTimeQuery = time.time()
                 # execute selected transaction
-                txns[choice](self, con)
-                elapsedTimeQuery = int(time.time() - startTimeQuery)
+                try:
+                    txns[choice](self, con)
+                    elapsedTimeQuery = int(time.time() - startTimeQuery)
 
-                # increment selected transaction count
-                absCounts[choice] += 1
+                    # increment selected transaction count
+                    absCounts[choice] += 1
 
-                cur2.execute("""UPDATE tpcestat SET """ + columnNames[choice] + """ = ( SELECT """ \
-                             + columnNames[choice] + """ FROM tpcestat WHERE STATID = 0 ) + 1 WHERE STATID = 0 """)
-                con.commit()
+                    cur2.execute("""UPDATE tpcestat SET """ + columnNames[choice] + """ = ( SELECT """ \
+                                 + columnNames[choice] + """ FROM tpcestat WHERE STATID = 0 ) + 1 WHERE STATID = 0 """)
+                    con.commit()
 
-                cur3.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)', {"id": elapsedTimeQuery})
-                con.commit()
+                    cur3.execute('insert into dwhstat values (seq.NEXTVAL, :id, sysdate)', {"id": elapsedTimeQuery})
+                    con.commit()
+                except:
+                    pass
                 cur.close()
                 cur2.close()
                 cur3.close()
