@@ -365,11 +365,13 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                     noProcesses = result[0]
 
             try:
-                cur.execute("""
+                cur1 = con.cursor()
+                cur1.execute("""
                 insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087263998','TLS','ZICAPRA','23','123','4300000028');
                 insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087263999','TMS','CTAC','12','344','4300000039');
                 insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087264000','TLB','THDO','34','34','4300000018');
                 """);
+                cur1.close()
             except:
                 pass
 
@@ -2083,42 +2085,6 @@ class LoadThread(threading.Thread):
 
             cur.close()
 
-    def tradecleanupTransaction(self, con):
-        if con:
-            cur = con.cursor()
-
-            cur.callproc("dbms_output.enable")
-            cur.execute("""
-            DECLARE
-            st_canceled_id VARCHAR2(20);
-            st_pending_id VARCHAR2(20);
-            st_submitted_id VARCHAR2(20);
-            start_trade_id NUMBER;
-            
-            TradeCleanupFrame1_res  INTEGER;
-            
-            BEGIN
-            select T_ST_ID, T_ID into st_canceled_id, start_trade_id from ( select T_ST_ID, T_ID, row_number() over (order by T_ST_ID) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
-            st_pending_id := st_canceled_id;
-            st_submitted_id := st_canceled_id;
-            
-            --DEBUGGING
-            dbms_output.put_line('st_canceled_id   = ' || st_canceled_id);
-            dbms_output.put_line('st_pending_id    = ' || st_pending_id);
-            dbms_output.put_line('st_submitted_id  = ' || st_submitted_id);
-            dbms_output.put_line('start_trade_id   = ' || start_trade_id);
-            
-            TradeCleanupFrame1_res := TradeCleanupFrame1_Pkg.TradeCleanupFrame1(st_canceled_id,	st_pending_id, st_submitted_id,	start_trade_id);
-            dbms_output.put_line('TradeCleanupFrame1_res   = ' || TradeCleanupFrame1_res);
-                
-            END;
-            """)
-
-            # LoadThread.printDBMSoutput(self, cur)
-            print "tc"
-
-            cur.close()
-
     def placeholder(self, con):
         pass
 
@@ -2222,7 +2188,7 @@ class LoadThread(threading.Thread):
         self.runLoad = 1
 
 class WatcherThread(threading.Thread):
-    def __init__(self, Entry1, Entry2, Entry3, Entry4, Entry5, EntryConUsers, EntryTestLength, existingThread, labelVariable):
+    def __init__(self, Entry1, Entry2, Entry3, Entry4, Entry5, EntryConUsers, EntryTestLength, existingThread, labelVariable, simpleApp):
         threading.Thread.__init__(self)
         self.EntryConUsers = EntryConUsers
         self.Entry3 = Entry3
@@ -2234,6 +2200,7 @@ class WatcherThread(threading.Thread):
         self.existingThread = existingThread
         self.labelVariable = labelVariable
         self.runWatch = 0
+        self.simpleApp = simpleApp
 
 
     def run(self):
@@ -2254,9 +2221,47 @@ class WatcherThread(threading.Thread):
                                                         MARKETWATCHCOUNT = 0, SECURITYDETAILCOUNT = 0, TRADELOOKUPCOUNT = 0, TRADEORDERCOUNT = 0, 
                                                         TRADERESULTCOUNT = 0, TRADESTATUSCOUNT = 0, TRADEUPDATECOUNT = 0, DATAMAINTENANCECOUNT = 0
                                                         WHERE STATID = 0 """)
+
+            cur1 = con.cursor()
+            try:
+                cur.callproc("dbms_output.enable")
+                cur.execute("""
+                DECLARE
+                st_canceled_id VARCHAR2(20);
+                st_pending_id VARCHAR2(20);
+                st_submitted_id VARCHAR2(20);
+                start_trade_id NUMBER;
+    
+                TradeCleanupFrame1_res  INTEGER;
+    
+                BEGIN
+                select T_ST_ID, T_ID into st_canceled_id, start_trade_id from ( select T_ST_ID, T_ID, row_number() over (order by T_ST_ID) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
+                st_pending_id := st_canceled_id;
+                st_submitted_id := st_canceled_id;
+    
+                --DEBUGGING
+                dbms_output.put_line('st_canceled_id   = ' || st_canceled_id);
+                dbms_output.put_line('st_pending_id    = ' || st_pending_id);
+                dbms_output.put_line('st_submitted_id  = ' || st_submitted_id);
+                dbms_output.put_line('start_trade_id   = ' || start_trade_id);
+    
+                TradeCleanupFrame1_res := TradeCleanupFrame1_Pkg.TradeCleanupFrame1(st_canceled_id,	st_pending_id, st_submitted_id,	start_trade_id);
+                dbms_output.put_line('TradeCleanupFrame1_res   = ' || TradeCleanupFrame1_res);
+    
+                END;
+                """)
+
+                # LoadThread.printDBMSoutput(self, cur)
+            except:
+                pass
+            print "tc"
+
+            cur1.close()
             con.commit()
             cur.close()
 
+        self.simpleApp.buttonExtendedStat.config(state=NORMAL)
+        
         i = 1
         while self.runWatch != 1:
             try:
@@ -2580,6 +2585,7 @@ class simpleapp_tk(Tkinter.Tk):
 
         self.buttonExtendedStat = Tkinter.Button(self, text=u"TPC-E Statistics", command=self.ExtendedStatistics \
                                                  , width=14)
+        self.buttonExtendedStat.config(state=DISABLED)
 
         self.buttonExtendedStat.grid(column=0, row=26, sticky=S)
 
@@ -2860,7 +2866,7 @@ class simpleapp_tk(Tkinter.Tk):
         
         self.InitTableStat()
 
-        self.watcherThread = WatcherThread(self.Entry1, self.Entry2, self.Entry3, self.Entry4, self.Entry5, self.EntryConUsers, self.EntryTestLength, self.existingThread, self.labelVariable2)
+        self.watcherThread = WatcherThread(self.Entry1, self.Entry2, self.Entry3, self.Entry4, self.Entry5, self.EntryConUsers, self.EntryTestLength, self.existingThread, self.labelVariable2, self)
         self.watcherThread.name = 1
         self.watcherThread.start()
         self.existingThread.append(self.watcherThread)
@@ -3010,8 +3016,6 @@ class simpleapp_tk(Tkinter.Tk):
                     self.labelVariable2.set("{0}: System, connection succesfull".format(resultVar))
                 cur.close()
                 con.close()
-
-
 
     def ExecTime(self):
         """ Method calculating the average execution time of the test query
