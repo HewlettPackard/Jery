@@ -365,12 +365,14 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                     noProcesses = result[0]
 
             try:
-                cur1 = con.cursor()
-                cur1.execute("""
-                insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087263998','TLS','ZICAPRA','23','123','4300000028');
-                insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087263999','TMS','CTAC','12','344','4300000039');
-                insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087264000','TLB','THDO','34','34','4300000018');
-                """);
+                cur.execute("""
+                        BEGIN
+                        insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087263998','TLS','ZICAPRA','23','123','4300000028');
+                        insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087263999','TMS','CTAC','12','344','4300000039');
+                        insert into TPCE.TRADE_REQUEST (TR_T_ID,TR_TT_ID,TR_S_SYMB,TR_QTY,TR_BID_PRICE,TR_B_ID) values ('200000087264000','TLB','THDO','34','34','4300000018');
+                        END;
+                        """)
+                con.commit()
                 cur1.close()
             except:
                 pass
