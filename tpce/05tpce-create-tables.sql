@@ -1,5 +1,4 @@
--- Clause 2.2.5.1
-CREATE TABLE TPCE.account_permission (
+CREATE TABLE account_permission (
     ap_ca_id NUMBER(11) NOT NULL,
     ap_acl VARCHAR2(4) NOT NULL,
     ap_tax_id VARCHAR2(20) NOT NULL,
@@ -8,7 +7,7 @@ CREATE TABLE TPCE.account_permission (
     
 
 -- Clause 2.2.5.2
-CREATE TABLE TPCE.customer (
+CREATE TABLE customer (
     c_id NUMBER(11) NOT NULL,
     c_tax_id VARCHAR2(20) NOT NULL,
     c_st_id VARCHAR2(4) NOT NULL,
@@ -36,7 +35,7 @@ CREATE TABLE TPCE.customer (
     
 
 -- Clause 2.2.5.3
-CREATE TABLE TPCE.customer_account (
+CREATE TABLE customer_account (
     ca_id NUMBER(11) NOT NULL,
     ca_b_id NUMBER(11) NOT NULL,
     ca_c_id NUMBER(11) NOT NULL,
@@ -46,13 +45,13 @@ CREATE TABLE TPCE.customer_account (
     
 
 -- Clause 2.2.5.4
-CREATE TABLE TPCE.customer_taxrate (
+CREATE TABLE customer_taxrate (
     cx_tx_id VARCHAR2(4) NOT NULL,
     cx_c_id NUMBER(11) NOT NULL);
     
 
 -- Clause 2.2.5.5
-CREATE TABLE TPCE.holding (
+CREATE TABLE holding (
     h_t_id NUMBER(15) NOT NULL,
     h_ca_id NUMBER(11) NOT NULL,
     h_s_symb VARCHAR2(15) NOT NULL,
@@ -62,7 +61,7 @@ CREATE TABLE TPCE.holding (
     
 
 -- Clause 2.2.5.6
-CREATE TABLE TPCE.holding_history (
+CREATE TABLE holding_history (
     hh_h_t_id NUMBER(15) NOT NULL,
     hh_t_id NUMBER(15) NOT NULL,
     hh_before_qty NUMBER(6) NOT NULL,
@@ -70,20 +69,20 @@ CREATE TABLE TPCE.holding_history (
     
 
 -- Clause 2.2.5.7
-CREATE TABLE TPCE.holding_summary (
+CREATE TABLE holding_summary (
     hs_ca_id NUMBER(11) NOT NULL,
     hs_s_symb VARCHAR2(15) NOT NULL,
     hs_qty NUMBER(6) NOT NULL);
     
 
 -- Clause 2.2.5.8
-CREATE TABLE TPCE.watch_item (
+CREATE TABLE watch_item (
     wi_wl_id NUMBER(11) NOT NULL,
     wi_s_symb VARCHAR2(15) NOT NULL);
     
 
 -- Clause 2.2.5.9
-CREATE TABLE TPCE.watch_list (
+CREATE TABLE watch_list (
     wl_id NUMBER(11) NOT NULL,
     wl_c_id NUMBER(11) NOT NULL);
     
@@ -91,7 +90,7 @@ CREATE TABLE TPCE.watch_list (
 -- Broker Tables
 
 -- Clause 2.2.6.1
-CREATE TABLE TPCE.broker (
+CREATE TABLE broker (
     b_id NUMBER(11) NOT NULL,
     b_st_id VARCHAR2(4) NOT NULL,
     b_name VARCHAR2(100) NOT NULL,
@@ -100,7 +99,7 @@ CREATE TABLE TPCE.broker (
     
 
 -- Clause 2.2.6.2
-CREATE TABLE TPCE.cash_transaction (
+CREATE TABLE cash_transaction (
     ct_t_id NUMBER(15) NOT NULL,
     ct_dts TIMESTAMP NOT NULL,
     ct_amt NUMBER(10,2) NOT NULL,
@@ -108,14 +107,14 @@ CREATE TABLE TPCE.cash_transaction (
     
 
 -- Clause 2.2.6.3
-CREATE TABLE TPCE.charge (
+CREATE TABLE charge (
     ch_tt_id VARCHAR2(3) NOT NULL,
     ch_c_tier SMALLINT,
     ch_chrg NUMBER(10,2) CHECK (ch_chrg > 0));
     
 
 -- Clause 2.2.6.4
-CREATE TABLE TPCE.commission_rate (
+CREATE TABLE commission_rate (
     cr_c_tier SMALLINT NOT NULL,
     cr_tt_id VARCHAR2(3) NOT NULL,
     cr_ex_id VARCHAR2(6) NOT NULL,
@@ -123,21 +122,28 @@ CREATE TABLE TPCE.commission_rate (
     cr_to_qty NUMBER(6) NOT NULL CHECK (cr_to_qty > 0),
     cr_rate NUMBER(5, 2) NOT NULL CHECK (cr_rate >= 0));
 
-ALTER TABLE TPCE.commission_rate ADD CONSTRAINT cr_to_qty_sup
+ALTER TABLE commission_rate ADD CONSTRAINT cr_to_qty_sup
     CHECK (cr_to_qty > cr_from_qty);
     
 
 -- Clause 2.2.6.5
-CREATE TABLE TPCE.settlement (
+CREATE TABLE settlement (
     se_t_id NUMBER(15) NOT NULL,
     se_cash_type VARCHAR2(40) NOT NULL,
     se_cash_due_date DATE NOT NULL,
     se_amt NUMBER(10,2) NOT NULL);
-    
+
+
+-- Sequence for clause 2.2.6.6
+CREATE SEQUENCE seq_trade_id
+  MINVALUE 1
+  START WITH 200000000000001
+  INCREMENT BY 1
+  CACHE 20;
 
 -- Clause 2.2.6.6
-CREATE TABLE TPCE.trade (
-    t_id NUMBER(15) NOT NULL,
+CREATE TABLE trade (
+    t_id NUMBER default seq_trade_id.nextval ,
     t_dts TIMESTAMP NOT NULL,
     t_st_id VARCHAR2(4) NOT NULL,
     t_tt_id VARCHAR2(3) NOT NULL,
@@ -155,14 +161,14 @@ CREATE TABLE TPCE.trade (
     
 
 -- Clause 2.2.6.7
-CREATE TABLE TPCE.trade_history (
+CREATE TABLE trade_history (
     th_t_id NUMBER(15) NOT NULL,
     th_dts TIMESTAMP NOT NULL,
     th_st_id VARCHAR2(4) NOT NULL);
     
 
 -- Clause 2.2.6.8
-CREATE TABLE TPCE.trade_request (
+CREATE TABLE trade_request (
     tr_t_id NUMBER(15) NOT NULL,
     tr_tt_id VARCHAR2(3) NOT NULL,
     tr_s_symb VARCHAR2(15) NOT NULL,
@@ -172,7 +178,7 @@ CREATE TABLE TPCE.trade_request (
     
 
 -- Clause 2.2.6.9
-CREATE TABLE TPCE.trade_type (
+CREATE TABLE trade_type (
     tt_id VARCHAR2(3) NOT NULL,
     tt_name VARCHAR2(12) NOT NULL,
     tt_is_sell NUMBER(1,0) NOT NULL,
@@ -182,7 +188,7 @@ CREATE TABLE TPCE.trade_type (
 -- Market Tables
 
 -- Clause 2.2.7.1
-CREATE TABLE TPCE.company (
+CREATE TABLE company (
     co_id NUMBER(11) NOT NULL,
     co_st_id VARCHAR2(4) NOT NULL,
     co_name VARCHAR2(60) NOT NULL,
@@ -195,14 +201,14 @@ CREATE TABLE TPCE.company (
     
 
 -- Clause 2.2.7.2
-CREATE TABLE TPCE.company_competitor (
+CREATE TABLE company_competitor (
     cp_co_id NUMBER(11) NOT NULL,
     cp_comp_co_id NUMBER(11) NOT NULL,
     cp_in_id VARCHAR2(2) NOT NULL);
     
 
 -- Clause 2.2.7.3
-CREATE TABLE TPCE.daily_market (
+CREATE TABLE daily_market (
     dm_date DATE NOT NULL,
     dm_s_symb VARCHAR2(15) NOT NULL,
     dm_close NUMBER(8,2) NOT NULL,
@@ -212,7 +218,7 @@ CREATE TABLE TPCE.daily_market (
     
 
 -- Clause 2.2.7.4
-CREATE TABLE TPCE.exchange (
+CREATE TABLE exchange (
     ex_id VARCHAR2(6) NOT NULL,
     ex_name VARCHAR2(100) NOT NULL,
     ex_num_symb INTEGER NOT NULL,
@@ -223,7 +229,7 @@ CREATE TABLE TPCE.exchange (
     
 
 -- Clause 2.2.7.5
-CREATE TABLE TPCE.financial (
+CREATE TABLE financial (
     fi_co_id NUMBER(11) NOT NULL,
     fi_year INTEGER NOT NULL,
     fi_qtr SMALLINT NOT NULL,
@@ -241,14 +247,14 @@ CREATE TABLE TPCE.financial (
     
 
 -- Clause 2.2.7.6
-CREATE TABLE TPCE.industry (
+CREATE TABLE industry (
     in_id VARCHAR2(2) NOT NULL,
     in_name VARCHAR2(50) NOT NULL,
     in_sc_id VARCHAR2(2) NOT NULL);
     
 
 -- Clause 2.2.7.7
-CREATE TABLE TPCE.last_trade (
+CREATE TABLE last_trade (
     lt_s_symb VARCHAR2(15) NOT NULL,
     lt_dts TIMESTAMP NOT NULL,
     lt_price NUMBER(8,2) NOT NULL,
@@ -262,7 +268,7 @@ CREATE TABLE TPCE.last_trade (
 --	stored outside the table. 
 --	TEXT seems to be simpler to handle
 
-CREATE TABLE TPCE.news_item (
+CREATE TABLE news_item (
     ni_id NUMBER(11) NOT NULL,
     ni_headline VARCHAR2(80) NOT NULL,
     ni_summary VARCHAR2(255) NOT NULL,
@@ -273,19 +279,19 @@ CREATE TABLE TPCE.news_item (
     
 
 -- Clause 2.2.7.9
-CREATE TABLE TPCE.news_xref (
+CREATE TABLE news_xref (
     nx_ni_id NUMBER(11) NOT NULL,
     nx_co_id NUMBER(11) NOT NULL);
     
 
 -- Clause 2.2.7.10
-CREATE TABLE TPCE.sector (
+CREATE TABLE sector (
     sc_id VARCHAR2(2) NOT NULL,
     sc_name VARCHAR2(30) NOT NULL);
     
 
 -- Clause 2.2.7.11
-CREATE TABLE TPCE.security (
+CREATE TABLE security (
     s_symb VARCHAR2(15) NOT NULL,
     s_issue VARCHAR2(6) NOT NULL,
     s_st_id VARCHAR2(4) NOT NULL,
@@ -307,7 +313,7 @@ CREATE TABLE TPCE.security (
 -- Dimension Tables
 
 -- Clause 2.2.8.1
-CREATE TABLE TPCE.address (
+CREATE TABLE address (
     ad_id NUMBER(11) NOT NULL,
     ad_line1 VARCHAR2(80),
     ad_line2 VARCHAR2(80),
@@ -316,43 +322,23 @@ CREATE TABLE TPCE.address (
     
 
 -- Clause 2.2.8.2
-CREATE TABLE TPCE.status_type (
+CREATE TABLE status_type (
     st_id VARCHAR2(4) NOT NULL,
     st_name VARCHAR2(10) NOT NULL);
     
 
 -- Clause 2.2.8.3
-CREATE TABLE TPCE.taxrate (
+CREATE TABLE taxrate (
     tx_id VARCHAR2(4) NOT NULL,
     tx_name VARCHAR2(50) NOT NULL,
     tx_rate NUMBER(6,5) NOT NULL CHECK (tx_rate >= 0));
     
 
 -- Clause 2.2.8.4
-CREATE TABLE TPCE.zip_code (
+CREATE TABLE zip_code (
     zc_code VARCHAR2(12) NOT NULL,
     zc_town VARCHAR2(80) NOT NULL,
     zc_div VARCHAR2(80) NOT NULL);
+    
 
--- TPCESTAT table for TPCE evaluation
-CREATE TABLE TPCE.tpcestat (
-  statid INT NOT NULL,
-  brokervolumecount INT NOT NULL,
-  customerpositioncount INT NOT NULL,
-  marketfeedcount INT NOT NULL,
-  marketwatchcount INT NOT NULL,
-  securitydetailcount INT NOT NULL,
-  tradelookupcount INT NOT NULL,
-  tradeordercount INT NOT NULL,
-  traderesultcount INT NOT NULL,
-  tradestatuscount INT NOT NULL,
-  tradeupdatecount INT NOT NULL,
-  datamaintenancecount INT NOT NULL);
-
-CREATE TABLE TPCE.dwhstat (
-  seq int not null primary key,
-  elapsed int,
-  insdate date);
-
-
-exit
+exit 
