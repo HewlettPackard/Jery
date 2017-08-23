@@ -9,7 +9,7 @@ tradeResultFrame2_tbl  TradeResultFrame1_Pkg.TradeResultFrame1_tab1 := TradeResu
 rec TradeResultFrame1_Pkg.TradeResultFrame1_record;
 
 BEGIN 
-select t_id into trade_id from ( select t_id, row_number() over (order by t_id) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
+select t_id into trade_id from trade sample(0.00001) where rownum < 2;
 
 --DEBUGGING
 dbms_output.put_line('trade_id:   ' || trade_id);

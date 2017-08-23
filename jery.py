@@ -1931,7 +1931,7 @@ class LoadThread(threading.Thread):
             BEGIN
             --generate random number between 1 and 3
             select dbms_random.value(1,3) num into frameno from dual;
-            frameno := 3;
+            frameno := 1;
             
             select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
             max_acct_id := acct_id;
@@ -1939,8 +1939,8 @@ class LoadThread(threading.Thread):
             max_trades := 10;
             max_updates := 10;
             
-            select t_dts into trade_dts from ( select t_dts, row_number() over (order by t_dts) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
-            select t_s_symb into symbol from ( select t_s_symb, row_number() over (order by t_s_symb) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
+            select t_dts into trade_dts from trade sample(0.00001) where rownum < 2;
+            select t_s_symb into symbol from trade sample(0.00001) where rownum < 2;
                 
             SELECT t_id BULK COLLECT INTO trade_id FROM trade where rownum <=10; 
             
@@ -1988,14 +1988,16 @@ class LoadThread(threading.Thread):
 
             cur.callproc("dbms_output.enable")
             cur.execute("""
-            DECLARE
+            DECLARE 
             trade_id NUMBER;
-        
+            trade_price NUMBER;
+            
             tradeResultFrame1_tbl  TradeResultFrame1_Pkg.TradeResultFrame1_tab := TradeResultFrame1_Pkg.TradeResultFrame1_tab();
+            tradeResultFrame2_tbl  TradeResultFrame1_Pkg.TradeResultFrame1_tab1 := TradeResultFrame1_Pkg.TradeResultFrame1_tab1();
             rec TradeResultFrame1_Pkg.TradeResultFrame1_record;
             
             BEGIN 
-            select t_id into trade_id from ( select t_id, row_number() over (order by t_id) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
+            select t_id into trade_id from trade sample(0.00001) where rownum < 2;
             
             --DEBUGGING
             dbms_output.put_line('trade_id:   ' || trade_id);
@@ -2008,6 +2010,11 @@ class LoadThread(threading.Thread):
             dbms_output.put_line('holdsum_qty = ' || tradeResultFrame1_tbl(i).holdsum_qty);
             dbms_output.put_line('is_lifo     = ' || tradeResultFrame1_tbl(i).is_lifo);
             dbms_output.put_line('[...]');
+            
+            select distinct t_trade_price into trade_price from trade where t_id = trade_id;
+            
+            tradeResultFrame2_tbl := TradeResultFrame1_Pkg.TradeResultFrame2(tradeResultFrame1_tbl(i).acct_id, tradeResultFrame1_tbl(i).holdsum_qty, tradeResultFrame1_tbl(i).is_lifo,	tradeResultFrame1_tbl(i).symbol, trade_id, trade_price, tradeResultFrame1_tbl(i).trade_qty, tradeResultFrame1_tbl(i).type_is_sell);
+            
             END LOOP; 
             END;
             """)
@@ -2046,8 +2053,8 @@ class LoadThread(threading.Thread):
             SELECT t_id BULK COLLECT INTO trade_id FROM trade where rownum <=10;
             select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
             max_acct_id := acct_id;
-            select t_dts into trade_dts from ( select t_dts, row_number() over (order by t_dts) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
-            select t_s_symb into symbol from ( select t_s_symb, row_number() over (order by t_s_symb) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
+            select T_DTS into trade_dts from trade sample(0.00001) where rownum < 2; 
+            select t_s_symb into symbol from trade sample(0.00001) where rownum < 2; 
             
             
             -------------------------------------------------------------------------------------------------------------------------
@@ -2233,30 +2240,32 @@ class WatcherThread(threading.Thread):
                 st_pending_id VARCHAR2(20);
                 st_submitted_id VARCHAR2(20);
                 start_trade_id NUMBER;
-    
+                
                 TradeCleanupFrame1_res  INTEGER;
-    
+                
                 BEGIN
-                select T_ST_ID, T_ID into st_canceled_id, start_trade_id from ( select T_ST_ID, T_ID, row_number() over (order by T_ST_ID) rno from trade order by rno) where  rno = ( select round (dbms_random.value (1,86400000)) from dual);
+                select T_ST_ID into st_canceled_id from trade sample(0.00001) where rownum < 2;
+                select T_ID into start_trade_id from trade sample(0.00001) where rownum < 2;
+                
                 st_pending_id := st_canceled_id;
                 st_submitted_id := st_canceled_id;
-    
+                
                 --DEBUGGING
                 dbms_output.put_line('st_canceled_id   = ' || st_canceled_id);
                 dbms_output.put_line('st_pending_id    = ' || st_pending_id);
                 dbms_output.put_line('st_submitted_id  = ' || st_submitted_id);
                 dbms_output.put_line('start_trade_id   = ' || start_trade_id);
-    
+                
                 TradeCleanupFrame1_res := TradeCleanupFrame1_Pkg.TradeCleanupFrame1(st_canceled_id,	st_pending_id, st_submitted_id,	start_trade_id);
                 dbms_output.put_line('TradeCleanupFrame1_res   = ' || TradeCleanupFrame1_res);
-    
+                    
                 END;
                 """)
 
                 # LoadThread.printDBMSoutput(self, cur)
             except:
                 pass
-            print "tc"
+            # #print "tc"
 
             cur1.close()
             con.commit()
