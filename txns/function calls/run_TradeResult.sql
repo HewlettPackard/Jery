@@ -25,7 +25,7 @@ dbms_output.put_line('[...]');
 
 select distinct t_trade_price into trade_price from trade where t_id = trade_id;
 
-tradeResultFrame2_tbl := TradeResultFrame1_Pkg.TradeResultFrame2(tradeResultFrame1_tbl(i).acct_id, tradeResultFrame1_tbl(i).holdsum_qty, tradeResultFrame1_tbl(i).is_lifo,	tradeResultFrame1_tbl(i).symbol, trade_id, trade_price, tradeResultFrame1_tbl(i).trade_qty, tradeResultFrame1_tbl(i).type_is_sell);
+--tradeResultFrame2_tbl := TradeResultFrame1_Pkg.TradeResultFrame2(tradeResultFrame1_tbl(i).acct_id, tradeResultFrame1_tbl(i).holdsum_qty, tradeResultFrame1_tbl(i).is_lifo,	tradeResultFrame1_tbl(i).symbol, trade_id, trade_price, tradeResultFrame1_tbl(i).trade_qty, tradeResultFrame1_tbl(i).type_is_sell);
 
 END LOOP; 
 END;

@@ -814,7 +814,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         print error
                         error_con = 2
 
-                f = open('./txns/TradeResultFrame1.sql')
+                f = open('./txns/TradeResultFrame1_mod.sql')
                 full_sql = f.read()
                 try:
                     cur.execute(full_sql)
@@ -1301,7 +1301,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
         can1.create_line(10, 10, 540, 10, width=3, fill='white')
 
 
-        statWindow.LabelTPCEscore = Tkinter.Label(statWindow, text="TPC-E Throughput:")
+        statWindow.LabelTPCEscore = Tkinter.Label(statWindow, text="Transactions/second:")
         statWindow.LabelTPCEscore.grid(column=0, row=13, columnspan=2, sticky="W")
 
         statWindow.EntryTPCEscorevar = Tkinter.StringVar()
@@ -2013,7 +2013,7 @@ class LoadThread(threading.Thread):
             
             select distinct t_trade_price into trade_price from trade where t_id = trade_id;
             
-            tradeResultFrame2_tbl := TradeResultFrame1_Pkg.TradeResultFrame2(tradeResultFrame1_tbl(i).acct_id, tradeResultFrame1_tbl(i).holdsum_qty, tradeResultFrame1_tbl(i).is_lifo,	tradeResultFrame1_tbl(i).symbol, trade_id, trade_price, tradeResultFrame1_tbl(i).trade_qty, tradeResultFrame1_tbl(i).type_is_sell);
+            --tradeResultFrame2_tbl := TradeResultFrame1_Pkg.TradeResultFrame2(tradeResultFrame1_tbl(i).acct_id, tradeResultFrame1_tbl(i).holdsum_qty, tradeResultFrame1_tbl(i).is_lifo,	tradeResultFrame1_tbl(i).symbol, trade_id, trade_price, tradeResultFrame1_tbl(i).trade_qty, tradeResultFrame1_tbl(i).type_is_sell);
             
             END LOOP; 
             END;
@@ -2442,7 +2442,7 @@ class simpleapp_tk(Tkinter.Tk):
         label1 = Tkinter.Label(self, textvariable=self.labelVariable1, fg="white", bg="gray60", font=(20))
         label1.grid(column=0, row=0, columnspan=3, sticky='EW')
 
-        self.labelVariable1.set(u"JERYe - TPC-E Benchmark")
+        self.labelVariable1.set(u"JERYe - TPC-E like Benchmark")
 
 
         self.Label1 = Tkinter.Label(self, text='IP of Oracle DB')
@@ -2594,7 +2594,7 @@ class simpleapp_tk(Tkinter.Tk):
         buttonQuit = Tkinter.Button(self, text=u"Quit Application", command=self.QuitApps, width=14)
         buttonQuit.grid(column=1, row=26, sticky=S)
 
-        self.buttonExtendedStat = Tkinter.Button(self, text=u"TPC-E Statistics", command=self.ExtendedStatistics \
+        self.buttonExtendedStat = Tkinter.Button(self, text=u"Transaction Statistics", command=self.ExtendedStatistics \
                                                  , width=14)
         self.buttonExtendedStat.config(state=DISABLED)
 
