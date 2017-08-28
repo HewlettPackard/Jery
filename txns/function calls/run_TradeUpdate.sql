@@ -21,7 +21,10 @@ BEGIN
 select dbms_random.value(1,3) num into frameno from dual;
 frameno := 1;
 
-select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+--select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+select ca_id into acct_id from customer_account sample(0.01) where rownum < 2;
+dbms_output.put_line('acct_id   = ' || acct_id);
+
 max_acct_id := acct_id;
 
 max_trades := 10;

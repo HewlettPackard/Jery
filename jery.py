@@ -1098,7 +1098,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
             Variable naming is static
         """    
 
-        statWindow.wm_title(" TPC-E Statistics")
+        statWindow.wm_title(" Transaction Statistics")
         statWindow.SID = SID
         statWindow.passwd = passwd
         statWindow.ip = ip
@@ -1443,7 +1443,7 @@ class ExtendedStatisticsWindow(Tkinter.Toplevel):
                         entrysSecondColumn[i].set(str(absCounts[i]))
                         entrysThirdColumn[i].set(str(relCounts[i]))
                     
-                    statWindow.EntryTPCEscorevar.set(str(tpceScore))
+                    statWindow.EntryTPCEscorevar.set(str(round(tpceScore)))
                     statWindow.EntryTotalNovar.set(str(totalCounts))
 
                 statWindow.VocableVariable.set("You are connected to {0}".format(str(SID)))
@@ -1647,7 +1647,9 @@ class LoadThread(threading.Thread):
                         
                 BEGIN
                 
-                select hs_ca_id into acct_id from ( select hs_ca_id, row_number() over (order by hs_ca_id) rno from holding_summary order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+                --select hs_ca_id into acct_id from ( select hs_ca_id, row_number() over (order by hs_ca_id) rno from holding_summary order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+                select hs_ca_id into acct_id from holding_summary sample(0.01) where rownum < 2;
+                
                 select wl_c_id  into cust_id from ( select wl_c_id, row_number() over (order by wl_c_id) rno from watch_list order by rno) where  rno = ( select round (dbms_random.value (1,5000)) from dual);
                 
                 --DEBUGGING
@@ -1655,6 +1657,11 @@ class LoadThread(threading.Thread):
                 dbms_output.put_line('cust_id: ' || cust_id);
                 
                 marketWatchFrame1_tbl := MarketWatchFrame1_Pkg.MarketWatchFrame1(acct_id, cust_id, ending_co_id, industry_name, starting_co_id);
+                
+                for i in 1 .. marketWatchFrame1_tbl.count
+                loop 
+                    DBMS_OUTPUT.PUT_LINE('status here in ' || marketWatchFrame1_tbl(i).status);
+                end loop; 
                 
                 END;
              """)
@@ -1688,7 +1695,8 @@ class LoadThread(threading.Thread):
                 select c_id into in_c_id from ( select c_id, row_number() over (order by c_id) rno from customer order by rno) where  rno = ( select round (dbms_random.value (1,5000)) from dual);
                 select co_id into in_co_id from ( select co_id, row_number() over (order by co_id) rno from company order by rno) where  rno = ( select round (dbms_random.value (1,2500)) from dual);
                 select round (dbms_random.value (1, 31)) into day_of_month from dual;
-                select dm_s_symb into symbol from ( select dm_s_symb, row_number() over (order by dm_s_symb) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,3425)) from dual);
+                --select dm_s_symb into symbol from ( select dm_s_symb, row_number() over (order by dm_s_symb) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,3425)) from dual);
+                select dm_s_symb into symbol from daily_market sample(0.01) where rownum < 2;
                 with tablenames as (
                       select 'ACCOUNT_PERMISSION' as s from dual union all
                       select 'ADDRESS' as s from dual union all
@@ -1709,7 +1717,8 @@ class LoadThread(threading.Thread):
                 into table_name       
                 from dual;
                 select tx_id into in_tx_id from ( select tx_id, row_number() over (order by tx_id) rno from taxrate order by rno) where  rno = ( select round (dbms_random.value (0,320)) from dual);
-                select dm_vol into vol_incr from ( select dm_vol, row_number() over (order by dm_vol) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,4469625)) from dual);
+                --select dm_vol into vol_incr from ( select dm_vol, row_number() over (order by dm_vol) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,4469625)) from dual);
+                select dm_vol into vol_incr from daily_market sample(0.01) where rownum < 2;
                 
                 -- DEBUGGING
                 dbms_output.put_line('in_acct_id:   ' || in_acct_id);
@@ -1858,13 +1867,23 @@ class LoadThread(threading.Thread):
             TradeStatusFrame1rec TradeStatusFrame1_Pkg.TradeStatusFrame1_record ;
             
             BEGIN 
-            select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            select ca_id into acct_id from customer_account sample(0.01) where rownum < 2;
             
             -- DEBUGGING
             dbms_output.put_line('acct_id:  ' || acct_id);
             
             TradeStatusFrame1_tbl := TradeStatusFrame1_Pkg.TradeStatusFrame1(acct_id);
             
+            --for i in 1 .. TradeStatusFrame1_tbl.count
+            --loop 
+            --DBMS_OUTPUT.PUT_LINE('cust_l_name ' || TradeStatusFrame1_tbl(i).cust_l_name);
+            --DBMS_OUTPUT.PUT_LINE('cust_f_name ' || TradeStatusFrame1_tbl(i).cust_f_name);
+            --DBMS_OUTPUT.PUT_LINE('broker_name ' || TradeStatusFrame1_tbl(i).broker_name);
+            --DBMS_OUTPUT.PUT_LINE('T_CHRG ' || TradeStatusFrame1_tbl(i).T_CHRG);
+            --DBMS_OUTPUT.PUT_LINE('T_EXEC_NAME ' || TradeStatusFrame1_tbl(i).T_EXEC_NAME);
+            --DBMS_OUTPUT.PUT_LINE('EX_NAME ' || TradeStatusFrame1_tbl(i).EX_NAME);
+            --DBMS_OUTPUT.PUT_LINE('S_NAME ' || TradeStatusFrame1_tbl(i).S_NAME);
+            --end loop;
             END;
             """)
 
@@ -1882,11 +1901,21 @@ class LoadThread(threading.Thread):
             DECLARE 
             acct_id NUMBER;
             
+            exec_f_name VARCHAR2(20);
+            exec_l_name VARCHAR2(20);
+            exec_tax_id VARCHAR2(20);
+            
+            
             tradeOrderFrame1_tbl  TradeOrderFrame1_Pkg.TradeOrderFrame1_tab := TradeOrderFrame1_Pkg.TradeOrderFrame1_tab();
+            tradeOrderFrame2_res  INTEGER;
+            tradeOrderFrame4_res  INTEGER;
             rec TradeOrderFrame1_Pkg.TradeOrderFrame1_record;
             
             BEGIN 
-            select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            --select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            select ca_id into acct_id from customer_account sample(0.05) where rownum < 2;
+            select ap_f_name, ap_l_name, ap_tax_id into exec_f_name, exec_l_name, exec_tax_id from ( select ap_f_name, ap_l_name, ap_tax_id, row_number() over (order by ap_f_name, ap_l_name, ap_tax_id) rno from account_permission order by rno) where  rno = ( select round (dbms_random.value (1,35567)) from dual);
+            
             
             --DEBUGGING
             dbms_output.put_line('acct_id:     ' || acct_id);
@@ -1897,7 +1926,9 @@ class LoadThread(threading.Thread):
             dbms_output.put_line('acct_name   = ' || tradeOrderFrame1_tbl(i).acct_name);
             dbms_output.put_line('broker_name = ' || tradeOrderFrame1_tbl(i).broker_name);
             dbms_output.put_line('[...]');
-            END LOOP; 
+            END LOOP;
+            
+            tradeOrderFrame2_res := TradeOrderFrame1_Pkg.TradeOrderFrame2(acct_id, exec_f_name, exec_l_name, exec_tax_id);
             END;
             """)
 
@@ -1933,7 +1964,10 @@ class LoadThread(threading.Thread):
             select dbms_random.value(1,3) num into frameno from dual;
             frameno := 1;
             
-            select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            --select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            select ca_id into acct_id from customer_account sample(0.01) where rownum < 2;
+            dbms_output.put_line('acct_id   = ' || acct_id);
+            
             max_acct_id := acct_id;
             
             max_trades := 10;
@@ -1997,7 +2031,7 @@ class LoadThread(threading.Thread):
             rec TradeResultFrame1_Pkg.TradeResultFrame1_record;
             
             BEGIN 
-            select t_id into trade_id from trade sample(0.00001) where rownum < 2;
+            select t_id into trade_id from trade sample(0.0001) where rownum < 2;
             
             --DEBUGGING
             dbms_output.put_line('trade_id:   ' || trade_id);
@@ -2051,13 +2085,15 @@ class LoadThread(threading.Thread):
             
             max_trades := 10;
             SELECT t_id BULK COLLECT INTO trade_id FROM trade where rownum <=10;
-            select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            --select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+            select ca_id into acct_id from customer_account sample(0.04) where rownum < 2;
             max_acct_id := acct_id;
             select T_DTS into trade_dts from trade sample(0.00001) where rownum < 2; 
             select t_s_symb into symbol from trade sample(0.00001) where rownum < 2; 
             
             
             -------------------------------------------------------------------------------------------------------------------------
+            frameno := 1;
             --execute frame 1 -> is working
             IF frameno = 1 then
                 tradeLookupFrame1_tbl := TradeLookupFrame1_Pkg.TradeLookupFrame1(max_trades, trade_id);
@@ -2134,7 +2170,7 @@ class LoadThread(threading.Thread):
                        "TRADESTATUSCOUNT",
                        "TRADEUPDATECOUNT",
                        "DATAMAINTENANCECOUNT"]
-        weight = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        weight = map(int, ConfigSectionMap("Prefilled")['weight'].split(","))
 
         totalWeight = np.sum(weight)
         probs = np.zeros(11)
@@ -2183,7 +2219,6 @@ class LoadThread(threading.Thread):
                 cur.close()
                 cur2.close()
                 cur3.close()
-                app.ExecTime()
 
                 if time.time() > (StartTimeTest + self.LengthTest):
                     app.OnButtonStopLoadClick()
@@ -2225,11 +2260,9 @@ class WatcherThread(threading.Thread):
         if error_con != 1:
             cur = con.cursor()
 
-            cur.execute("""UPDATE tpcestat 
-                                                        SET BROKERVOLUMECOUNT = 0, CUSTOMERPOSITIONCOUNT = 0, MARKETFEEDCOUNT = 0, 
-                                                        MARKETWATCHCOUNT = 0, SECURITYDETAILCOUNT = 0, TRADELOOKUPCOUNT = 0, TRADEORDERCOUNT = 0, 
-                                                        TRADERESULTCOUNT = 0, TRADESTATUSCOUNT = 0, TRADEUPDATECOUNT = 0, DATAMAINTENANCECOUNT = 0
-                                                        WHERE STATID = 0 """)
+            cur.execute("TRUNCATE TABLE TPCE.tpcestat")
+
+            cur.execute("""INSERT INTO TPCE.tpcestat values (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)""")
 
             cur1 = con.cursor()
             try:
@@ -2323,8 +2356,9 @@ class WatcherThread(threading.Thread):
                     self.labelVariable.set("Please enter a valid number of users")
             except TclError:
                 print "TclError"
+            
 
-
+            self.simpleApp.ExecTime()
 
             time.sleep(1)
 

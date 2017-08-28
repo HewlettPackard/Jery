@@ -21,13 +21,15 @@ select dbms_random.value(1,4) num into frameno from dual;
 
 max_trades := 10;
 SELECT t_id BULK COLLECT INTO trade_id FROM trade where rownum <=10;
-select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+--select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+select ca_id into acct_id from customer_account sample(0.04) where rownum < 2;
 max_acct_id := acct_id;
 select T_DTS into trade_dts from trade sample(0.00001) where rownum < 2; 
 select t_s_symb into symbol from trade sample(0.00001) where rownum < 2; 
 
 
 -------------------------------------------------------------------------------------------------------------------------
+frameno := 1;
 --execute frame 1 -> is working
 IF frameno = 1 then
     tradeLookupFrame1_tbl := TradeLookupFrame1_Pkg.TradeLookupFrame1(max_trades, trade_id);

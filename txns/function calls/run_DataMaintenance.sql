@@ -18,7 +18,8 @@ select ap_ca_id into in_acct_id from ( select ap_ca_id, row_number() over (order
 select c_id into in_c_id from ( select c_id, row_number() over (order by c_id) rno from customer order by rno) where  rno = ( select round (dbms_random.value (1,5000)) from dual);
 select co_id into in_co_id from ( select co_id, row_number() over (order by co_id) rno from company order by rno) where  rno = ( select round (dbms_random.value (1,2500)) from dual);
 select round (dbms_random.value (1, 31)) into day_of_month from dual;
-select dm_s_symb into symbol from ( select dm_s_symb, row_number() over (order by dm_s_symb) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,3425)) from dual);
+--select dm_s_symb into symbol from ( select dm_s_symb, row_number() over (order by dm_s_symb) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,3425)) from dual);
+select dm_s_symb into symbol from daily_market sample(0.01) where rownum < 2;
 with tablenames as (
       select 'ACCOUNT_PERMISSION' as s from dual union all
       select 'ADDRESS' as s from dual union all
@@ -39,7 +40,8 @@ select (select s
 into table_name       
 from dual;
 select tx_id into in_tx_id from ( select tx_id, row_number() over (order by tx_id) rno from taxrate order by rno) where  rno = ( select round (dbms_random.value (0,320)) from dual);
-select dm_vol into vol_incr from ( select dm_vol, row_number() over (order by dm_vol) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,4469625)) from dual);
+--select dm_vol into vol_incr from ( select dm_vol, row_number() over (order by dm_vol) rno from daily_market order by rno) where  rno = ( select round (dbms_random.value (1,4469625)) from dual);
+select dm_vol into vol_incr from daily_market sample(0.01) where rownum < 2;
 
 -- DEBUGGING
 dbms_output.put_line('in_acct_id:   ' || in_acct_id);

@@ -13,7 +13,9 @@ marketWatchFrame1rec MarketWatchFrame1_Pkg.MarketWatchFrame1_record ;
 		
 BEGIN
 
-select hs_ca_id into acct_id from ( select hs_ca_id, row_number() over (order by hs_ca_id) rno from holding_summary order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+--select hs_ca_id into acct_id from ( select hs_ca_id, row_number() over (order by hs_ca_id) rno from holding_summary order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+select hs_ca_id into acct_id from holding_summary sample(0.01) where rownum < 2;
+
 select wl_c_id  into cust_id from ( select wl_c_id, row_number() over (order by wl_c_id) rno from watch_list order by rno) where  rno = ( select round (dbms_random.value (1,5000)) from dual);
 
 --DEBUGGING

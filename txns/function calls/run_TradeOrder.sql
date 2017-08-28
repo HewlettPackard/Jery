@@ -14,7 +14,8 @@ tradeOrderFrame4_res  INTEGER;
 rec TradeOrderFrame1_Pkg.TradeOrderFrame1_record;
 
 BEGIN 
-select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+--select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+select ca_id into acct_id from customer_account sample(0.05) where rownum < 2;
 select ap_f_name, ap_l_name, ap_tax_id into exec_f_name, exec_l_name, exec_tax_id from ( select ap_f_name, ap_l_name, ap_tax_id, row_number() over (order by ap_f_name, ap_l_name, ap_tax_id) rno from account_permission order by rno) where  rno = ( select round (dbms_random.value (1,35567)) from dual);
 
 

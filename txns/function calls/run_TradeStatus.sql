@@ -7,7 +7,7 @@ TradeStatusFrame1_tbl  TradeStatusFrame1_Pkg.TradeStatusFrame1_tab := TradeStatu
 TradeStatusFrame1rec TradeStatusFrame1_Pkg.TradeStatusFrame1_record ;
 
 BEGIN 
-select ca_id into acct_id from ( select ca_id, row_number() over (order by ca_id) rno from customer_account order by rno) where  rno = ( select round (dbms_random.value (1,25000)) from dual);
+select ca_id into acct_id from customer_account sample(0.01) where rownum < 2;
 
 -- DEBUGGING
 dbms_output.put_line('acct_id:  ' || acct_id);
