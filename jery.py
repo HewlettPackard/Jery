@@ -83,7 +83,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.LabelPwSSH.grid(column=0, row=8, sticky='W')
 
         CrSchemaWindow.entryPwSSHVariable = Tkinter.StringVar()
-        CrSchemaWindow.Entry4 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryUserSSHVariable, show="*")
+        CrSchemaWindow.Entry4 = Tkinter.Entry(CrSchemaWindow, textvariable=CrSchemaWindow.entryPwSSHVariable, show="*")
         CrSchemaWindow.Entry4.grid(column=0, row=9, sticky='EW', pady=(0, 20))
         CrSchemaWindow.entryPwSSHVariable.set(ConfigSectionMap("Prefilled")['pwdssh'])
 
