@@ -109,6 +109,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         CrSchemaWindow.update()
         CrSchemaWindow.geometry(CrSchemaWindow.geometry())
 
+    def time(self):
+        return time.strftime('%H:%M:%S')
 
     def CreateSchema(CrSchemaWindow, SID, user, passwd, ip, port, RatioVar):
         """
@@ -157,8 +159,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                     error_con = 2
 
             if error_con == 0:
-                print "STEP 1: Created tablespace"
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 1/10: Created tablespace")
+                print CrSchemaWindow.time() + " - STEP 1: Created tablespace"
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 1/12: Created tablespace")
                 CrSchemaWindow.update()
 
             # create user
@@ -176,8 +178,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         error_con = 2
 
             if error_con == 0:
-                print "STEP 2: Created user"
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 2/10: Created user")
+                print CrSchemaWindow.time() + " - STEP 2: Created user"
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 2/12: Created user")
                 CrSchemaWindow.update()
 
             # create tables
@@ -195,8 +197,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         error_con = 2
 
             if error_con == 0:
-                print "STEP 3: Created tables"
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 3/10: Created tables")
+                print CrSchemaWindow.time() + " - STEP 3: Created tables"
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 3/12: Created tables")
                 CrSchemaWindow.update()
 
 
@@ -272,8 +274,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
             sftp = paramiko.SFTPClient.from_transport(transport)
 
-            print "STEP 4: Connected to %s" % ip
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 4/10: Connected to " + ip)
+            print CrSchemaWindow.time() + " - STEP 4: Connected to %s" % ip
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 4/12: Connected to " + ip)
             CrSchemaWindow.update()
 
             #Send commands for folder (re)creation (non-blocking)
@@ -286,8 +288,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             sftp.put(loaderSource, loaderDestination)
             sftp.put(inputSource, inputDestination)
             sftp.put(scriptSource, scriptDestination)
-            print "STEP 5: Copied files to server"
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 5/10: Copied files to server")
+            print CrSchemaWindow.time() + " - STEP 5: Copied files to server"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 5/12: Copied files to server")
             CrSchemaWindow.update()
 
 
@@ -308,22 +310,25 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             waitForTerminate(stdout)
             stdin, stdout, stderr = ssh.exec_command("mkdir -p " + outputPath)
             waitForTerminate(stdout)
-            print "STEP 6: Unzipped files on server"
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 6/10: Unzipped files on server")
+            print CrSchemaWindow.time() + " - STEP 6: Unzipped files on server"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 6/12: Unzipped files on server")
             CrSchemaWindow.update()
             stdin, stdout, stderr = ssh.exec_command(
                 loaderDestination + " -i " + inputUnzipped + " -o " + outputPath) # + " -f 1000")
             waitForTerminate(stdout)
             stdin, stdout, stderr = ssh.exec_command("rm -f " + loaderDestination)
             waitForTerminate(stdout)
-            print "STEP 7: Generated tables on server"
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 7/10: Generated tables on server")
+            print CrSchemaWindow.time() + " - STEP 7: Generated tables on server"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 7/12: Generated tables on server")
             CrSchemaWindow.update()
 
             # Send commands for table import (non-blocking)
             stdin, stdout, stderr = ssh.exec_command("chmod +x " + scriptsUnzipped + "06ImportTPCETables.sh")
             waitForTerminate(stdout)
             stdin, stdout, stderr = ssh.exec_command("sed -i -e 's/\\r$//' " + scriptsUnzipped + "06ImportTPCETables.sh")
+            waitForTerminate(stdout)
+            stdin, stdout, stderr = ssh.exec_command(
+                "sed -i '4i\\'$'\\n''ORACLE_HOME=" + SID + "'$'\\n' " + scriptsUnzipped + "06ImportTPCETables.sh")
             waitForTerminate(stdout)
             stdin, stdout, stderr = ssh.exec_command("cd " + scriptsUnzipped + " && ./06ImportTPCETables.sh")
             waitForTerminate(stdout)
@@ -377,8 +382,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             except:
                 pass
 
-            print "\nSTEP 8: Imported tables in database"
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 8/10: Imported tables in database")
+            print "\n" + CrSchemaWindow.time() + " - STEP 8: Imported tables in database"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 8/12: Imported tables in database")
             CrSchemaWindow.update()
 
             cur.close()
@@ -421,7 +426,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
-                print "created pks"
+                print "\t\tcreated pks"
 
                 # create indexes 2
                 f = open('./tpce/08_1tpce-create-fk.sql')
@@ -436,7 +441,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
-                print "created fks 1"
+                print "\t\tcreated fks 1"
 
                 # create indexes 3
                 f = open('./tpce/08_2tpce-create-fk.sql')
@@ -451,7 +456,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
-                print "created fks 2"
+                print "\t\tcreated fks 2"
 
                 # create indexes 4
                 f = open('./tpce/08_3tpce-create-fk.sql')
@@ -466,7 +471,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
-                print "created fks 3"
+                print "\t\tcreated fks 3"
 
                 # create indexes 5
                 f = open('./tpce/08_4tpce-create-fk.sql')
@@ -481,11 +486,11 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         if error.code != 900:
                             print error
                             error_con = 2
-                print "created fks 4"
+                print "\t\tcreated fks 4"
 
                 if error_con == 0:
-                    print "STEP 9: Created indexes"
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 9/10: Created indexes")
+                    print CrSchemaWindow.time() + " - STEP 9: Created indexes"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 9/12: Created indexes")
                     CrSchemaWindow.update()
 
                 cur.close()
@@ -544,8 +549,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         error_con = 2
 
                 if error_con == 0:
-                    print "STEP 10: Calculated statistics"
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 10/10: Calculated statistics")
+                    print CrSchemaWindow.time() + " - STEP 10: Calculated statistics"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 10/12: Calculated statistics")
                     CrSchemaWindow.update()
 
         if error_con != 1:
@@ -582,7 +587,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                             print error
                             error_con = 2
                 if error_con == 0:
-                    print "dropped all functions"
+                    print "\t\tdropped all functions"
 
                 cur.close()
                 con.close()
@@ -720,7 +725,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         error_con = 2
 
                 if error_con == 0:
-                    print "created packages"
+                    print "\t\tcreated packages"
 
                 # create functions
 
@@ -845,7 +850,12 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         error_con = 2
 
                 if error_con == 0:
-                    print "created functions"
+                    print CrSchemaWindow.time() + " - STEP 11: Created functions"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 11/12: Created TPC-E like functions in database" + ip)
+
+            if error_con != 1:
+                print CrSchemaWindow.time() + " - STEP 12: Successfully created TPC-E like schema!"
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 12/12: Successfully created TPC-E like schema!" + ip)
 
     def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
         """ Test if the connection parameters are valid.
