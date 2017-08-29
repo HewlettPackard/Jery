@@ -328,7 +328,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             stdin, stdout, stderr = ssh.exec_command("sed -i -e 's/\\r$//' " + scriptsUnzipped + "06ImportTPCETables.sh")
             waitForTerminate(stdout)
             stdin, stdout, stderr = ssh.exec_command(
-                "sed -i '4i\\'$'\\n''ORACLE_HOME=" + SID + "'$'\\n' " + scriptsUnzipped + "06ImportTPCETables.sh")
+                "sed -i '4i\\'$'\\n''ORACLE_SID=" + SID + "'$'\\n' " + scriptsUnzipped + "06ImportTPCETables.sh")
             waitForTerminate(stdout)
             stdin, stdout, stderr = ssh.exec_command("cd " + scriptsUnzipped + " && ./06ImportTPCETables.sh")
             waitForTerminate(stdout)
