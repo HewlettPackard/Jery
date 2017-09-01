@@ -448,8 +448,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             #     except cx_Oracle.DatabaseError as e:
             #         CreateSchemaProgressSchema already exists!")
             #
-            cur.close()
-            con.close()
+            # cur.close()
+            # con.close()
 
 
         if error_con == 0:
