@@ -340,5 +340,22 @@ CREATE TABLE tpce.zip_code (
     zc_town VARCHAR2(80) NOT NULL,
     zc_div VARCHAR2(80) NOT NULL);
     
+--- TPCESTAT table for TPCE evaluation
+ CREATE TABLE TPCE.tpcestat (
+    statid INT NOT NULL,
+    brokervolumecount INT NOT NULL,
+    customerpositioncount INT NOT NULL,
+    marketfeedcount INT NOT NULL,
+    marketwatchcount INT NOT NULL,
+    securitydetailcount INT NOT NULL,
+    tradelookupcount INT NOT NULL,
+    tradeordercount INT NOT NULL,
+    traderesultcount INT NOT NULL,
+    tradestatuscount INT NOT NULL,
+    tradeupdatecount INT NOT NULL,
+    datamaintenancecount INT NOT NULL);
 
-exit 
+CREATE TABLE TPCE.dwhstat (
+    seq int not null primary key,
+    elapsed int,
+    insdate date);

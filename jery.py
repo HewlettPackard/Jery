@@ -125,11 +125,11 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
 
     def CreateSchema(CrSchemaWindow, SID, user, passwd, ip, port, RatioVar):
         """
-            1) create tablespace
-            2) create user 
+            1) create tablespace (works)
+            2) create user (works)
             3) create tables
-            4) generate data 
-            5) import data into tables
+            4) generate data (EGen)
+            5) import data into tables (+check for errors)
             6) create indexes
         """
 
@@ -139,7 +139,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
         password = CrSchemaWindow.entryPwSSHVariable.get()
         SSHport = 22
 
-        #establish Oracle DB connection
+        # establish Oracle DB connection
         try:
             con = connectToOracle(str(ip), str(port), str(SID), "system", str(passwd))
         except cx_Oracle.DatabaseError as e:
@@ -157,7 +157,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
                 error_con = 1
 
-        #establish SSH and SFTP connection
+        # establish SSH and SFTP connection
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -171,107 +171,78 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             CrSchemaWindow.update()
             error_con = 3
 
-        # #Check if JERYe can create the TPCE datafile
-        # try:
-        #     stdin, stdout, stderr = ssh.exec_command("touch " + pathToBlock)
-        #     CrSchemaWindow.waitForTerminate(stdout)
-        #     if stderr.readlines() != []:
-        #         raise Exception('Can not create data file')
-        #     stdin, stdout, stderr = ssh.exec_command("tm  " + pathToBlock)
-        #     CrSchemaWindow.waitForTerminate(stdout)
-        #     if stderr.readlines() != []:
-        #         raise Exception('Can not create data file')
-        # except:
-        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": Not able to create TPCE datafile")
-        #     CrSchemaWindow.update()
-        #     error_con = 3
-        #
-        # #Check if enough space is left for creating the TPC-E tablespace
-        # try:
-        #     stdin, stdout, stderr = ssh.exec_command("df -Pk " + pathToBlock + " | tail -1 | awk '{print $4}' > 100000000")
-        #     CrSchemaWindow.waitForTerminate(stdout)
-        #     if stderr.readlines() != []:
-        #         raise Exception('Not enough space')
-        # except:
-        #     CrSchemaWindow.VocableVariable.set(str(SID) + ": Not enough space to create the TPCE tablespace")
-        #     CrSchemaWindow.update()
-        #     error_con = 3
-
-
-        #create tablespace, user
+        # create tablespace, user
         if error_con == 0:
             cur = con.cursor()
 
             # create tablespace
             try:
-                cur.execute(
-                    "create bigfile tablespace \"TPCE\" datafile '" + pathToBlock + "' size 85G LOGGING EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO")
+                cur.execute("create bigfile tablespace \"TPCE\" datafile '" + pathToBlock + "' size 85G LOGGING EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO")
 
             except cx_Oracle.DatabaseError as e:
                 error, = e.args
                 if error.code != 900:
-                    print error
                     CrSchemaWindow.VocableVariable.set(str(SID) + ": Not able to create TPCE datafile")
-                    CrSchemaWindow.update()
+                    print error
                     error_con = 2
 
             if error_con == 0:
                 print CrSchemaWindow.time() + " - STEP 1: Created tablespace"
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 1/13: Created tablespace")
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 1/12: Created tablespace")
                 CrSchemaWindow.update()
 
+                # Check if enough space is left for creating the TPC-E tablespace
+                try:
+                    stdin, stdout, stderr = ssh.exec_command(
+                        "df -Pk " + pathToBlock + " | tail -1 | awk '{print $4}' > 100000000")
+                    CrSchemaWindow.waitForTerminate(stdout)
+                    if stderr.readlines() != []:
+                        raise Exception('Not enough space')
+                except:
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": Not enough space to create the TPCE tablespace")
+                    CrSchemaWindow.update()
+                    error_con = 3
 
-            #Check if enough space is left for creating the TPC-E tablespace
-            try:
-                stdin, stdout, stderr = ssh.exec_command("df -Pk " + pathToBlock + " | tail -1 | awk '{print $4}' > 100000000")
-                CrSchemaWindow.waitForTerminate(stdout)
-                if stderr.readlines() != []:
-                    raise Exception('Not enough space')
-            except:
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": Not enough space to create the TPCE tablespace")
-                CrSchemaWindow.update()
-                error_con = 3
+            # create user
+            f = open('./tpce/03tpce-create-user.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
 
-
-            if error_con == 0:
-                # create user
-                f = open('./tpce/03tpce-create-user.sql')
-                full_sql = f.read()
-                sql_commands = full_sql.split(';')
-
-                for sql_command in sql_commands:
-                    try:
-                        cur.execute(sql_command)
-                    except cx_Oracle.DatabaseError as e:
-                        error, = e.args
-                        if error.code != 900:
-                            print error
-                            error_con = 2
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
 
             if error_con == 0:
                 print CrSchemaWindow.time() + " - STEP 2: Created user"
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 2/13: Created user")
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 2/12: Created user")
                 CrSchemaWindow.update()
 
-            if error_con == 0:
-                # create tables
-                f = open('./tpce/05tpce-create-tables.sql')
-                full_sql = f.read()
-                sql_commands = full_sql.split(';')
+            # create tables
+            f = open('./tpce/05tpce-create-tables.sql')
+            full_sql = f.read()
+            sql_commands = full_sql.split(';')
 
-                for sql_command in sql_commands:
-                    try:
-                        cur.execute(sql_command)
-                    except cx_Oracle.DatabaseError as e:
-                        error, = e.args
-                        if error.code != 900:
-                            print error
-                            error_con = 2
+            for sql_command in sql_commands:
+                try:
+                    cur.execute(sql_command)
+                except cx_Oracle.DatabaseError as e:
+                    error, = e.args
+                    if error.code != 900:
+                        print error
+                        error_con = 2
 
             if error_con == 0:
                 print CrSchemaWindow.time() + " - STEP 3: Created tables"
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 3/13: Created user")
+                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 3/12: Created tables")
                 CrSchemaWindow.update()
+
+            cur.close()
+            con.close()
 
         if error_con == 0:
             #path definition
@@ -285,9 +256,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             scriptsUnzipped = "/tmp/jery/scripts/"
             outputPath = "/tmp/jery/tables/"
 
-
             print CrSchemaWindow.time() + " - STEP 4: Connected to %s" % ip
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 4/13: Connected to " + ip)
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 4/12: Connected to " + ip)
             CrSchemaWindow.update()
 
             #Send commands for folder (re)creation (non-blocking)
@@ -301,7 +271,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             sftp.put(inputSource, inputDestination)
             sftp.put(scriptSource, scriptDestination)
             print CrSchemaWindow.time() + " - STEP 5: Copied files to server"
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 5/13: Copied files to server")
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 5/12: Copied files to server")
             CrSchemaWindow.update()
 
 
@@ -323,15 +293,15 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             stdin, stdout, stderr = ssh.exec_command("mkdir -p " + outputPath)
             CrSchemaWindow.waitForTerminate(stdout)
             print CrSchemaWindow.time() + " - STEP 6: Unzipped files on server"
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 6/13: Unzipped files on server")
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 6/12: Unzipped files on server")
             CrSchemaWindow.update()
             stdin, stdout, stderr = ssh.exec_command(
                 loaderDestination + " -i " + inputUnzipped + " -o " + outputPath) # + " -f 1000")
             CrSchemaWindow.waitForTerminate(stdout)
             stdin, stdout, stderr = ssh.exec_command("rm -f " + loaderDestination)
             CrSchemaWindow.waitForTerminate(stdout)
-            print CrSchemaWindow.time() + " - STEP 7: Generated tables on server"
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 7/13: Generated tables on server")
+            print CrSchemaWindow.time() + " - STEP 7: Generated EGen data on server"
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 7/12: Generated EGen data on server")
             CrSchemaWindow.update()
 
             # Send commands for table import (non-blocking)
@@ -395,7 +365,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 pass
 
             print "\n" + CrSchemaWindow.time() + " - STEP 8: Imported tables in database"
-            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 8/13: Imported tables in database")
+            CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 8/12: Imported tables in database")
             CrSchemaWindow.update()
 
             cur.close()
@@ -403,53 +373,6 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
             sftp.close()
             transport.close()
             ssh.close()
-
-
-            if error_con == 0:
-                print CrSchemaWindow.time() + " - STEP 9: Created tables"
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 9/13: Created tables")
-                CrSchemaWindow.update()
-
-
-            #     f = open('./queries/scott_ora.sql')
-            #     full_sql = f.read()
-            #     sql_commands = full_sql.split(';')
-            #
-            #     for sql_command in sql_commands:
-            #         try:
-            #             cur.execute(sql_command)
-            #         except cx_Oracle.DatabaseError as e:
-            #             error, = e.args
-            #
-            #
-            #     try:
-            #         cur.execute('create table scott.emp2 as select * from scott.emp')
-            #     except cx_Oracle.DatabaseError as e:
-            #         error, = e.args
-            #         if error.code == 3113:
-            #             cur.execute('drop table scott.emp2')
-            #             cur.execute('create table scott.emp2 as select * from scott.emp')
-            #         elif error.code == 955:
-            #             cur.execute('drop table scott.emp2')
-            #             cur.execute('create table scott.emp2 as select * from scott.emp')
-            #         else:
-            #             CrSchemaWindow.VocableVariable.set(str(SID) + ": Failed to create schema")
-            #             cur.close()
-            #             return
-            #     try:
-            #         cur.execute('create table scott.dwhstat (seq int not null primary key, elapsed int, insdate date)')
-            #     except cx_Oracle.DatabaseError as e:
-            #         error, = e.args
-            #         if error.code == 955:
-            #             cur.execute('truncate table scott.dwhstat')
-            #
-            #     try:
-            #         cur.execute('CREATE SEQUENCE scott.seq START WITH 1 INCREMENT BY 1 NOCACHE')
-            #     except cx_Oracle.DatabaseError as e:
-            #         CreateSchemaProgressSchema already exists!")
-            #
-            # cur.close()
-            # con.close()
 
 
         if error_con == 0:
@@ -470,7 +393,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                     CrSchemaWindow.VocableVariable.set(str(SID) + ": Unable to connect")
                     error_con = 1
 
-            if error_con != 1:
+            if error_con == 0:
                 cur = con.cursor()
                 # create indexes 1
                 f = open('./tpce/07tpce-create-pk.sql')
@@ -548,8 +471,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 print "\t\tcreated fks 4"
 
                 if error_con == 0:
-                    print CrSchemaWindow.time() + " - STEP 10: Created indexes"
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 10/13: Created indexes")
+                    print CrSchemaWindow.time() + " - STEP 9: Created indexes"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 9/12: Created indexes")
                     CrSchemaWindow.update()
 
                 cur.close()
@@ -591,7 +514,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                 try:
                     cur.execute("""INSERT INTO TPCE.tpcestat(statid, brokervolumecount, customerpositioncount, marketfeedcount,
                         marketwatchcount, securitydetailcount, tradelookupcount, tradeordercount, traderesultcount,
-                        tradestatuscount, tradeupdatecount, datamaintenancecount)
+                        tradestatuscount, tradeupdatecount, datamaintenancecount) 
                         VALUES('0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0')""")
                 except cx_Oracle.DatabaseError as e:
                     error, = e.args
@@ -608,8 +531,8 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         error_con = 2
 
                 if error_con == 0:
-                    print CrSchemaWindow.time() + " - STEP 11: Calculated statistics"
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 11/13: Calculated statistics")
+                    print CrSchemaWindow.time() + " - STEP 10: Calculated statistics"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 10/12: Calculated statistics")
                     CrSchemaWindow.update()
 
         if error_con == 0:
@@ -630,7 +553,7 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                     print("Unable to connect")
                     error_con = 1
 
-            if error_con != 1:
+            if error_con == 0:
                 cur = con.cursor()
                 # drop all functions
                 f = open('./txns/drop_all_functions.sql')
@@ -909,12 +832,17 @@ class CreateTestSchemaWindow(Tkinter.Toplevel):
                         error_con = 2
 
                 if error_con == 0:
-                    print CrSchemaWindow.time() + " - STEP 12: Created functions"
-                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 12/13: Created TPC-E like functions in database" + ip)
+                    print CrSchemaWindow.time() + " - STEP 11: Created functions"
+                    CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 11/12: Created TPC-E like functions in database" + ip)
 
-            if error_con != 1:
+            if error_con == 0:
                 print CrSchemaWindow.time() + " - STEP 13: Successfully created TPC-E like schema!"
-                CrSchemaWindow.VocableVariable.set(str(SID) + ": STEP 13/13: Successfully created TPC-E like schema!" + ip)
+                CrSchemaWindow.VocableVariable.set(
+                    str(SID) + ": STEP 13/13: Successfully created TPC-E like schema!" + ip)
+            if error_con != 0:
+                print CrSchemaWindow.time() + " - failed to create schema"
+                CrSchemaWindow.VocableVariable.set(
+                    str(SID) + ": failed to create schema")
 
     def DropSchema(CrSchemaWindow, SID, user, passwd, ip, port):
         """ Test if the connection parameters are valid.
