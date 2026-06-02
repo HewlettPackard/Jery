@@ -1,5 +1,11 @@
-[![Github All Releases](https://img.shields.io/github/downloads/HewlettPackard/Jery/total.svg)](https://github.com/HewlettPackard/Jery)
-[![Docker Pulls](https://img.shields.io/docker/pulls/oraclekc/jery.svg)](https://hub.docker.com/r/oraclekc/jery/)
+## ⚠️ Repository Archived
+
+This repository is no longer actively maintained.
+
+It has been archived and is provided for reference purposes only. 
+No further updates, bug fixes, or support will be provided.
+
+Please consider using alternative solutions or actively maintained forks.
 
 
 # JERY
